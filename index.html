@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; media-src https:; connect-src 'self' https://nominatim.openstreetmap.org; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#f6efe2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="방문코스 지도">
 <script>
 /* 카카오톡·스레드·인스타그램 같은 앱 안 브라우저로 열리면 화면이 좁다 → 휴대폰 기본 브라우저로 내보낸다 */
 (function(){
@@ -459,7 +466,7 @@ function chips(){
   const got=allNums.filter(n=>stamps.has(n)).length, n=visible().reduce((a,c)=>a+c.spots.length,0), c=cur&&C.find(x=>x.key===cur);
   const label=c?`${esc(courseName(c))} (${done(c)}/${c.spots.length})`:`${filter==="all"?"전체 길":`방문코스 ${filter} 전체`} 보기 (${n}곳)`;
   document.getElementById("chips").innerHTML=`<button class="csel" id="courseSel" type="button" aria-haspopup="dialog" style="--c:${c?COLOR[cur]:"var(--muted)"}"><i aria-hidden="true"></i><span>${label}</span><b aria-hidden="true">▾</b></button>`+
-    `<div class="total">내 스탬프 <b>${got}</b> / ${allNums.length}곳 · <button class="lk" type="button" data-cert>인증서</button> · <button class="lk" type="button" data-backup>백업</button></div>`;
+    `<div class="total">내 스탬프 <b>${got}</b> / ${allNums.length}곳 · <button class="lk" type="button" data-cert>인증서</button> · <button class="lk" type="button" data-backup>백업</button>${standalone()?"":` · <button class="lk" type="button" data-install>홈 화면에 추가</button>`}</div>`;
   document.getElementById("courseSel").onclick=openPicker;
 }
 const courseName=c=>`${shortTitle(c)}${partOf(c)?` ${partOf(c)}구간`:""}`;
@@ -912,6 +919,24 @@ document.getElementById("chips").addEventListener("click",e=>{
   if(e.target.closest("[data-cert]")) openCert();
   if(e.target.closest("[data-backup]")) openBackup();
 });
+
+// ── 홈 화면 앱: 저장본(오프라인) + '홈 화면에 추가'
+const standalone=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+let installEv=null;
+addEventListener("beforeinstallprompt",e=>{e.preventDefault(); installEv=e;});  // 안드로이드 크롬·삼성인터넷: 버튼에서 바로 설치 창
+addEventListener("appinstalled",()=>{installEv=null; chips();});
+if("serviceWorker" in navigator&&location.protocol==="https:") navigator.serviceWorker.register("sw.js").catch(()=>{});
+function openInstall(){
+  if(installEv){installEv.prompt(); installEv.userChoice.finally(()=>{installEv=null;}); return;}
+  const ios=/iPhone|iPad|iPod/i.test(navigator.userAgent), sam=/SamsungBrowser/i.test(navigator.userAgent);
+  modal(`<h3>홈 화면에 추가</h3>
+    <img src="icons/icon-192.png" alt="" width="72" height="72" style="border-radius:18px;align-self:center">
+    <p class="mt">${ios?"Safari 아래쪽 <b>공유</b>(네모에 위 화살표) → <b>홈 화면에 추가</b> → 추가"
+      :sam?"아래쪽 <b>메뉴(≡)</b> → <b>현재 페이지 추가</b> → <b>홈 화면</b>"
+      :"오른쪽 위 <b>⋮</b> → <b>홈 화면에 추가</b>(또는 <b>앱 설치</b>) → 설치"}</p>
+    <p class="mt">설치하면 주소창 없이 앱처럼 열리고, 한 번 연 화면과 자료는 신호가 약한 유적지에서도 열려요. (지도 바탕은 인터넷이 필요해요)</p>`);
+}
+document.getElementById("chips").addEventListener("click",e=>{if(e.target.closest("[data-install]")) openInstall();});
 
 let saved=""; try{saved=localStorage.getItem("hcm-course")||""}catch(e){}
 const fromHash=location.hash.replace("#c","");

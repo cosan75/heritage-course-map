@@ -1,0 +1,17 @@
+{
+  "name": "국가유산 방문코스 지도",
+  "short_name": "방문코스 지도",
+  "description": "2026 국가유산 방문 캠페인 15개 길 105곳 — 내 위치, 오늘 운영, 맛집, 도장 수첩",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f6efe2",
+  "theme_color": "#f6efe2",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
