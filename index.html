@@ -99,6 +99,9 @@ h1{font:700 1.3rem/1.2 var(--display);margin:0;text-wrap:balance;letter-spacing:
 .seal img{width:82%;height:82%;object-fit:contain;filter:saturate(1.15)}
 .seal span{font:700 13px/1.15 var(--display);color:var(--seal);text-align:center;padding:0 10px;word-break:keep-all}
 .seal small{position:absolute;bottom:7px;left:0;right:0;text-align:center;font:600 8.5px/1 var(--body);color:var(--seal);letter-spacing:.04em}
+.seal.myh{box-shadow:none;background:none;border-radius:0;overflow:visible;opacity:1}
+.seal.myh img{width:100%;height:100%;filter:none}
+.seal.myh small{bottom:-12px;font-size:9.5px;letter-spacing:0}
 .seal.thud{animation:thud .5s cubic-bezier(.2,.9,.3,1.25) both}
 .spot.thudcard{animation:shake .35s .28s ease-out}
 @keyframes thud{0%{transform:scale(2.8) rotate(-30deg);opacity:0}55%{transform:scale(.88) rotate(-12deg);opacity:1}75%{transform:scale(1.04) rotate(-12deg)}100%{transform:scale(1) rotate(-12deg);opacity:.92}}
@@ -235,9 +238,11 @@ function status(s,now=new Date()){
   if(toMin(c)-t<=60) return {cls:"soon",text:`곧 마감 ${c}`};
   return {cls:"open",text:`운영 중 ~${c}`};
 }
-// 도장: 사이트 스탬프 그림이 있으면 그림, 없거나 못 불러오면 이름 도장
+// 도장: ① 나만의 국가유산 해설사 분류 스탬프 ② 캠페인 사이트 스탬프 그림 ③ 이름 도장 (못 불러오면 이름 도장)
 const sealName=s=>esc(s.name.replace(/\s*\(.*\)$/,"").replace(/ 천연보호구역$/,""));
-const sealHTML=s=>`<div class="seal" aria-hidden="true">${s.stampImg?`<img src="${esc(s.stampImg)}" alt="" onerror="this.outerHTML='<span>${sealName(s)}</span>'">`:`<span>${sealName(s)}</span>`}<small>${s.stampImg?"":"STAMP"}</small></div>`;
+const sealHTML=s=>{const fb=`this.parentNode.className='seal';this.outerHTML='<span>${sealName(s)}</span>'`;
+  if(s.myhStamp) return `<div class="seal myh" aria-hidden="true" title="${esc(s.myhStamp.cat)} 스탬프"><img src="${esc(s.myhStamp.img)}" alt="" onerror="${fb}"><small>${esc(s.myhStamp.cat)}</small></div>`;
+  return `<div class="seal" aria-hidden="true">${s.stampImg?`<img src="${esc(s.stampImg)}" alt="" onerror="${fb}">`:`<span>${sealName(s)}</span>`}<small>${s.stampImg?"":"STAMP"}</small></div>`;};
 const stBadge=s=>{const x=status(s);return x?`<span class="st ${x.cls}">${x.text}</span>`:""};
 
 function chips(){
