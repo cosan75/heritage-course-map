@@ -927,12 +927,21 @@ addEventListener("beforeinstallprompt",e=>{e.preventDefault(); installEv=e;});  
 addEventListener("appinstalled",()=>{installEv=null; chips();});
 if("serviceWorker" in navigator&&location.protocol==="https:") navigator.serviceWorker.register("sw.js").catch(()=>{});
 function openInstall(){
-  if(installEv){installEv.prompt(); installEv.userChoice.finally(()=>{installEv=null;}); return;}
   const ios=/iPhone|iPad|iPod/i.test(navigator.userAgent), sam=/SamsungBrowser/i.test(navigator.userAgent);
+  // 삼성 인터넷의 '앱 설치'는 휴대폰 보안(Play 프로텍트)이 '안전하지 않은 앱'으로 막는 일이 있어 → 크롬 설치나 바로가기로 안내
+  if(installEv&&!sam){installEv.prompt(); installEv.userChoice.finally(()=>{installEv=null;}); return;}
+  if(sam){
+    const chrome="intent://"+location.host+location.pathname+"#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url="+encodeURIComponent(location.href)+";end";
+    modal(`<h3>홈 화면에 추가</h3>
+      <img src="icons/icon-192.png" alt="" width="72" height="72" style="border-radius:18px;align-self:center">
+      <p class="mt">삼성 인터넷에서 앱으로 설치하면 휴대폰 보안(Play 프로텍트)이 <b>‘안전하지 않은 앱 차단됨’</b>을 띄울 수 있어요. 이 지도에 문제가 있어서가 아니라, 삼성 인터넷이 앱 꾸러미를 오래된 안드로이드 기준으로 만들어서 생기는 경고예요.</p>
+      <div class="acts"><a class="btn primary" href="${chrome}">크롬에서 열어 설치 (추천)</a></div>
+      <p class="mt">크롬에서 열리면 다시 <b>홈 화면에 추가</b>를 누르세요. 크롬이 없으면 삼성 인터넷 아래쪽 <b>메뉴(≡)</b> → <b>현재 페이지 추가</b> → <b>홈 화면</b>으로 바로가기를 만들 수 있어요(설치 경고 없음).</p>`);
+    return;
+  }
   modal(`<h3>홈 화면에 추가</h3>
     <img src="icons/icon-192.png" alt="" width="72" height="72" style="border-radius:18px;align-self:center">
     <p class="mt">${ios?"Safari 아래쪽 <b>공유</b>(네모에 위 화살표) → <b>홈 화면에 추가</b> → 추가"
-      :sam?"아래쪽 <b>메뉴(≡)</b> → <b>현재 페이지 추가</b> → <b>홈 화면</b>"
       :"오른쪽 위 <b>⋮</b> → <b>홈 화면에 추가</b>(또는 <b>앱 설치</b>) → 설치"}</p>
     <p class="mt">설치하면 주소창 없이 앱처럼 열리고, 한 번 연 화면과 자료는 신호가 약한 유적지에서도 열려요. (지도 바탕은 인터넷이 필요해요)</p>`);
 }
