@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; media-src https:; connect-src 'self' https://nominatim.openstreetmap.org; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; media-src https:; connect-src 'self' https://nominatim.openstreetmap.org https://api.met.no; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -176,6 +176,12 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
 .src{font-size:11px;line-height:1.6;color:var(--muted);padding:8px max(16px,env(safe-area-inset-left,0px));border-top:1px solid var(--rule)}
 .src a{color:var(--muted)}
 .grab{display:none}
+.wx{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 6px;max-width:min(62vw,280px);background:var(--sheet);color:var(--ink);border:1px solid var(--rule);border-radius:8px;padding:4px 9px;font:500 12px/1.4 var(--body);cursor:pointer;text-align:left;margin-top:6px!important}
+.wx-i{font-size:15px;line-height:1}.wx b{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+.wx-s{color:var(--ink)}.wx-p{color:var(--muted);font-size:11px}
+.wx-more{display:none;flex-basis:100%;color:var(--muted);font-size:11.5px;line-height:1.5;border-top:1px dashed var(--rule);margin-top:3px;padding-top:3px}
+.wx.open .wx-more{display:block}
+.wx-more small{font-size:10.5px}
 .csel{display:flex;align-items:center;gap:8px;width:100%;min-height:40px;border:1px solid var(--rule);border-radius:8px;background:var(--sheet);color:var(--ink);padding:0 12px 0 11px;font:500 13.5px/1.3 var(--body);cursor:pointer;text-align:left}
 .csel i{width:11px;height:11px;border-radius:50%;background:var(--c);flex:none}
 .csel span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -323,7 +329,7 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
     <div class="list" id="list"></div>
     <div class="player" id="player" hidden><b id="playerTitle"></b><audio id="audio" controls preload="none"></audio>
       <button class="btn" type="button" id="playerClose" aria-label="음성 해설 닫기">닫기</button></div>
-    <div class="src">출처: 해설·사진·지역 행사 <a href="https://my.heritage.go.kr/main/index.do" target="_blank" rel="noopener">나만의 국가유산 해설사</a> · 방문코스 1 <a href="https://eb.kh.or.kr:8000/" target="_blank" rel="noopener">국가유산 방문 캠페인 코스 사이트</a> · 방문코스 2 <a href="https://www.kh.or.kr/visit/resource/files/2026_%EA%B5%AD%EA%B0%80%EC%9C%A0%EC%82%B0_%EB%B0%A9%EB%AC%B8%EC%BD%94%EC%8A%A4_%EC%97%AC%ED%96%89%EC%A7%80%EB%8F%84.pdf" target="_blank" rel="noopener">2026 여행지도 PDF</a>·<a href="https://www.kh.or.kr/visit/kor/bbsctt/view.do?key=2407110057&amp;bbscttSn=2609180015" target="_blank" rel="noopener">스탬프 위치 공지</a> · 좌표: 국가유산청 오픈API·OpenStreetMap · 맛집: © OpenStreetMap 기여자</div>
+    <div class="src">출처: 해설·사진·지역 행사 <a href="https://my.heritage.go.kr/main/index.do" target="_blank" rel="noopener">나만의 국가유산 해설사</a> · 방문코스 1 <a href="https://eb.kh.or.kr:8000/" target="_blank" rel="noopener">국가유산 방문 캠페인 코스 사이트</a> · 방문코스 2 <a href="https://www.kh.or.kr/visit/resource/files/2026_%EA%B5%AD%EA%B0%80%EC%9C%A0%EC%82%B0_%EB%B0%A9%EB%AC%B8%EC%BD%94%EC%8A%A4_%EC%97%AC%ED%96%89%EC%A7%80%EB%8F%84.pdf" target="_blank" rel="noopener">2026 여행지도 PDF</a>·<a href="https://www.kh.or.kr/visit/kor/bbsctt/view.do?key=2407110057&amp;bbscttSn=2609180015" target="_blank" rel="noopener">스탬프 위치 공지</a> · 좌표: 국가유산청 오픈API·OpenStreetMap · 맛집: © OpenStreetMap 기여자 · 날씨: <a href="https://api.met.no/" target="_blank" rel="noopener">MET Norway</a>(CC BY 4.0)</div>
   </aside>
   <div id="map"></div>
 </div>
@@ -636,7 +642,7 @@ function select(k,noFit){  // noFit: 코스만 바꾸고 지도 화면은 그대
   cur=k; pick=null;
   if(k){const c=C.find(x=>x.key===k); if(filter!=="all"&&String(c.group)!==filter) filter="all";}
   try{localStorage.setItem("hcm-course",k)}catch(e){}
-  chips(); draw(noFit); list();
+  chips(); draw(noFit); list(); wxUpdate();
 }
 document.querySelectorAll(".filters .btn").forEach(b=>b.onclick=()=>{filter=b.dataset.f; select("");});
 document.getElementById("foodBtn").onclick=e=>{showFood=!showFood;e.currentTarget.classList.toggle("on",showFood);e.currentTarget.setAttribute("aria-pressed",showFood);draw();};
@@ -656,6 +662,7 @@ document.getElementById("gpsBtn").onclick=()=>{
     L.circleMarker([me.lat,me.lng],{radius:7,color:"#fff",weight:2,fillColor:blue,fillOpacity:1}).bindPopup("내 위치").addTo(meLayer);
     nearCheck(me);  // 아직 안 찍은 유산 200m 안이면 도장 안내
     if(first){first=false; listedAt=me;
+      wxUpdate();  // 날씨도 내 위치 기준으로
       findNearest(me,`정확도 ±${Math.round(me.acc)}m ·`).then(r=>{if(!r) return; if(cur!==r.s.c.key) select(r.s.c.key,true); else list(); fitNear(me,r.h);});}  // 가장 가까운 유산의 코스를 고르고, 화면은 내 위치 주변
     else if(hav(listedAt.lat,listedAt.lng,me.lat,me.lng)>50){listedAt=me; list(); findNearest(me,`정확도 ±${Math.round(me.acc)}m ·`);}  // 50m 이상 움직였을 때만 다시 계산
   },err=>{  // 위치를 못 받으면 지도 가운데를 기준으로 찾아 준다
@@ -946,6 +953,46 @@ function openInstall(){
     <p class="mt">설치하면 주소창 없이 앱처럼 열리고, 한 번 연 화면과 자료는 신호가 약한 유적지에서도 열려요. (지도 바탕은 인터넷이 필요해요)</p>`);
 }
 document.getElementById("chips").addEventListener("click",e=>{if(e.target.closest("[data-install]")) openInstall();});
+
+// ── 오늘 날씨: 기준점(내 위치 › 고른 길 가운데 › 대전)의 지금 날씨·오늘 최고/최저 (MET Norway, 키 없음·CC BY 4.0)
+// 좌표는 소수 둘째 자리(약 1km)까지만 보내고, 같은 곳은 30분 동안 다시 묻지 않는다.
+const WX_SYM=[["thunder","⚡","뇌우"],["snow","❄","눈"],["sleet","🌨","진눈깨비"],["heavyrain","☔","강한 비"],["rain","☂","비"],
+  ["fog","🌫","안개"],["cloudy","☁","흐림"],["partlycloudy","⛅","구름 조금"],["fair","🌤","대체로 맑음"],["clearsky","☀","맑음"]];
+const wxSym=c=>WX_SYM.find(([k])=>String(c||"").startsWith(k)||String(c||"").includes(k))||["","·","—"];
+const wxCtl=L.control({position:"topright"});
+wxCtl.onAdd=()=>{const d=L.DomUtil.create("button","wx"); d.type="button"; d.setAttribute("aria-label","오늘 날씨"); L.DomEvent.disableClickPropagation(d);
+  d.onclick=()=>d.classList.toggle("open"); return d;};
+wxCtl.addTo(map);
+let wxKey="", wxTimer=null;
+function wxPlace(){
+  if(me) return {lat:me.lat,lng:me.lng,name:"내 위치"};
+  const c=cur&&C.find(x=>x.key===cur);
+  if(c){const b=L.latLngBounds(c.spots.map(s=>[s.lat,s.lng])).getCenter(); return {lat:b.lat,lng:b.lng,name:shortTitle(c)};}
+  return {lat:DAEJEON[0],lng:DAEJEON[1],name:"대전"};
+}
+function wxUpdate(){clearTimeout(wxTimer); wxTimer=setTimeout(wxLoad,300);}
+async function wxLoad(){
+  const p=wxPlace(), lat=p.lat.toFixed(2), lng=p.lng.toFixed(2), key=`${lat},${lng}`, box=wxCtl.getContainer();
+  if(key===wxKey&&box.dataset.ok) {box.querySelector(".wx-p").textContent=p.name; return;}
+  wxKey=key; let data=null;
+  try{const c=JSON.parse(localStorage.getItem("hcm-wx-"+key)||"null"); if(c&&Date.now()-c.t<30*60e3) data=c.d;}catch(e){}
+  if(!data){
+    try{const r=await fetch(`https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${lat}&lon=${lng}`); if(!r.ok) throw 0; data=await r.json();
+      try{localStorage.setItem("hcm-wx-"+key,JSON.stringify({t:Date.now(),d:data}));}catch(e){}}
+    catch(e){box.innerHTML=`<span class="wx-m">날씨를 불러오지 못했어요</span>`; return;}
+  }
+  if(key!==wxKey) return;  // 그사이 기준점이 바뀜
+  const ts=data.properties.timeseries, now=Date.now();
+  const i=Math.max(0,ts.findIndex(x=>new Date(x.time).getTime()>now-30*60e3)), t0=ts[i];
+  const kst=d=>new Date(new Date(d).getTime()+9*3600e3).toISOString().slice(0,10), today=kst(now);
+  const day=ts.filter(x=>kst(x.time)===today), temps=(day.length?day:ts.slice(0,24)).map(x=>x.data.instant.details.air_temperature);
+  const rain=day.reduce((a,x)=>a+((x.data.next_1_hours||{}).details?.precipitation_amount||0),0);
+  const sym=wxSym((t0.data.next_1_hours||t0.data.next_6_hours||{}).summary?.symbol_code), later=ts[i+3], lsym=later&&wxSym((later.data.next_1_hours||later.data.next_6_hours||{}).summary?.symbol_code);
+  box.dataset.ok="1";
+  box.innerHTML=`<span class="wx-i" aria-hidden="true">${sym[1]}</span><b>${Math.round(t0.data.instant.details.air_temperature)}°</b><span class="wx-s">${sym[2]}</span><span class="wx-p">${esc(p.name)}</span>
+    <span class="wx-more">오늘 최고 ${Math.round(Math.max(...temps))}° · 최저 ${Math.round(Math.min(...temps))}° · 비 ${rain<0.1?"없음":rain.toFixed(1)+"mm"} · 바람 ${Math.round(t0.data.instant.details.wind_speed)}m/s${later?`<br>3시간 뒤 ${lsym[1]} ${Math.round(later.data.instant.details.air_temperature)}° ${lsym[2]}`:""}<br><small>자료: MET Norway</small></span>`;
+  box.setAttribute("aria-label",`오늘 날씨 ${p.name}: ${sym[2]} ${Math.round(t0.data.instant.details.air_temperature)}도`);
+}
 
 let saved=""; try{saved=localStorage.getItem("hcm-course")||""}catch(e){}
 const fromHash=location.hash.replace("#c","");
