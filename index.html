@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; media-src https:; connect-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; media-src https:; connect-src 'self' https://nominatim.openstreetmap.org; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <script>
 /* 카카오톡·스레드·인스타그램 같은 앱 안 브라우저로 열리면 화면이 좁다 → 휴대폰 기본 브라우저로 내보낸다 */
@@ -169,6 +169,20 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
 .src{font-size:11px;line-height:1.6;color:var(--muted);padding:8px max(16px,env(safe-area-inset-left,0px));border-top:1px solid var(--rule)}
 .src a{color:var(--muted)}
 .grab{display:none}
+.sbtn{display:none}
+.search{position:relative}
+.search input{width:100%;min-height:38px;border:1px solid var(--rule);border-radius:8px;background:var(--sheet);color:var(--ink);font:500 13.5px/1.3 var(--body);padding:0 12px 0 34px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6.5'/%3E%3Cpath d='m15.5 15.5 5 5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-size:16px;background-position:11px 50%}
+.search input:focus{outline:2px solid var(--sea);outline-offset:1px}
+#qres{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:1200;list-style:none;margin:0;padding:4px;background:var(--sheet);border:1px solid var(--rule);border-radius:10px;
+  box-shadow:0 8px 24px rgb(0 0 0 / .18);max-height:min(60vh,420px);overflow:auto}
+#qres li{display:flex;gap:8px;align-items:baseline;padding:7px 9px;border-radius:7px;cursor:pointer;font-size:13px}
+#qres li[aria-selected="true"],#qres li:hover{background:var(--sea-soft)}
+#qres li b{font-weight:600}
+#qres li small{color:var(--muted);font-size:11.5px;margin-left:auto;white-space:nowrap}
+#qres li.more{color:var(--sea);justify-content:center}
+#qres li.empty{color:var(--muted);cursor:default;background:none}
+.qpin{width:18px;height:18px;border-radius:50%;background:var(--sea);border:3px solid #fff;box-shadow:0 0 0 2px var(--sea),0 2px 6px rgb(0 0 0 / .3)}
 .picked{border-bottom:2px solid var(--rule);margin-bottom:6px;padding-top:8px}
 .picked>.label{margin:0 0 2px}
 .inapp{position:fixed;left:8px;right:8px;top:max(8px,env(safe-area-inset-top,0px));z-index:3000;display:flex;align-items:center;gap:8px;flex-wrap:wrap;
@@ -199,15 +213,18 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
   .player{position:sticky;bottom:0;z-index:2}
   .leaflet-bottom{bottom:var(--sheet-vis,50dvh);transition:bottom .28s}
   /* 고정 머리: 제목 · 아이콘 버튼 · 코스 묶음을 한 줄로 */
-  .head{flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px 6px;padding-top:6px;padding-bottom:8px}
-  .head h1{font-size:15.5px;flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .head{flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px 5px;padding-top:6px;padding-bottom:8px}
+  .head h1{font-size:14.5px;flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}  /* 남는 폭만 쓰고 버튼은 한 줄에 */
   .head .lg{display:none}
   .tools{display:contents}
-  .btn.ico{width:34px;height:34px;min-height:34px;padding:0;justify-content:center;border-radius:50%}
+  .btn.ico{width:32px;height:32px;min-height:32px;padding:0;justify-content:center;border-radius:50%}
   .filters{align-self:center}
-  .filters .btn{min-height:34px;padding:4px 10px}
+  .filters .btn{min-height:32px;padding:4px 9px}
   .gps{order:10;flex-basis:100%;font-size:11.5px;line-height:1.45}
   #chips{order:11;flex-basis:100%;min-width:0}
+  .sbtn{display:inline-flex}
+  .search{order:9;flex-basis:100%;display:none}
+  .head.searching .search{display:block}
   .chip{padding:3px 9px}
   .total{margin-top:2px;font-size:11.5px}
   .legend small{display:none}
@@ -234,7 +251,12 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
       <div class="tools">
         <button class="btn primary ico" id="gpsBtn" type="button" aria-label="내 위치(GPS)" title="내 위치(GPS)"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span class="lg">내 위치(GPS)</span></button>
         <button class="btn on ico" id="foodBtn" type="button" aria-pressed="true" aria-label="주변 맛집" title="주변 맛집"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v8M4.5 2v5.5a2.5 2.5 0 0 0 5 0V2M7 10v12M17 22V2c-2.2 1.3-3.5 4-3.5 7.5V14H17"/></svg><span class="lg">주변 맛집</span></button>
+        <button class="btn ico sbtn" id="searchBtn" type="button" aria-label="지명·유산 검색" aria-expanded="false" title="지명·유산 검색"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
         <span class="gps" id="gpsMsg" aria-live="polite"></span>
+      </div>
+      <div class="search" id="search" role="search">
+        <input id="q" type="search" placeholder="지명·유산 검색 (예: 공주, 불국사, 황남동)" aria-label="지명·유산 검색" autocomplete="off" enterkeyhint="search" aria-controls="qres" aria-autocomplete="list">
+        <ul id="qres" role="listbox" hidden></ul>
       </div>
       <div class="filters" role="group" aria-label="코스 묶음">
         <button class="btn" type="button" data-f="all">전체</button>
@@ -615,6 +637,86 @@ let drag=null;
 addEventListener("resize",()=>setSheet(sheet,true));
 MQ.addEventListener("change",()=>setSheet(sheet,true));
 setSheet("half");
+
+// 지명·유산 검색: 방문코스 유산 · 전국 국가유산 · 시·군·구는 이 사이트 안에서 바로,
+// 동·역 같은 자세한 지명은 '자세한 지명 찾기'를 누를 때(또는 결과가 없을 때 Enter)만 OpenStreetMap에 물어본다
+const qEl=document.getElementById("q"), qres=document.getElementById("qres"), searchLayer=L.layerGroup().addTo(map);
+let qItems=[], qSel=-1, qTimer=null, qPlaces=null;
+const nz=s=>String(s||"").replace(/\s+/g,"").toLowerCase();
+function qLocal(q){
+  const n=nz(q); if(!n) return [];
+  const score=name=>{const k=nz(name); return !k?9:k===n?0:k.startsWith(n)?1:k.includes(n)?2:9;};
+  const seen=new Set(), spots=[];
+  C.forEach(c=>c.spots.forEach(s=>{const sc=Math.min(score(s.name),score(s.address)+1); if(sc<9&&!seen.has(s.name)){seen.add(s.name); spots.push({t:"spot",sc,c,s});}}));
+  const regions=(window.KHS_REGIONS||[]).map(r=>({t:"region",sc:Math.min(score(r[1]),score(r[0]+r[1])),r})).filter(x=>x.sc<9);
+  const khs=(KHS||[]).map(h=>({t:"khs",sc:score(h.name),h})).filter(x=>x.sc<9&&!seen.has(x.h.name));
+  const by=a=>a.sort((x,y)=>x.sc-y.sc);
+  return [...by(regions).slice(0,4),...by(spots).slice(0,6),...by(khs).slice(0,8)];
+}
+const qMark=()=>qres.querySelectorAll("li[data-i]").forEach(li=>li.setAttribute("aria-selected",String(+li.dataset.i===qSel)));
+function qRender(q){
+  qItems=qLocal(q).concat(qPlaces||[]); qSel=qItems.length?0:-1;
+  const row=(x,i)=>{
+    if(x.t==="spot") return `<li role="option" data-i="${i}"><b>${esc(x.s.name)}</b><small>방문코스 · ${esc(x.c.title)}</small></li>`;
+    if(x.t==="region") return `<li role="option" data-i="${i}"><b>${esc(x.r[0])} ${esc(x.r[1])}</b><small>지역</small></li>`;
+    if(x.t==="khs") return `<li role="option" data-i="${i}"><b>${esc(x.h.name)}</b><small>국가유산 · ${esc(x.h.kind)}</small></li>`;
+    return `<li role="option" data-i="${i}"><b>${esc(x.name)}</b><small>${esc(x.sub)}</small></li>`;
+  };
+  qres.innerHTML=qItems.map(row).join("")+(qPlaces?(qPlaces.length?"":`<li class="empty">자세한 지명도 찾지 못했어요</li>`)
+    :`<li class="more" data-more>‘${esc(q)}’ 자세한 지명 찾기 (동·역·건물)</li>`);
+  qres.hidden=false; qMark();
+  qres.querySelectorAll("li[data-i]").forEach(li=>li.onmousedown=e=>{e.preventDefault(); qChoose(qItems[+li.dataset.i]);});
+  const more=qres.querySelector("[data-more]"); if(more) more.onmousedown=e=>{e.preventDefault(); qPlace(q);};
+}
+function qPlace(q){  // OpenStreetMap 지명 검색 (누를 때만, 대한민국 안)
+  const more=qres.querySelector("[data-more]"); if(more) more.textContent="찾는 중…";
+  fetch("https://nominatim.openstreetmap.org/search?"+new URLSearchParams({q,format:"jsonv2",countrycodes:"kr","accept-language":"ko",limit:"6"}))
+    .then(r=>r.json()).then(a=>{
+      qPlaces=a.map(p=>{const parts=p.display_name.split(", ").filter(x=>!/^\d{5}$|대한민국/.test(x));
+        return {t:"place",name:parts[0],sub:parts.slice(1,4).reverse().join(" "),lat:+p.lat,lng:+p.lon,bb:p.boundingbox.map(Number)};});
+      const n0=qLocal(q).length; qRender(q); if(qPlaces.length){qSel=n0; qMark();}})
+    .catch(()=>{qPlaces=[]; qRender(q);});
+}
+function qChoose(x){
+  if(!x) return; qres.hidden=true; qEl.blur(); searchLayer.clearLayers();
+  document.querySelector(".head").classList.remove("searching"); document.getElementById("searchBtn").setAttribute("aria-expanded","false");
+  const kh=getComputedStyle(document.documentElement).getPropertyValue("--kh").trim();
+  if(x.t==="spot"){  // 방문코스 유산: 카드(바로 도장)와 지도
+    const k=x.c.key+"|"+x.s.num;
+    if(cur&&cur!==x.c.key) select(x.c.key,true);
+    if(!cur){pick={key:x.c.key,num:x.s.num}; list(); document.getElementById("list").scrollTop=0;}
+    showOnMap([x.s.lat,x.s.lng],15); if(markers[k]) markers[k].openPopup(); if(cur) focusCard(x.c.key,x.s.num,false);
+    if(mobile()){setSheet("half",true); const pk=document.querySelector(".picked")||document.getElementById(`card-${x.c.key}-${x.s.num}`); if(pk) aside.scrollTop=pk.offsetTop-20;}
+    return;
+  }
+  if(x.t==="khs"){
+    showOnMap([x.h.lat,x.h.lng],16);
+    L.circleMarker([x.h.lat,x.h.lng],{radius:11,color:kh,weight:3,fillColor:"#fff",fillOpacity:.6}).bindPopup(()=>khsPopup(x.h)).addTo(searchLayer).openPopup();
+    return;
+  }
+  // 지역(시·군·구) 또는 자세한 지명: 그 범위로, 국가유산 점이 보이는 배율 이상
+  const b=x.t==="region"?L.latLngBounds([x.r[4],x.r[5]],[x.r[6],x.r[7]]):L.latLngBounds([x.bb[0],x.bb[2]],[x.bb[1],x.bb[3]]);
+  if(mobile()&&sheet!=="peek") setSheet("peek");
+  map.fitBounds(b,{paddingTopLeft:[30,30],paddingBottomRight:[30,padB()],maxZoom:15,animate:false});
+  const c=x.t==="region"?[x.r[2],x.r[3]]:[x.lat,x.lng], label=x.t==="region"?`${x.r[0]} ${x.r[1]}`:x.name;
+  if(map.getZoom()<KHS_ZOOM) map.setView(c,KHS_ZOOM,{animate:false});
+  L.marker(c,{icon:L.divIcon({className:"",html:'<div class="qpin"></div>',iconSize:[18,18],iconAnchor:[9,9]}),title:label}).bindPopup(`<b>${esc(label)}</b>`).addTo(searchLayer);
+}
+qEl.addEventListener("focus",()=>{loadKHS().then(()=>{if(qEl.value.trim()) qRender(qEl.value.trim());}).catch(()=>{});});
+qEl.addEventListener("input",()=>{qPlaces=null; clearTimeout(qTimer); const q=qEl.value.trim();
+  if(!q){qres.hidden=true; return;} qTimer=setTimeout(()=>{qRender(q); if(!KHS) loadKHS().then(()=>{if(qEl.value.trim()===q) qRender(q);}).catch(()=>{});},120);});  // 전국 목록은 처음 칠 때 불러옴
+qEl.addEventListener("keydown",e=>{
+  if(e.isComposing) return;  // 한글 조합 중 Enter는 무시
+  if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault(); if(qItems.length){qSel=(qSel+(e.key==="ArrowDown"?1:-1)+qItems.length)%qItems.length; qMark();}}
+  else if(e.key==="Enter"){e.preventDefault(); const q=qEl.value.trim(); if(!q) return;
+    clearTimeout(qTimer); if(qres.hidden) qRender(q);
+    if(qSel>=0&&qItems.length) qChoose(qItems[qSel]); else if(qPlaces===null) qPlace(q);}  // 결과가 있으면 고른 것, 없으면 자세한 지명 찾기
+  else if(e.key==="Escape") qres.hidden=true;
+});
+qEl.addEventListener("blur",()=>setTimeout(()=>{qres.hidden=true;},150));
+document.getElementById("searchBtn").onclick=()=>{const h=document.querySelector(".head"), on=!h.classList.contains("searching");
+  h.classList.toggle("searching",on); document.getElementById("searchBtn").setAttribute("aria-expanded",String(on));
+  if(on){if(sheet==="peek") setSheet("half",true); aside.scrollTop=0; qEl.focus();}};
 
 let saved=""; try{saved=localStorage.getItem("hcm-course")||""}catch(e){}
 const fromHash=location.hash.replace("#c","");
