@@ -93,23 +93,24 @@ h1{font:700 1.3rem/1.2 var(--display);margin:0;text-wrap:balance;letter-spacing:
 .pin.done{border-color:var(--seal)}
 /* 찍은 유산 카드 오른쪽 위의 도장: 사이트 스탬프 그림(방문코스 1) 또는 이름 도장(방문코스 2) */
 .spot{position:relative}
-.spot.done>h3,.spot.done>.line,.spot.done>.acts{padding-right:86px}
+.spot.done>h3,.spot.done>.line,.spot.done>.acts{padding-right:100px}
 .seal{position:absolute;top:6px;right:8px;width:80px;height:80px;border-radius:50%;box-shadow:0 0 0 2.5px var(--seal),inset 0 0 0 5px var(--sheet),inset 0 0 0 6.5px var(--seal);
   display:grid;place-items:center;overflow:hidden;transform:rotate(-12deg);pointer-events:none;background:var(--sheet);opacity:.92}
 .seal img{width:82%;height:82%;object-fit:contain;filter:saturate(1.15)}
 .seal span{font:700 13px/1.15 var(--display);color:var(--seal);text-align:center;padding:0 10px;word-break:keep-all}
 .seal small{position:absolute;bottom:7px;left:0;right:0;text-align:center;font:600 8.5px/1 var(--body);color:var(--seal);letter-spacing:.04em}
-.seal.myh{box-shadow:none;background:none;border-radius:0;overflow:visible;opacity:1}
-.seal.myh img{width:100%;height:100%;filter:none}
-.seal.myh small{bottom:-12px;font-size:9.5px;letter-spacing:0}
-.visit{position:absolute;top:62px;right:58px;width:58px;transform:rotate(-8deg);pointer-events:none;filter:drop-shadow(0 1px 1px rgb(0 0 0 / .15))}
-.visit.thud{animation:thud2 .45s .32s cubic-bezier(.2,.9,.3,1.25) both}
-@keyframes thud2{0%{transform:scale(2.6) rotate(10deg);opacity:0}60%{transform:scale(.9) rotate(-8deg);opacity:1}100%{transform:scale(1) rotate(-8deg)}}
+.seal.myh{--r:-6deg;--o:1;width:96px;height:96px;top:2px;right:6px;box-shadow:none;background:none;border-radius:0;overflow:visible;opacity:1;transform:rotate(-6deg);display:block}
+.seal.myh .frame{width:100%;height:100%;object-fit:contain;filter:none;display:block}
+.seal.myh b{position:absolute;left:12%;right:12%;top:53%;text-align:center;font:700 10.5px/1.15 var(--body);color:#131416;word-break:keep-all;letter-spacing:-.02em}
+.seal.myh b i{display:block;font:600 7.5px/1.2 var(--body);font-style:normal;margin-bottom:1px}
+.seal.myh .cert{position:absolute;top:-6px;right:-10px;width:36px;height:36px;transform:rotate(-10deg)}
+.seal.myh.thud .cert{animation:thud2 .45s .32s cubic-bezier(.2,.9,.3,1.25) both}
+@keyframes thud2{0%{transform:scale(2.6) rotate(20deg);opacity:0}60%{transform:scale(.9) rotate(-10deg);opacity:1}100%{transform:scale(1) rotate(-10deg)}}
 .seal.thud{animation:thud .5s cubic-bezier(.2,.9,.3,1.25) both}
 .spot.thudcard{animation:shake .35s .28s ease-out}
-@keyframes thud{0%{transform:scale(2.8) rotate(-30deg);opacity:0}55%{transform:scale(.88) rotate(-12deg);opacity:1}75%{transform:scale(1.04) rotate(-12deg)}100%{transform:scale(1) rotate(-12deg);opacity:.92}}
+@keyframes thud{0%{transform:scale(2.8) rotate(-30deg);opacity:0}55%{transform:scale(.88) rotate(var(--r,-12deg));opacity:1}75%{transform:scale(1.04) rotate(var(--r,-12deg))}100%{transform:scale(1) rotate(var(--r,-12deg));opacity:var(--o,.92)}}
 @keyframes shake{0%,100%{transform:none}25%{transform:translate(1px,2px)}50%{transform:translate(-1px,-1px)}75%{transform:translate(1px,0)}}
-@media (prefers-reduced-motion:reduce){.visit.thud,.seal.thud,.spot.thudcard{animation:none}}
+@media (prefers-reduced-motion:reduce){.seal.thud .cert,.seal.thud,.spot.thudcard{animation:none}}
 details{grid-column:2;font-size:12.5px;margin-top:4px}
 summary{cursor:pointer;color:var(--sea);padding:2px 0}
 .rest{list-style:none;margin:6px 0 2px;padding:0;display:flex;flex-direction:column;gap:2px}
@@ -241,11 +242,12 @@ function status(s,now=new Date()){
   if(toMin(c)-t<=60) return {cls:"soon",text:`곧 마감 ${c}`};
   return {cls:"open",text:`운영 중 ~${c}`};
 }
-const VISIT_IMG="https://my.heritage.go.kr/images/2025/contents/stamp/check.png";  // 해설사 방문 캠페인의 '방문' 인증 도장
+const CERT_IMG="https://my.heritage.go.kr/images/2025/contents/stamp/cert.svg";  // 해설사 방문 인증의 '인증완료' 배지
 // 도장: ① 나만의 국가유산 해설사 분류 스탬프 ② 캠페인 사이트 스탬프 그림 ③ 이름 도장 (못 불러오면 이름 도장)
 const sealName=s=>esc(s.name.replace(/\s*\(.*\)$/,"").replace(/ 천연보호구역$/,""));
 const sealHTML=s=>{const fb=`this.parentNode.className='seal';this.outerHTML='<span>${sealName(s)}</span>'`;
-  if(s.myhStamp) return `<div class="seal myh" aria-hidden="true" title="${esc(s.myhStamp.cat)} 스탬프"><img src="${esc(s.myhStamp.img)}" alt="" onerror="${fb}"><small>${esc(s.myhStamp.cat)}</small></div>`;
+  // 해설사 '방문 인증' 화면의 도장: 분류 그림 + 지정 종목 + 이름 + 인증완료 배지
+  if(s.myhStamp) return `<div class="seal myh" aria-hidden="true" title="${esc(s.myhStamp.cat)} 스탬프 · 인증완료"><img class="frame" src="${esc(s.myhStamp.img)}" alt="" onerror="${fb}"><b><i>${esc(s.myhStamp.kind)}</i>${sealName(s)}</b><img class="cert" src="${CERT_IMG}" alt="" onerror="this.remove()"></div>`;
   return `<div class="seal" aria-hidden="true">${s.stampImg?`<img src="${esc(s.stampImg)}" alt="" onerror="${fb}">`:`<span>${sealName(s)}</span>`}<small>${s.stampImg?"":"STAMP"}</small></div>`;};
 const stBadge=s=>{const x=status(s);return x?`<span class="st ${x.cls}">${x.text}</span>`:""};
 
@@ -306,7 +308,7 @@ function list(){
   // 카드 기본 3줄: ① 번호·이름·오늘 상태 ② 스탬프 장소·거리 ③ 스탬프 체크·길찾기 — 나머지는 펼치기
   spots.map(s=>`<article class="spot${stamps.has(s.num)?" done":""}" style="--c:${col}" id="card-${c.key}-${s.num}" data-k="${c.key}|${s.num}">
     <div class="num${c.group===2?" sq":""}">${esc(s.num)}</div>
-    ${stamps.has(s.num)?sealHTML(s)+`<img class="visit" src="${VISIT_IMG}" alt="" aria-hidden="true" onerror="this.remove()">`:""}
+    ${stamps.has(s.num)?sealHTML(s):""}
     <h3>${esc(s.name)}${stBadge(s)}</h3>
     <div class="line">스탬프 <b>${esc(s.stamp||"현장 안내 확인")}</b>${s.d!=null?` · <span class="dist">${km(s.d)}</span>`:""}</div>
     <div class="acts"><button class="btn stampBtn" type="button" data-n="${esc(s.num)}" aria-pressed="${stamps.has(s.num)}">${stamps.has(s.num)?"✓ 스탬프 찍음":"스탬프 찍었어요"}</button>
@@ -343,7 +345,7 @@ function list(){
     chips(); refreshPins(); list();
     open.forEach(k=>{const[id,i]=k.split("|"); const a=document.getElementById(id); if(a) a.children[+i].open=true;});  // 펼친 항목 유지
     if(add){const a=document.getElementById(card), sl=a&&a.querySelector(".seal");  // 쿵: 도장이 내려찍히고 카드가 살짝 흔들림
-      if(sl){sl.classList.add("thud"); const v=a.querySelector(".visit"); if(v) v.classList.add("thud"); a.classList.add("thudcard"); setTimeout(()=>a.classList.remove("thudcard"),700); try{navigator.vibrate&&navigator.vibrate(40)}catch(e){}}}
+      if(sl){sl.classList.add("thud");  a.classList.add("thudcard"); setTimeout(()=>a.classList.remove("thudcard"),700); try{navigator.vibrate&&navigator.vibrate(40)}catch(e){}}}
   });
   el.querySelectorAll(".spot").forEach(a=>a.addEventListener("click",e=>{
     if(e.target.closest("a,button,summary,li,details")) return;
