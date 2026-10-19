@@ -180,8 +180,9 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
 .wx:empty{display:none}
 .vi{white-space:nowrap}
 .vi-p{color:var(--ink);font-weight:500}
-.plus{margin-left:5px;width:17px;height:17px;border-radius:50%;border:0;background:var(--sea-soft);color:var(--sea);font:600 13px/17px var(--body);display:inline-block;text-align:center;padding:0;cursor:pointer;vertical-align:-3px;transition:transform .15s}
-.plus:hover{transform:scale(1.15)}
+.plus{margin-left:6px;height:24px;padding:1px 3px;border:0;border-radius:6px;background:none;cursor:pointer;vertical-align:-7px;transition:transform .15s}
+.plus img{display:block;height:22px;width:auto}
+.plus:hover,.plus:focus-visible{transform:scale(1.12) rotate(-3deg)}
 .wx-i{font-size:15px;line-height:1}.viewinfo .wx b{font-size:14px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
 .wx-s{color:var(--ink)}
 .wx-more b{color:var(--ink);font-weight:600}
@@ -384,7 +385,7 @@ const viewInfo=L.control({position:"topright"}); viewInfo.onAdd=()=>{const d=L.D
 function drawKHS(){
   const box=viewInfo.getContainer().querySelector(".vi"), b=map.getBounds();
   const courseIn=new Set(C.flatMap(c=>c.spots).filter(s=>b.contains([s.lat,s.lng])).map(s=>s.name)).size;
-  if(map.getZoom()<KHS_ZOOM){khsLayer.clearLayers(); box.innerHTML=`<span class="vi-p">${esc(wxPlace().name)}</span><button class="plus" type="button" data-more-khs aria-label="주변 국가유산 더보기" title="주변 국가유산 더보기">+</button>`; box.title=`이 화면 방문코스 ${courseIn}곳`;
+  if(map.getZoom()<KHS_ZOOM){khsLayer.clearLayers(); box.innerHTML=`<span class="vi-p">${esc(wxPlace().name)}</span><button class="plus" type="button" data-more-khs aria-label="주변 국가유산 더보기" title="주변 국가유산 더보기"><img src="icons/btn-more.png" alt="" width="45" height="22"></button>`; box.title=`이 화면 방문코스 ${courseIn}곳`;
     box.querySelector("[data-more-khs]").onclick=()=>{  // 기준점(내 위치 › 고른 길 › 대전)이 보이면 그곳, 아니면 보이는 지도 가운데를 국가유산 점이 보이게 확대
       const a=zoomAnchor().ll, v=visibleBounds(); map.setView(v.contains(a)?a:v.getCenter(),KHS_ZOOM);};
     return;}
