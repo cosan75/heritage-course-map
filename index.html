@@ -13,18 +13,18 @@
 :root{
   --paper:#f4f3ee; --sheet:#fbfaf6; --ink:#1f2328; --muted:#5f655f; --rule:#d9d7cc;
   --sea:#2c5d82; --sea-soft:#e2ebf1; --seal:#c8372d; --food:#b35a17; --me:#1f6fd6;
-  --ok:#1e7a46; --ok-soft:#dcefe3; --warn:#94590a; --warn-soft:#f8ead2;
+  --ok:#1e7a46; --ok-soft:#dcefe3; --warn:#94590a; --warn-soft:#f8ead2; --kh:#6b5b95;
   --display:"Gowun Batang","Noto Serif KR",serif;
   --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --paper:#15181b; --sheet:#1c2024; --ink:#e9e8e2; --muted:#a2a79f; --rule:#343a3f;
   --sea:#7fb0d6; --sea-soft:#1e2c37; --seal:#ef6a5c; --food:#f08f4e; --me:#66a6ff;
-  --ok:#82d3a2; --ok-soft:#1b3326; --warn:#f0bf6c; --warn-soft:#382c16; color-scheme:dark}}
+  --ok:#82d3a2; --ok-soft:#1b3326; --warn:#f0bf6c; --warn-soft:#382c16; --kh:#b3a6dc; color-scheme:dark}}
 :root[data-theme="dark"]{
   --paper:#15181b; --sheet:#1c2024; --ink:#e9e8e2; --muted:#a2a79f; --rule:#343a3f;
   --sea:#7fb0d6; --sea-soft:#1e2c37; --seal:#ef6a5c; --food:#f08f4e; --me:#66a6ff;
-  --ok:#82d3a2; --ok-soft:#1b3326; --warn:#f0bf6c; --warn-soft:#382c16; color-scheme:dark}
+  --ok:#82d3a2; --ok-soft:#1b3326; --warn:#f0bf6c; --warn-soft:#382c16; --kh:#b3a6dc; color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{height:100%;margin:0}
@@ -134,6 +134,11 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
 .pin.sq{border-radius:5px;font-size:10px}
 .fpin{width:12px;height:12px;border-radius:50%;background:var(--food);border:2px solid #fff;box-shadow:0 0 2px rgba(0,0,0,.4)}
 .legend{background:var(--sheet);color:var(--ink);border:1px solid var(--rule);border-radius:8px;padding:6px 10px;font:12px/1.7 var(--body);display:flex;flex-wrap:wrap;gap:4px 12px;max-width:min(92vw,520px)}
+.viewinfo{background:var(--sheet);color:var(--ink);border:1px solid var(--rule);border-radius:8px;padding:4px 9px;font:12px/1.5 var(--body);max-width:min(70vw,300px)}
+.viewinfo:empty{display:none}
+.viewinfo b{color:var(--kh)}
+.gps b{color:var(--ink)}
+.gps .lk{color:var(--sea);text-decoration:underline;cursor:pointer;background:none;border:0;padding:0;font:inherit}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend i{display:inline-block;width:16px;height:12px;background:var(--muted)}
 .leaflet-popup-content{font:13px/1.55 var(--body);word-break:keep-all}
@@ -204,9 +209,60 @@ map.createPane("food").style.zIndex=550;  // 맛집 점은 유산 번호 핀(mar
 const spotLayer=L.layerGroup().addTo(map), foodLayer=L.layerGroup().addTo(map), meLayer=L.layerGroup().addTo(map), nearLayer=L.layerGroup().addTo(map);
 const legend=L.control({position:"bottomleft"});
 legend.onAdd=()=>{const d=L.DomUtil.create("div","legend");
-  d.innerHTML='<span><i style="border-radius:6px"></i>방문코스 1 (01~98)</span><span><i style="border-radius:2px"></i>방문코스 2 (001~024)</span><span><i style="width:10px;height:10px;border-radius:50%;background:var(--food)"></i>맛집</span>';return d};
+  d.innerHTML='<span><i style="border-radius:6px"></i>방문코스 1 (01~98)</span><span><i style="border-radius:2px"></i>방문코스 2 (001~024)</span><span><i style="width:10px;height:10px;border-radius:50%;background:var(--food)"></i>맛집</span><span><i style="width:9px;height:9px;border-radius:50%;background:var(--kh)"></i>국가유산 (확대 시)</span>';return d};
 legend.addTo(map);
 let cur="", filter="all", showFood=true, me=null, markers={};
+
+// 전국 국가유산 1.2만 곳 (heritage_all.js, 1MB라 처음 필요할 때 불러온다)
+let KHS=null, khsLoading=null;
+function loadKHS(){
+  if(KHS) return Promise.resolve(KHS);
+  return khsLoading||(khsLoading=new Promise((ok,no)=>{const s=document.createElement("script"); s.src="heritage_all.js";
+    s.onload=()=>{KHS=window.KHS_ALL.map(r=>({name:r[0],kind:window.KHS_KINDS[r[1]]||"",lat:r[2],lng:r[3],code:r[4]})); ok(KHS);};
+    s.onerror=()=>{khsLoading=null; no();}; document.head.appendChild(s);}));
+}
+const myhUrl=h=>{const[kd,asno,ctcd,cpno]=h.code.split("|");return `https://my.heritage.go.kr/public/commentary/culSelectDetail.do?ccbaKdcd=${kd}&ccbaAsno=${asno}&ccbaCtcd=${ctcd}&ccbaCpno=${cpno}`};
+const khsPopup=h=>`<b>${esc(h.name)}</b><br>${esc(h.kind)}${me?` · 내 위치에서 ${km(hav(me.lat,me.lng,h.lat,h.lng))}`:""}<br><a href="${myhUrl(h)}" target="_blank" rel="noopener">국가유산 해설사에서 보기</a> · <a href="${kakaoTo(h)}" target="_blank" rel="noopener">길찾기</a>`;
+const khsRenderer=L.canvas({padding:.3}), khsLayer=L.layerGroup().addTo(map), nearestLayer=L.layerGroup().addTo(map);
+const KHS_ZOOM=11, KHS_MAX=400;  // 시·군 단위로 확대했을 때만, 화면 가운데에서 가까운 400곳까지
+const viewInfo=L.control({position:"topright"}); viewInfo.onAdd=()=>L.DomUtil.create("div","viewinfo"); viewInfo.addTo(map);
+// 지도 화면(확대·이동)에 맞춰 그 안의 국가유산을 점으로 표시
+function drawKHS(){
+  const box=viewInfo.getContainer(), b=map.getBounds();
+  const courseIn=new Set(C.flatMap(c=>c.spots).filter(s=>b.contains([s.lat,s.lng])).map(s=>s.name)).size;
+  if(map.getZoom()<KHS_ZOOM){khsLayer.clearLayers(); box.innerHTML=`이 화면 방문코스 <b>${courseIn}</b>곳 · 더 확대하면 주변 국가유산이 점으로 보여요`; return;}
+  loadKHS().then(all=>{
+    if(map.getZoom()<KHS_ZOOM) return;
+    const c=map.getCenter(), inView=all.filter(h=>b.contains([h.lat,h.lng]));
+    inView.forEach(h=>h._c=hav(c.lat,c.lng,h.lat,h.lng)); inView.sort((x,y)=>x._c-y._c);
+    const kh=getComputedStyle(document.documentElement).getPropertyValue("--kh").trim();
+    khsLayer.clearLayers();
+    inView.slice(0,KHS_MAX).forEach(h=>L.circleMarker([h.lat,h.lng],{renderer:khsRenderer,radius:5,color:"#fff",weight:1.5,fillColor:kh,fillOpacity:.9}).bindPopup(()=>khsPopup(h)).addTo(khsLayer));
+    box.innerHTML=`이 화면 국가유산 <b>${inView.length}</b>곳${inView.length>KHS_MAX?` (가운데서 가까운 ${KHS_MAX}곳 표시)`:""} · 방문코스 ${courseIn}곳`;
+  }).catch(()=>{box.textContent="국가유산 목록을 불러오지 못했어요.";});
+}
+let khsTimer=null; map.on("moveend",()=>{clearTimeout(khsTimer); khsTimer=setTimeout(drawKHS,150);});
+// 내 위치와 가장 가까운 국가유산이 함께 보이게 (국가유산 점이 보이는 배율 이상)
+function fitNear(pt,h){
+  map.stop(); const b=L.latLngBounds([[pt.lat,pt.lng],[h.x.lat,h.x.lng]]);
+  map.fitBounds(b,{padding:[50,50],maxZoom:15,animate:false}); if(map.getZoom()<KHS_ZOOM) map.setView(b.getCenter(),KHS_ZOOM,{animate:false});
+  setTimeout(()=>h.marker.openPopup(),300);
+}
+// 기준점(내 위치 또는 지도 가운데)에서 가장 가까운 국가유산·방문코스 유산
+function findNearest(pt,label){
+  const msg=document.getElementById("gpsMsg");
+  return loadKHS().then(all=>{
+    let h=null; all.forEach(x=>{const d=hav(pt.lat,pt.lng,x.lat,x.lng); if(!h||d<h.d) h={d,x};});
+    let s=null; C.forEach(c=>c.spots.forEach(y=>{const d=hav(pt.lat,pt.lng,y.lat,y.lng); if(!s||d<s.d) s={d,c,s:y};}));
+    nearestLayer.clearLayers();
+    const kh=getComputedStyle(document.documentElement).getPropertyValue("--kh").trim();
+    const m=L.circleMarker([h.x.lat,h.x.lng],{radius:11,color:kh,weight:3,fillColor:"#fff",fillOpacity:.6}).bindPopup(()=>"<small>가장 가까운 국가유산</small><br>"+khsPopup(h.x)).addTo(nearestLayer);
+    msg.innerHTML=`${label} 가장 가까운 국가유산: <button class="lk" type="button" id="nearKhs">${esc(h.x.name)}</button> (${esc(h.x.kind)}, ${km(h.d)})<br>가장 가까운 방문코스 유산: <button class="lk" type="button" id="nearSpot">${esc(s.s.name)}</button> (${esc(s.c.title)}, ${km(s.d)})`;
+    document.getElementById("nearKhs").onclick=()=>{map.setView([h.x.lat,h.x.lng],Math.max(map.getZoom(),15)); m.openPopup();};
+    document.getElementById("nearSpot").onclick=()=>{if(cur!==s.c.key) select(s.c.key); const mk=markers[s.c.key+"|"+s.s.num]; map.setView([s.s.lat,s.s.lng],15); if(mk) mk.openPopup(); focusCard(s.c.key,s.s.num);};
+    h.marker=m; return {s,h};
+  }).catch(()=>{msg.textContent="국가유산 목록을 불러오지 못했어요. 잠시 후 다시 눌러 주세요.";});
+}
 
 const pinIcon=(label,c,g)=>L.divIcon({className:"",html:`<div class="pin${g===2?" sq":""}${stamps.has(label)?" done":""}" style="--c:${c}">${label}</div>`,iconSize:[30,26],iconAnchor:[15,13],popupAnchor:[0,-13]});
 const foodIcon=L.divIcon({className:"",html:'<div class="fpin"></div>',iconSize:[12,12],iconAnchor:[6,6]});
@@ -276,7 +332,7 @@ function popupHtml(c,s){
   <a href="${kakaoTo(s)}" target="_blank" rel="noopener">카카오맵 길찾기</a> · <a href="${naverFood(s)}" target="_blank" rel="noopener">네이버 주변 맛집</a>`;
 }
 
-function draw(){
+function draw(noFit){
   spotLayer.clearLayers(); foodLayer.clearLayers(); nearLayer.clearLayers(); markers={};
   const list=cur?C.filter(c=>c.key===cur):visible(), pts=[];
   list.forEach(c=>{
@@ -290,7 +346,7 @@ function draw(){
         .bindPopup(`<b>${esc(f.name)}</b><br>${esc(kind(f))}<br>${esc(s.name)}에서 ${km(f.dist)}${f.addr?`<br>${esc(f.addr)}`:""}${(f.phone||f.tel)?`<br>전화: ${esc(f.phone||f.tel)}`:""}${f.photo?`<br><img src="${esc(f.photo)}" alt="" style="width:160px;border-radius:6px;margin-top:4px">`:""}`).addTo(foodLayer));
     });
   });
-  if(pts.length) map.fitBounds(pts,{padding:[30,30],maxZoom:13});
+  if(pts.length&&!noFit) map.fitBounds(pts,{padding:[30,30],maxZoom:13});
 }
 
 function list(){
@@ -385,11 +441,11 @@ function focusCard(key,num){
   const c=document.getElementById(`card-${key}-${num}`); if(!c) return;
   c.classList.add("active"); c.scrollIntoView({block:"nearest",behavior:"smooth"});
 }
-function select(k){
+function select(k,noFit){  // noFit: 코스만 바꾸고 지도 화면은 그대로 (내 위치 찾기에서)
   cur=k;
   if(k){const c=C.find(x=>x.key===k); if(filter!=="all"&&String(c.group)!==filter) filter="all";}
   try{localStorage.setItem("hcm-course",k)}catch(e){}
-  chips(); draw(); list();
+  chips(); draw(noFit); list();
 }
 document.querySelectorAll(".filters .btn").forEach(b=>b.onclick=()=>{filter=b.dataset.f; select("");});
 document.getElementById("foodBtn").onclick=e=>{showFood=!showFood;e.currentTarget.classList.toggle("on",showFood);e.currentTarget.setAttribute("aria-pressed",showFood);draw();};
@@ -407,17 +463,19 @@ document.getElementById("gpsBtn").onclick=()=>{
     const blue=getComputedStyle(document.documentElement).getPropertyValue("--me").trim();
     L.circle([me.lat,me.lng],{radius:me.acc,color:blue,weight:1,fillOpacity:.1}).addTo(meLayer);
     L.circleMarker([me.lat,me.lng],{radius:7,color:"#fff",weight:2,fillColor:blue,fillOpacity:1}).bindPopup("내 위치").addTo(meLayer);
-    let best=null; visible().forEach(c=>c.spots.forEach(s=>{const d=hav(me.lat,me.lng,s.lat,s.lng); if(!best||d<best.d) best={d,c,s};}));
-    msg.textContent=`정확도 ±${Math.round(me.acc)}m · 가장 가까운 곳: ${best.s.name} (${best.c.title}, ${km(best.d)})`;
-    if(first){first=false; listedAt=me; if(!cur) select(best.c.key); else list(); map.fitBounds([[me.lat,me.lng],[best.s.lat,best.s.lng]],{padding:[40,40],maxZoom:14});}
-    else if(hav(listedAt.lat,listedAt.lng,me.lat,me.lng)>50){listedAt=me; list();}  // 50m 이상 움직였을 때만 거리순 다시 정렬
-  },err=>{msg.textContent=err.code===1?"위치 권한이 거부됐어요. 주소창의 사이트 권한에서 위치를 허용해 주세요.":"위치를 가져오지 못했어요. 잠시 후 다시 눌러 주세요.";},
+    if(first){first=false; listedAt=me;
+      findNearest(me,`정확도 ±${Math.round(me.acc)}m ·`).then(r=>{if(!r) return; if(cur!==r.s.c.key) select(r.s.c.key,true); else list(); fitNear(me,r.h);});}  // 가장 가까운 유산의 코스를 고르고, 화면은 내 위치 주변
+    else if(hav(listedAt.lat,listedAt.lng,me.lat,me.lng)>50){listedAt=me; list(); findNearest(me,`정확도 ±${Math.round(me.acc)}m ·`);}  // 50m 이상 움직였을 때만 다시 계산
+  },err=>{  // 위치를 못 받으면 지도 가운데를 기준으로 찾아 준다
+    const why=err.code===1?"위치 권한이 거부됐어요(주소창의 사이트 권한에서 허용).":"위치를 가져오지 못했어요.";
+    findNearest(map.getCenter(),why+" 대신 지도 가운데에서");},
   {enableHighAccuracy:true,maximumAge:10000,timeout:15000});
 };
 
 let saved=""; try{saved=localStorage.getItem("hcm-course")||""}catch(e){}
 const fromHash=location.hash.replace("#c","");
 select([fromHash,saved].find(k=>C.some(c=>c.key===k))||"");
+drawKHS();
 </script>
 </body>
 </html>
