@@ -176,7 +176,11 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
 .inapp span{flex:1 1 140px}
 .inapp a,.inapp button{color:var(--sheet);background:none;border:1px solid currentColor;border-radius:6px;padding:3px 8px;font:inherit;text-decoration:none;cursor:pointer}
 .inapp [data-x]{border:0;padding:3px 4px}
-.crow .grp span{font-size:11px}
+.csel{display:flex;align-items:center;gap:8px;border:1px solid var(--rule);border-radius:8px;background:var(--sheet);padding:0 4px 0 11px}
+.csel:focus-within{outline:2px solid var(--sea);outline-offset:1px}
+.csel i{width:11px;height:11px;border-radius:50%;background:var(--c);flex:none}
+.csel select{flex:1;min-width:0;min-height:38px;border:0;background:transparent;color:var(--ink);font:500 13.5px/1.3 var(--body);cursor:pointer;outline:none}
+.csel select optgroup{font-weight:600}
 .btn.ico svg{flex:none}
 .legend small{font-size:inherit;color:var(--muted)}
 .viewinfo small{color:var(--muted)}
@@ -204,10 +208,6 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
   .filters .btn{min-height:34px;padding:4px 10px}
   .gps{order:10;flex-basis:100%;font-size:11.5px;line-height:1.45}
   #chips{order:11;flex-basis:100%;min-width:0}
-  .crow{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-  .crow .grp{margin:0;flex:none}
-  .crow .grp span{display:none}
-  .crow .chips{flex:1;min-width:0}
   .chip{padding:3px 9px}
   .total{margin-top:2px;font-size:11.5px}
   .legend small{display:none}
@@ -381,14 +381,14 @@ const stBadge=s=>{const x=status(s);return x?`<span class="st ${x.cls}">${x.text
 
 function chips(){
   document.querySelectorAll(".filters .btn").forEach(b=>b.classList.toggle("on",b.dataset.f===filter));
-  const row=g=>`<div class="crow"><div class="grp"><b>방문코스 ${g}</b><span>${g===1?"사이트 크롤링 · 여행지도 번호":"여행지도 PDF · 스탬프 위치 공지"}</span></div><div class="chips">`+
-    C.filter(c=>c.group===g).map(c=>`<button class="chip${g===2?" g2":""}" type="button" style="--c:${COLOR[c.key]}" data-k="${c.key}" aria-label="${esc(c.title)}" aria-pressed="${cur===c.key}"><i></i>${esc(shortTitle(c))}${partOf(c)?` <span class="part">${partOf(c)}</span>`:""} <span class="prog">${done(c)}/${c.spots.length}</span></button>`).join("")+"</div></div>";
-  const got=allNums.filter(n=>stamps.has(n)).length;
-  document.getElementById("chips").innerHTML=(filter!=="2"?row(1):"")+(filter!=="1"?row(2):"")+
+  // 길 고르기: 드롭다운 하나 (방문코스 1·2 묶음, 길마다 찍은 수/전체)
+  const opt=c=>`<option value="${c.key}"${cur===c.key?" selected":""}>${esc(shortTitle(c))}${partOf(c)?` ${partOf(c)}구간`:""} (${done(c)}/${c.spots.length})</option>`;
+  const grp=g=>`<optgroup label="방문코스 ${g} · ${g===1?"사이트 크롤링 · 여행지도 번호":"여행지도 PDF · 스탬프 위치 공지"}">${C.filter(c=>c.group===g).map(opt).join("")}</optgroup>`;
+  const got=allNums.filter(n=>stamps.has(n)).length, n=visible().reduce((a,c)=>a+c.spots.length,0);
+  document.getElementById("chips").innerHTML=`<label class="csel" style="--c:${cur?COLOR[cur]:"var(--muted)"}"><i aria-hidden="true"></i>
+    <select id="courseSel" aria-label="길 고르기"><option value="">${filter==="all"?"전체 길":`방문코스 ${filter} 전체`} 보기 (${n}곳)</option>${(filter!=="2"?grp(1):"")+(filter!=="1"?grp(2):"")}</select></label>`+
     `<div class="total">내 스탬프 <b>${got}</b> / ${allNums.length}곳</div>`;
-  document.querySelectorAll("#chips .chip").forEach(b=>b.onclick=()=>select(cur===b.dataset.k?"":b.dataset.k));
-  const on=document.querySelector('#chips .chip[aria-pressed="true"]');  // 고른 칩이 보이게 — 칩 줄만 옆으로 (목록·시트는 움직이지 않게)
-  if(on){const row=on.parentElement; row.scrollLeft=on.offsetLeft-row.offsetLeft-(row.clientWidth-on.offsetWidth)/2;}
+  document.getElementById("courseSel").onchange=e=>select(e.target.value);
 }
 
 function popupHtml(c,s){
