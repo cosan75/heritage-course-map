@@ -169,6 +169,22 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
 .src{font-size:11px;line-height:1.6;color:var(--muted);padding:8px max(16px,env(safe-area-inset-left,0px));border-top:1px solid var(--rule)}
 .src a{color:var(--muted)}
 .grab{display:none}
+.total .lk{color:var(--sea);text-decoration:underline;cursor:pointer;background:none;border:0;padding:0;font:inherit;font-weight:600}
+.nearbar{position:fixed;left:50%;transform:translateX(-50%);top:max(10px,env(safe-area-inset-top,0px));z-index:2500;width:min(560px,calc(100vw - 20px));display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;
+  background:var(--sheet);color:var(--ink);border:2px solid var(--seal);border-radius:12px;padding:9px 10px;font:500 13px/1.45 var(--body);box-shadow:0 6px 20px rgb(0 0 0 / .22)}
+.nearbar span{flex:1 1 200px}
+.nearbar button{border:1px solid var(--rule);background:var(--sheet);color:var(--ink);border-radius:8px;padding:5px 10px;font:600 12.5px/1.2 var(--body);cursor:pointer;min-height:32px}
+.nearbar [data-go]{background:var(--seal);border-color:var(--seal);color:#fff}
+.nearbar [data-x]{border:0;padding:5px 6px}
+.modal{position:fixed;inset:0;z-index:3000;background:rgb(0 0 0 / .45);display:grid;place-items:center;padding:16px}
+.sheet-box{background:var(--sheet);color:var(--ink);border-radius:14px;padding:16px;width:min(460px,100%);max-height:calc(100dvh - 32px);overflow:auto;display:flex;flex-direction:column;gap:10px}
+.sheet-box h3{font:700 1.05rem/1.3 var(--display);margin:0}
+.sheet-box .mt{color:var(--muted);font-size:12.5px;margin:0}
+.sheet-box .acts{display:flex;gap:8px;flex-wrap:wrap}
+.sheet-box [data-close]{align-self:flex-end}
+.cert-img{width:100%;border-radius:8px;border:1px solid var(--rule)}
+.lbl{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--muted)}
+.lbl textarea{font:500 13px/1.4 ui-monospace,monospace;color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:8px;padding:8px;resize:vertical;word-break:break-all}
 .sheetBtn{display:none}
 .sbtn{display:none}
 .search{position:relative}
@@ -421,7 +437,7 @@ function chips(){
   const got=allNums.filter(n=>stamps.has(n)).length, n=visible().reduce((a,c)=>a+c.spots.length,0);
   document.getElementById("chips").innerHTML=`<label class="csel" style="--c:${cur?COLOR[cur]:"var(--muted)"}"><i aria-hidden="true"></i>
     <select id="courseSel" aria-label="길 고르기"><option value="">${filter==="all"?"전체 길":`방문코스 ${filter} 전체`} 보기 (${n}곳)</option>${(filter!=="2"?grp(1):"")+(filter!=="1"?grp(2):"")}</select></label>`+
-    `<div class="total">내 스탬프 <b>${got}</b> / ${allNums.length}곳</div>`;
+    `<div class="total">내 스탬프 <b>${got}</b> / ${allNums.length}곳 · <button class="lk" type="button" data-cert>인증서</button> · <button class="lk" type="button" data-backup>백업</button></div>`;
   document.getElementById("courseSel").onchange=e=>select(e.target.value);
 }
 
@@ -582,6 +598,7 @@ document.getElementById("gpsBtn").onclick=()=>{
     const blue=getComputedStyle(document.documentElement).getPropertyValue("--me").trim();
     L.circle([me.lat,me.lng],{radius:me.acc,color:blue,weight:1,fillOpacity:.1}).addTo(meLayer);
     L.circleMarker([me.lat,me.lng],{radius:7,color:"#fff",weight:2,fillColor:blue,fillOpacity:1}).bindPopup("내 위치").addTo(meLayer);
+    nearCheck(me);  // 아직 안 찍은 유산 200m 안이면 도장 안내
     if(first){first=false; listedAt=me;
       findNearest(me,`정확도 ±${Math.round(me.acc)}m ·`).then(r=>{if(!r) return; if(cur!==r.s.c.key) select(r.s.c.key,true); else list(); fitNear(me,r.h);});}  // 가장 가까운 유산의 코스를 고르고, 화면은 내 위치 주변
     else if(hav(listedAt.lat,listedAt.lng,me.lat,me.lng)>50){listedAt=me; list(); findNearest(me,`정확도 ±${Math.round(me.acc)}m ·`);}  // 50m 이상 움직였을 때만 다시 계산
@@ -735,6 +752,117 @@ qEl.addEventListener("blur",()=>setTimeout(()=>{qres.hidden=true;},150));
 document.getElementById("searchBtn").onclick=()=>{const h=document.querySelector(".head"), on=!h.classList.contains("searching");
   h.classList.toggle("searching",on); document.getElementById("searchBtn").setAttribute("aria-expanded",String(on));
   if(on){if(sheet==="peek") setSheet("half",true); aside.scrollTop=0; qEl.focus();}};
+
+// ── 도장 찍기(공통): 카드 버튼·근처 안내에서 함께 쓴다
+function stampNow(n){
+  if(stamps.has(n)) return;
+  stamps.add(n); saveStamps();
+  const el=document.getElementById("list"), keep=[aside.scrollTop,el.scrollTop];
+  chips(); refreshPins(); list(); aside.scrollTop=keep[0]; el.scrollTop=keep[1];
+  const btn=document.querySelector(`.stampBtn[data-n="${CSS.escape(n)}"]`), a=btn&&btn.closest(".spot"), sl=a&&a.querySelector(".seal");
+  if(sl){sl.classList.add("thud"); a.classList.add("thudcard"); setTimeout(()=>a.classList.remove("thudcard"),700);}
+  try{navigator.vibrate&&navigator.vibrate(40)}catch(e){}
+}
+
+// ── 1) 근처 도장 안내: 아직 안 찍은 유산 200m 안에 들어오면 위에 띠를 띄운다 (자동으로 찍지는 않음)
+const NEAR_M=200, nearSkip=new Set();
+function nearCheck(pt){
+  let best=null;
+  C.forEach(c=>c.spots.forEach(s=>{if(stamps.has(s.num)||nearSkip.has(s.num)) return;
+    const d=hav(pt.lat,pt.lng,s.lat,s.lng)-Math.min(pt.acc||0,100); if(d<=NEAR_M&&(!best||d<best.d)) best={d,c,s};}));
+  const old=document.getElementById("nearBar");
+  if(!best){if(old) old.remove(); return;}
+  if(old&&old.dataset.n===best.s.num) return;
+  if(old) old.remove();
+  const b=document.createElement("div"); b.id="nearBar"; b.className="nearbar"; b.dataset.n=best.s.num; b.setAttribute("role","status");
+  b.innerHTML=`<span><b>${esc(best.s.name)}</b> 근처예요 (${km(Math.max(0,best.d))}) · 스탬프: ${esc(best.s.stamp||"현장 안내 확인")}</span>
+    <button type="button" data-go>도장 찍기</button><button type="button" data-card>카드 보기</button><button type="button" data-x aria-label="나중에">✕</button>`;
+  b.querySelector("[data-go]").onclick=()=>{
+    if(cur!==best.c.key&&!(pick&&pick.num===best.s.num)){if(cur) select(best.c.key,true); else pick={key:best.c.key,num:best.s.num};}
+    list(); stampNow(best.s.num); b.remove(); nearSkip.add(best.s.num);};
+  b.querySelector("[data-card]").onclick=()=>{b.remove(); nearSkip.add(best.s.num);
+    qChoose({t:"spot",c:best.c,s:best.s});};
+  b.querySelector("[data-x]").onclick=()=>{b.remove(); nearSkip.add(best.s.num);};
+  document.body.appendChild(b);
+}
+
+// ── 2) 도장 모음 인증서: 지금까지 찍은 도장을 한 장 그림(1080×1350)으로 → 저장·공유
+async function certImage(){
+  await document.fonts.ready;
+  const W=1080,H=1350,cv=document.createElement("canvas"); cv.width=W; cv.height=H; const g=cv.getContext("2d");
+  const paper="#f4f3ee",ink="#1f2328",muted="#6b6f68",seal="#c8372d",rule="#d9d7cc",serif='"Gowun Batang",serif',sans='"IBM Plex Sans KR",sans-serif';
+  g.fillStyle=paper; g.fillRect(0,0,W,H);
+  g.strokeStyle=ink; g.lineWidth=3; g.strokeRect(36,36,W-72,H-72); g.lineWidth=1; g.strokeRect(48,48,W-96,H-96);
+  const got=allNums.filter(n=>stamps.has(n)).length, done1=C.filter(c=>c.spots.every(s=>stamps.has(s.num)));
+  g.fillStyle=muted; g.font=`500 30px ${sans}`; g.textAlign="center"; g.fillText("2026 국가유산 방문 캠페인",W/2,128);
+  g.fillStyle=ink; g.font=`700 64px ${serif}`; g.fillText("국가유산 방문 도장 수첩",W/2,208);
+  // 가운데 큰 도장
+  g.save(); g.translate(W/2,350); g.rotate(-0.12); g.strokeStyle=seal; g.fillStyle=seal; g.lineWidth=7;
+  g.beginPath(); g.arc(0,0,118,0,Math.PI*2); g.stroke(); g.lineWidth=2.5; g.beginPath(); g.arc(0,0,104,0,Math.PI*2); g.stroke();
+  g.font=`700 92px ${serif}`; g.textBaseline="middle"; g.fillText(String(got),0,-10);
+  g.font=`600 26px ${sans}`; g.fillText(`/ ${allNums.length}곳`,0,58); g.restore();
+  g.fillStyle=ink; g.font=`500 30px ${sans}`; g.textAlign="center"; g.textBaseline="alphabetic";
+  g.fillText(done1.length?`완주한 길 ${done1.length}곳 · ${done1.slice(0,3).map(c=>c.title).join(", ")}${done1.length>3?" 외":""}`:"길마다 도장을 모아 완주해 보세요",W/2,526);
+  // 길별 진행 막대
+  const rows=C, top=580, rh=(H-200-top)/rows.length;
+  rows.forEach((c,i)=>{const y=top+i*rh+rh*.62, d=c.spots.filter(s=>stamps.has(s.num)).length, full=d===c.spots.length;
+    g.textAlign="left"; g.fillStyle=ink; g.font=`${full?700:500} 27px ${sans}`; g.fillText(c.title,110,y);
+    const bx=430,bw=380; g.fillStyle=rule; g.fillRect(bx,y-16,bw,14); g.fillStyle=full?seal:(COLOR[c.key]||ink); g.fillRect(bx,y-16,bw*d/c.spots.length,14);
+    g.textAlign="right"; g.fillStyle=full?seal:muted; g.font=`600 26px ${sans}`; g.fillText(full?`완주 ${d}/${c.spots.length}`:`${d}/${c.spots.length}`,W-110,y);});
+  g.textAlign="center"; g.fillStyle=muted; g.font=`500 24px ${sans}`;
+  const day=new Date(); g.fillText(`${day.getFullYear()}.${day.getMonth()+1}.${day.getDate()} · cosan75.github.io/heritage-course-map`,W/2,H-96);
+  return cv;
+}
+function modal(html){
+  const m=document.createElement("div"); m.className="modal"; m.setAttribute("role","dialog"); m.setAttribute("aria-modal","true");
+  m.innerHTML=`<div class="sheet-box">${html}<button type="button" class="btn" data-close>닫기</button></div>`;
+  m.onclick=e=>{if(e.target===m||e.target.closest("[data-close]")) m.remove();};
+  document.addEventListener("keydown",function k(e){if(e.key==="Escape"){m.remove(); document.removeEventListener("keydown",k);}});
+  document.body.appendChild(m); return m;
+}
+async function openCert(){
+  const m=modal(`<h3>도장 모음 인증서</h3><p class="mt">만드는 중…</p>`);
+  const cv=await certImage(), url=cv.toDataURL("image/png");
+  const blob=await new Promise(r=>cv.toBlob(r,"image/png")), file=new File([blob],"국가유산-도장수첩.png",{type:"image/png"});
+  const canShare=navigator.canShare&&navigator.canShare({files:[file]});
+  m.querySelector(".mt").outerHTML=`<img class="cert-img" src="${url}" alt="지금까지 찍은 도장 수와 길별 진행을 담은 인증서">
+    <div class="acts">${canShare?`<button type="button" class="btn primary" data-share>공유하기</button>`:""}<a class="btn" download="국가유산-도장수첩.png" href="${url}">그림 저장</a></div>
+    <p class="mt">이 그림은 휴대폰 안에서 만들어지고 어디로도 보내지지 않아요. 공유하기는 직접 고른 앱으로만 갑니다.</p>`;
+  const sh=m.querySelector("[data-share]");
+  if(sh) sh.onclick=()=>navigator.share({files:[file],title:"국가유산 방문 도장 수첩",text:"국가유산 방문코스 지도 https://cosan75.github.io/heritage-course-map/"}).catch(()=>{});
+}
+
+// ── 3) 스탬프 백업·옮기기: 찍은 번호를 짧은 코드·링크로 (휴대폰을 바꾸거나 브라우저 기록을 지워도 되살림)
+const backupCode=()=>"HCM1."+[...stamps].sort().join(".");
+function readCode(s){
+  const m=String(s||"").trim().match(/HCM1\.([0-9.]*)/)||String(s||"").match(/[#&]s=([0-9.]+)/);
+  if(!m) return null; return m[1].split(".").filter(n=>allNums.includes(n));
+}
+function mergeStamps(nums,from){
+  const add=nums.filter(n=>!stamps.has(n));
+  if(!add.length){alert(`${from}의 도장 ${nums.length}곳은 이미 모두 찍혀 있어요.`); return;}
+  if(!confirm(`${from}에서 도장 ${add.length}곳을 더할까요? (지금 찍힌 ${stamps.size}곳은 그대로 둡니다)`)) return;
+  add.forEach(n=>stamps.add(n)); saveStamps(); chips(); refreshPins(); list();
+}
+function openBackup(){
+  const link=location.origin+location.pathname+"#s="+[...stamps].sort().join(".");
+  const m=modal(`<h3>스탬프 백업·옮기기</h3>
+    <p class="mt">찍은 도장은 이 브라우저에만 저장돼요. 휴대폰을 바꾸거나 기록을 지우기 전에 코드나 링크를 저장해 두세요. (찍힌 ${stamps.size}곳)</p>
+    <label class="lbl">백업 코드<textarea readonly rows="2" data-code>${esc(backupCode())}</textarea></label>
+    <div class="acts"><button type="button" class="btn primary" data-copy="code">코드 복사</button><button type="button" class="btn" data-copy="link">옮기기 링크 복사</button></div>
+    <label class="lbl">다른 곳의 코드 불러오기<textarea rows="2" placeholder="HCM1.01.02… 를 붙여 넣기" data-in></textarea></label>
+    <div class="acts"><button type="button" class="btn" data-load>불러오기(합치기)</button></div>`);
+  m.querySelectorAll("[data-copy]").forEach(b=>b.onclick=async()=>{const v=b.dataset.copy==="code"?backupCode():link;
+    try{await navigator.clipboard.writeText(v); b.textContent="복사됨";}catch(e){prompt("복사해 두세요",v);}});
+  m.querySelector("[data-load]").onclick=()=>{const nums=readCode(m.querySelector("[data-in]").value);
+    if(!nums){alert("백업 코드(HCM1.…)나 옮기기 링크를 붙여 넣어 주세요."); return;} mergeStamps(nums,"붙여 넣은 코드"); m.remove();};
+}
+// 옮기기 링크(#s=…)로 열면 합칠지 묻는다
+(function(){const nums=readCode(location.hash); if(nums&&nums.length){history.replaceState(null,"",location.pathname+location.search); setTimeout(()=>mergeStamps(nums,"옮기기 링크"),400);}})();
+document.getElementById("chips").addEventListener("click",e=>{
+  if(e.target.closest("[data-cert]")) openCert();
+  if(e.target.closest("[data-backup]")) openBackup();
+});
 
 let saved=""; try{saved=localStorage.getItem("hcm-course")||""}catch(e){}
 const fromHash=location.hash.replace("#c","");
