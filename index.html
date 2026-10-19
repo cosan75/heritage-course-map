@@ -169,6 +169,35 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
 .src{font-size:11px;line-height:1.6;color:var(--muted);padding:8px max(16px,env(safe-area-inset-left,0px));border-top:1px solid var(--rule)}
 .src a{color:var(--muted)}
 .grab{display:none}
+.csel{display:flex;align-items:center;gap:8px;width:100%;min-height:40px;border:1px solid var(--rule);border-radius:8px;background:var(--sheet);color:var(--ink);padding:0 12px 0 11px;font:500 13.5px/1.3 var(--body);cursor:pointer;text-align:left}
+.csel i{width:11px;height:11px;border-radius:50%;background:var(--c);flex:none}
+.csel span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.csel b{color:var(--muted);font-weight:500}
+.csel:focus-visible{outline:2px solid var(--sea);outline-offset:1px}
+.pk{position:fixed;inset:0;z-index:2800;background:rgb(0 0 0 / .38);display:flex;align-items:flex-end;justify-content:center}
+.pk-sheet{width:min(440px,100%);max-height:min(82dvh,720px);background:var(--sheet);color:var(--ink);border-radius:20px 20px 0 0;display:flex;flex-direction:column;box-shadow:0 -6px 24px rgb(0 0 0 / .2);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (min-width:821px){.pk{align-items:center}.pk-sheet{border-radius:16px}}
+.pk-grab{border:0;background:none;padding:9px 0 4px;cursor:pointer}
+.pk-grab::before{content:"";display:block;width:42px;height:5px;border-radius:3px;background:var(--muted);opacity:.4;margin:0 auto}
+.pk-hd{display:flex;align-items:baseline;justify-content:space-between;padding:2px 18px 8px}
+.pk-hd b{font:700 18px/1.3 var(--display)}.pk-hd span{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.pk-body{overflow:auto;padding-bottom:10px;overscroll-behavior:contain}
+.pk-seg{display:flex;gap:6px;padding:0 18px 8px;position:sticky;top:0;background:var(--sheet);z-index:1}
+.pk-seg button{font:500 12.5px/1 var(--body);padding:7px 12px;border-radius:999px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);cursor:pointer}
+.pk-seg button.on{background:var(--ink);border-color:var(--ink);color:var(--sheet)}
+.pk-g{font-size:11.5px;color:var(--muted);padding:10px 18px 4px;letter-spacing:.02em}
+.pk-it{display:flex;align-items:center;gap:11px;width:100%;border:0;background:none;color:inherit;text-align:left;padding:9px 18px;cursor:pointer;font:inherit}
+.pk-it:hover{background:var(--paper)}
+.pk-it.on{background:var(--sea-soft)}
+.pk-it:focus-visible{outline:2px solid var(--sea);outline-offset:-2px}
+.pk-d{width:11px;height:11px;border-radius:50%;flex:none}.pk-d.sq{border-radius:3px}
+.pk-n{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.pk-n b{font-weight:500;font-size:14.5px}.pk-n small{font-size:11.5px;color:var(--muted)}
+.pk-bar{height:4px;background:var(--rule);border-radius:2px;overflow:hidden;display:block}.pk-bar i{display:block;height:100%;background:var(--seal)}
+.pk-c{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.pk-it.on .pk-c{color:var(--sea);font-weight:600}
+.pk-done{font:700 10.5px/1 var(--body);color:var(--seal);border:1.5px solid var(--seal);border-radius:50%;width:34px;height:34px;display:grid;place-items:center;transform:rotate(-12deg);flex:none}
+.pk-all{border-bottom:1px solid var(--rule)}
 .total .lk{color:var(--sea);text-decoration:underline;cursor:pointer;background:none;border:0;padding:0;font:inherit;font-weight:600}
 .nearbar{position:fixed;left:50%;transform:translateX(-50%);top:max(10px,env(safe-area-inset-top,0px));z-index:2500;width:min(560px,calc(100vw - 20px));display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;
   background:var(--sheet);color:var(--ink);border:2px solid var(--seal);border-radius:12px;padding:9px 10px;font:500 13px/1.45 var(--body);box-shadow:0 6px 20px rgb(0 0 0 / .22)}
@@ -207,11 +236,6 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
 .inapp span{flex:1 1 140px}
 .inapp a,.inapp button{color:var(--sheet);background:none;border:1px solid currentColor;border-radius:6px;padding:3px 8px;font:inherit;text-decoration:none;cursor:pointer}
 .inapp [data-x]{border:0;padding:3px 4px}
-.csel{display:flex;align-items:center;gap:8px;border:1px solid var(--rule);border-radius:8px;background:var(--sheet);padding:0 4px 0 11px}
-.csel:focus-within{outline:2px solid var(--sea);outline-offset:1px}
-.csel i{width:11px;height:11px;border-radius:50%;background:var(--c);flex:none}
-.csel select{flex:1;min-width:0;min-height:38px;border:0;background:transparent;color:var(--ink);font:500 13.5px/1.3 var(--body);cursor:pointer;outline:none}
-.csel select optgroup{font-weight:600}
 .btn.ico svg{flex:none}
 .legend small{font-size:inherit;color:var(--muted)}
 .viewinfo small{color:var(--muted)}
@@ -431,14 +455,39 @@ const stBadge=s=>{const x=status(s);return x?`<span class="st ${x.cls}">${x.text
 
 function chips(){
   document.querySelectorAll(".filters .btn").forEach(b=>b.classList.toggle("on",b.dataset.f===filter));
-  // 길 고르기: 드롭다운 하나 (방문코스 1·2 묶음, 길마다 찍은 수/전체)
-  const opt=c=>`<option value="${c.key}"${cur===c.key?" selected":""}>${esc(shortTitle(c))}${partOf(c)?` ${partOf(c)}구간`:""} (${done(c)}/${c.spots.length})</option>`;
-  const grp=g=>`<optgroup label="방문코스 ${g} · ${g===1?"사이트 크롤링 · 여행지도 번호":"여행지도 PDF · 스탬프 위치 공지"}">${C.filter(c=>c.group===g).map(opt).join("")}</optgroup>`;
-  const got=allNums.filter(n=>stamps.has(n)).length, n=visible().reduce((a,c)=>a+c.spots.length,0);
-  document.getElementById("chips").innerHTML=`<label class="csel" style="--c:${cur?COLOR[cur]:"var(--muted)"}"><i aria-hidden="true"></i>
-    <select id="courseSel" aria-label="길 고르기"><option value="">${filter==="all"?"전체 길":`방문코스 ${filter} 전체`} 보기 (${n}곳)</option>${(filter!=="2"?grp(1):"")+(filter!=="1"?grp(2):"")}</select></label>`+
+  // 길 고르기: 누르면 '길 고르기' 목록 시트 (색 점 · 진행 막대 · 완주 도장)
+  const got=allNums.filter(n=>stamps.has(n)).length, n=visible().reduce((a,c)=>a+c.spots.length,0), c=cur&&C.find(x=>x.key===cur);
+  const label=c?`${esc(courseName(c))} (${done(c)}/${c.spots.length})`:`${filter==="all"?"전체 길":`방문코스 ${filter} 전체`} 보기 (${n}곳)`;
+  document.getElementById("chips").innerHTML=`<button class="csel" id="courseSel" type="button" aria-haspopup="dialog" style="--c:${c?COLOR[cur]:"var(--muted)"}"><i aria-hidden="true"></i><span>${label}</span><b aria-hidden="true">▾</b></button>`+
     `<div class="total">내 스탬프 <b>${got}</b> / ${allNums.length}곳 · <button class="lk" type="button" data-cert>인증서</button> · <button class="lk" type="button" data-backup>백업</button></div>`;
-  document.getElementById("courseSel").onchange=e=>select(e.target.value);
+  document.getElementById("courseSel").onclick=openPicker;
+}
+const courseName=c=>`${shortTitle(c)}${partOf(c)?` ${partOf(c)}구간`:""}`;
+function openPicker(){
+  document.getElementById("picker")?.remove();
+  const got=allNums.filter(n=>stamps.has(n)).length;
+  const row=c=>{const d=done(c),n=c.spots.length,full=d===n;
+    return `<button type="button" class="pk-it${cur===c.key?" on":""}" data-k="${c.key}" aria-pressed="${cur===c.key}">
+      <span class="pk-d${c.group===2?" sq":""}" style="background:${COLOR[c.key]}"></span>
+      <span class="pk-n"><b>${esc(courseName(c))}</b>${d&&!full?`<span class="pk-bar"><i style="width:${Math.round(100*d/n)}%"></i></span>`:full?`<span class="pk-bar"><i style="width:100%"></i></span>`:`<small>${n}곳</small>`}</span>
+      ${full?`<span class="pk-done">완주</span>`:`<span class="pk-c">${d}/${n}</span>`}</button>`;};
+  const body=()=>`<div class="pk-seg">${[["all","전체"],["1","방문코스 1"],["2","방문코스 2"]].map(([f,l])=>`<button type="button" data-f="${f}" class="${filter===f?"on":""}">${l}</button>`).join("")}</div>
+    <button type="button" class="pk-it pk-all${cur?"":" on"}" data-k=""><span class="pk-n"><b>${filter==="all"?"전체 길":`방문코스 ${filter} 전체`} 보기</b><small>${visible().reduce((a,c)=>a+c.spots.length,0)}곳 · 지도에 모두 표시</small></span></button>
+    ${[1,2].filter(g=>filter==="all"||String(g)===filter).map(g=>`<div class="pk-g">방문코스 ${g}</div>${C.filter(c=>c.group===g).map(row).join("")}`).join("")}`;
+  const m=document.createElement("div"); m.id="picker"; m.className="pk"; m.setAttribute("role","dialog"); m.setAttribute("aria-modal","true"); m.setAttribute("aria-label","길 고르기");
+  m.innerHTML=`<div class="pk-sheet"><button type="button" class="pk-grab" aria-label="닫기"></button>
+    <div class="pk-hd"><b>길 고르기</b><span>내 스탬프 ${got} / ${allNums.length}곳</span></div><div class="pk-body">${body()}</div></div>`;
+  const close=()=>{m.remove(); document.removeEventListener("keydown",esc_); document.getElementById("courseSel")?.focus();};
+  const esc_=e=>{if(e.key==="Escape") close();};
+  const wire=()=>{
+    m.querySelectorAll(".pk-it").forEach(b=>b.onclick=()=>{close(); select(b.dataset.k);});
+    m.querySelectorAll(".pk-seg button").forEach(b=>b.onclick=()=>{filter=b.dataset.f; if(cur&&filter!=="all"&&String(C.find(x=>x.key===cur).group)!==filter) cur="";
+      m.querySelector(".pk-body").innerHTML=body(); wire(); select(cur);});};
+  m.onclick=e=>{if(e.target===m||e.target.closest(".pk-grab")) close();};
+  document.addEventListener("keydown",esc_);
+  document.body.appendChild(m); wire();
+  const on=m.querySelector(".pk-it.on:not(.pk-all)"); if(on) on.scrollIntoView({block:"center"});
+  (on||m.querySelector(".pk-it")).focus({preventScroll:true});
 }
 
 function popupHtml(c,s){
