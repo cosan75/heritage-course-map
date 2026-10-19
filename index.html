@@ -385,7 +385,7 @@ const viewInfo=L.control({position:"topright"}); viewInfo.onAdd=()=>{const d=L.D
 function drawKHS(){
   const box=viewInfo.getContainer().querySelector(".vi"), b=map.getBounds();
   const courseIn=new Set(C.flatMap(c=>c.spots).filter(s=>b.contains([s.lat,s.lng])).map(s=>s.name)).size;
-  if(map.getZoom()<KHS_ZOOM){khsLayer.clearLayers(); box.innerHTML=`<span class="vi-p">${esc(wxPlace().name)}</span><button class="plus" type="button" data-more-khs aria-label="주변 국가유산 더보기" title="주변 국가유산 더보기"><img src="icons/btn-more.png" alt="" width="45" height="22"></button>`; box.title=`이 화면 방문코스 ${courseIn}곳`;
+  if(map.getZoom()<KHS_ZOOM){khsLayer.clearLayers(); box.innerHTML=`<span class="vi-p">${esc(wxPlace().name)}</span><button class="plus" type="button" data-more-khs aria-label="주변 국가유산 더보기" title="주변 국가유산 더보기"><img src="icons/btn-more.png" alt="" width="31" height="22"></button>`; box.title=`이 화면 방문코스 ${courseIn}곳`;
     box.querySelector("[data-more-khs]").onclick=()=>{  // 기준점(내 위치 › 고른 길 › 대전)이 보이면 그곳, 아니면 보이는 지도 가운데를 국가유산 점이 보이게 확대
       const a=zoomAnchor().ll, v=visibleBounds(); map.setView(v.contains(a)?a:v.getCenter(),KHS_ZOOM);};
     return;}
