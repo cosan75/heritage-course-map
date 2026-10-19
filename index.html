@@ -161,7 +161,7 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
 .pin.sq{border-radius:5px;font-size:10px}
 .fpin{width:12px;height:12px;border-radius:50%;background:var(--food);border:2px solid #fff;box-shadow:0 0 2px rgba(0,0,0,.4)}
 .legend{background:var(--sheet);color:var(--ink);border:1px solid var(--rule);border-radius:8px;padding:6px 10px;font:12px/1.7 var(--body);display:flex;flex-wrap:wrap;gap:4px 12px;max-width:min(92vw,520px)}
-.viewinfo{background:var(--sheet);color:var(--ink);border:1px solid var(--rule);border-radius:8px;padding:4px 9px;font:12px/1.5 var(--body);max-width:min(70vw,300px)}
+.viewinfo{background:var(--sheet);color:var(--ink);border:1px solid var(--rule);border-radius:8px;padding:3px 4px 3px 8px;font:12px/1.5 var(--body);display:flex;flex-wrap:wrap;align-items:center;gap:0 8px;max-width:calc(100vw - 70px)}
 .viewinfo:empty{display:none}
 .viewinfo b{color:var(--kh)}
 .gps b{color:var(--ink)}
@@ -176,11 +176,14 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
 .src{font-size:11px;line-height:1.6;color:var(--muted);padding:8px max(16px,env(safe-area-inset-left,0px));border-top:1px solid var(--rule)}
 .src a{color:var(--muted)}
 .grab{display:none}
-.wx{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 6px;max-width:min(62vw,280px);background:var(--sheet);color:var(--ink);border:1px solid var(--rule);border-radius:8px;padding:4px 9px;font:500 12px/1.4 var(--body);cursor:pointer;text-align:left;margin-top:6px!important}
-.wx-i{font-size:15px;line-height:1}.wx b{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
-.wx-s{color:var(--ink)}.wx-p{color:var(--muted);font-size:11px}
-.wx-more{display:none;flex-basis:100%;color:var(--muted);font-size:11.5px;line-height:1.5;border-top:1px dashed var(--rule);margin-top:3px;padding-top:3px}
-.wx.open .wx-more{display:block}
+.wx{display:inline-flex;align-items:baseline;gap:4px;background:none;border:0;padding:0 8px 0 0;border-right:1px solid var(--rule);color:var(--ink);font:500 12px/1.4 var(--body);cursor:pointer;white-space:nowrap}
+.wx:empty{display:none}
+.vi{white-space:nowrap}
+.plus{margin-left:7px;width:22px;height:22px;border-radius:50%;border:1px solid var(--sea);background:var(--sea-soft);color:var(--sea);font:700 15px/1 var(--body);display:inline-grid;place-items:center;padding:0;cursor:pointer;vertical-align:middle}
+.wx-i{font-size:15px;line-height:1}.viewinfo .wx b{font-size:14px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.wx-s{color:var(--ink)}
+.wx-more b{color:var(--ink);font-weight:600}
+.wx-more{flex-basis:100%;white-space:normal;padding-right:4px;color:var(--muted);font-size:11.5px;line-height:1.5;border-top:1px dashed var(--rule);margin-top:3px;padding-top:3px}
 .wx-more small{font-size:10.5px}
 .csel{display:flex;align-items:center;gap:8px;width:100%;min-height:40px;border:1px solid var(--rule);border-radius:8px;background:var(--sheet);color:var(--ink);padding:0 12px 0 11px;font:500 13.5px/1.3 var(--body);cursor:pointer;text-align:left}
 .csel i{width:11px;height:11px;border-radius:50%;background:var(--c);flex:none}
@@ -373,12 +376,13 @@ const myhUrl=h=>{const[kd,asno,ctcd,cpno]=h.code.split("|");return `https://my.h
 const khsPopup=h=>`<b>${esc(h.name)}</b><br>${esc(h.kind)}${me?` · 내 위치에서 ${km(hav(me.lat,me.lng,h.lat,h.lng))}`:""}<br><a href="${myhUrl(h)}" target="_blank" rel="noopener">국가유산 해설사에서 보기</a> · <a href="${kakaoTo(h)}" target="_blank" rel="noopener">길찾기</a>`;
 const khsRenderer=L.canvas({padding:.3}), khsLayer=L.layerGroup().addTo(map), nearestLayer=L.layerGroup().addTo(map);
 const KHS_ZOOM=11, KHS_MAX=400;  // 시·군 단위로 확대했을 때만, 화면 가운데에서 가까운 400곳까지
-const viewInfo=L.control({position:"topright"}); viewInfo.onAdd=()=>{const d=L.DomUtil.create("div","viewinfo"); L.DomEvent.disableClickPropagation(d); return d;}; viewInfo.addTo(map);
+const viewInfo=L.control({position:"topright"}); viewInfo.onAdd=()=>{const d=L.DomUtil.create("div","viewinfo"); L.DomEvent.disableClickPropagation(d);
+  d.innerHTML=`<button class="wx" type="button" aria-expanded="false" aria-label="오늘 날씨"></button><span class="vi"></span><div class="wx-more" hidden></div>`; return d;}; viewInfo.addTo(map);  // 날씨 | 화면 안내 를 한 줄로
 // 지도 화면(확대·이동)에 맞춰 그 안의 국가유산을 점으로 표시
 function drawKHS(){
-  const box=viewInfo.getContainer(), b=map.getBounds();
+  const box=viewInfo.getContainer().querySelector(".vi"), b=map.getBounds();
   const courseIn=new Set(C.flatMap(c=>c.spots).filter(s=>b.contains([s.lat,s.lng])).map(s=>s.name)).size;
-  if(map.getZoom()<KHS_ZOOM){khsLayer.clearLayers(); box.innerHTML=`방문코스 <b>${courseIn}</b>곳 · <button class="lk" type="button" data-more-khs>주변 국가유산 더보기</button>`;
+  if(map.getZoom()<KHS_ZOOM){khsLayer.clearLayers(); box.innerHTML=`방문코스 <b>${courseIn}</b>곳<button class="plus" type="button" data-more-khs aria-label="주변 국가유산 더보기" title="주변 국가유산 더보기">+</button>`;
     box.querySelector("[data-more-khs]").onclick=()=>{  // 기준점(내 위치 › 고른 길 › 대전)이 보이면 그곳, 아니면 보이는 지도 가운데를 국가유산 점이 보이게 확대
       const a=zoomAnchor().ll, v=visibleBounds(); map.setView(v.contains(a)?a:v.getCenter(),KHS_ZOOM);};
     return;}
@@ -389,7 +393,7 @@ function drawKHS(){
     const kh=getComputedStyle(document.documentElement).getPropertyValue("--kh").trim();
     khsLayer.clearLayers();
     inView.slice(0,KHS_MAX).forEach(h=>L.circleMarker([h.lat,h.lng],{renderer:khsRenderer,radius:5,color:"#fff",weight:1.5,fillColor:kh,fillOpacity:.9}).bindPopup(()=>khsPopup(h)).addTo(khsLayer));
-    box.innerHTML=`국가유산 <b>${inView.length}</b>곳${inView.length>KHS_MAX?`<small> (가까운 ${KHS_MAX}곳만)</small>`:""} · 방문코스 ${courseIn}곳`;
+    box.innerHTML=`국가유산 <b>${inView.length}</b>곳 · 코스 ${courseIn}곳`; box.title=inView.length>KHS_MAX?`가운데서 가까운 ${KHS_MAX}곳만 점으로 표시`:"";
   }).catch(()=>{box.textContent="국가유산 목록을 불러오지 못했어요.";});
 }
 let khsTimer=null; map.on("moveend",()=>{clearTimeout(khsTimer); khsTimer=setTimeout(drawKHS,150);});
@@ -959,10 +963,8 @@ document.getElementById("chips").addEventListener("click",e=>{if(e.target.closes
 const WX_SYM=[["thunder","⚡","뇌우"],["snow","❄","눈"],["sleet","🌨","진눈깨비"],["heavyrain","☔","강한 비"],["rain","☂","비"],
   ["fog","🌫","안개"],["cloudy","☁","흐림"],["partlycloudy","⛅","구름 조금"],["fair","🌤","대체로 맑음"],["clearsky","☀","맑음"]];
 const wxSym=c=>WX_SYM.find(([k])=>String(c||"").startsWith(k)||String(c||"").includes(k))||["","·","—"];
-const wxCtl=L.control({position:"topright"});
-wxCtl.onAdd=()=>{const d=L.DomUtil.create("button","wx"); d.type="button"; d.setAttribute("aria-label","오늘 날씨"); L.DomEvent.disableClickPropagation(d);
-  d.onclick=()=>d.classList.toggle("open"); return d;};
-wxCtl.addTo(map);
+const wxBox=()=>viewInfo.getContainer().querySelector(".wx"), wxMore=()=>viewInfo.getContainer().querySelector(".wx-more");
+wxBox().onclick=()=>{const m=wxMore(), on=m.hidden; m.hidden=!on; wxBox().setAttribute("aria-expanded",String(on));};  // 누르면 오늘 자세히
 let wxKey="", wxTimer=null;
 function wxPlace(){
   if(me) return {lat:me.lat,lng:me.lng,name:"내 위치"};
@@ -972,8 +974,8 @@ function wxPlace(){
 }
 function wxUpdate(){clearTimeout(wxTimer); wxTimer=setTimeout(wxLoad,300);}
 async function wxLoad(){
-  const p=wxPlace(), lat=p.lat.toFixed(2), lng=p.lng.toFixed(2), key=`${lat},${lng}`, box=wxCtl.getContainer();
-  if(key===wxKey&&box.dataset.ok) {box.querySelector(".wx-p").textContent=p.name; return;}
+  const p=wxPlace(), lat=p.lat.toFixed(2), lng=p.lng.toFixed(2), key=`${lat},${lng}`, box=wxBox();
+  if(key===wxKey&&box.dataset.ok) return;
   wxKey=key; let data=null;
   try{const c=JSON.parse(localStorage.getItem("hcm-wx-"+key)||"null"); if(c&&Date.now()-c.t<30*60e3) data=c.d;}catch(e){}
   if(!data){
@@ -989,8 +991,8 @@ async function wxLoad(){
   const rain=day.reduce((a,x)=>a+((x.data.next_1_hours||{}).details?.precipitation_amount||0),0);
   const sym=wxSym((t0.data.next_1_hours||t0.data.next_6_hours||{}).summary?.symbol_code), later=ts[i+3], lsym=later&&wxSym((later.data.next_1_hours||later.data.next_6_hours||{}).summary?.symbol_code);
   box.dataset.ok="1";
-  box.innerHTML=`<span class="wx-i" aria-hidden="true">${sym[1]}</span><b>${Math.round(t0.data.instant.details.air_temperature)}°</b><span class="wx-s">${sym[2]}</span><span class="wx-p">${esc(p.name)}</span>
-    <span class="wx-more">오늘 최고 ${Math.round(Math.max(...temps))}° · 최저 ${Math.round(Math.min(...temps))}° · 비 ${rain<0.1?"없음":rain.toFixed(1)+"mm"} · 바람 ${Math.round(t0.data.instant.details.wind_speed)}m/s${later?`<br>3시간 뒤 ${lsym[1]} ${Math.round(later.data.instant.details.air_temperature)}° ${lsym[2]}`:""}<br><small>자료: MET Norway</small></span>`;
+  box.innerHTML=`<span class="wx-i" aria-hidden="true">${sym[1]}</span><b>${Math.round(t0.data.instant.details.air_temperature)}°</b><span class="wx-s">${sym[2]}</span>`;
+  wxMore().innerHTML=`<b>${esc(p.name)}</b> 오늘 최고 ${Math.round(Math.max(...temps))}° · 최저 ${Math.round(Math.min(...temps))}° · 비 ${rain<0.1?"없음":rain.toFixed(1)+"mm"} · 바람 ${Math.round(t0.data.instant.details.wind_speed)}m/s${later?`<br>3시간 뒤 ${lsym[1]} ${Math.round(later.data.instant.details.air_temperature)}° ${lsym[2]}`:""}<br><small>자료: MET Norway</small>`;
   box.setAttribute("aria-label",`오늘 날씨 ${p.name}: ${sym[2]} ${Math.round(t0.data.instant.details.air_temperature)}도`);
 }
 
