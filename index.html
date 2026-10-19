@@ -179,7 +179,9 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
 .wx{display:inline-flex;align-items:baseline;gap:4px;background:none;border:0;padding:0 8px 0 0;border-right:1px solid var(--rule);color:var(--ink);font:500 12px/1.4 var(--body);cursor:pointer;white-space:nowrap}
 .wx:empty{display:none}
 .vi{white-space:nowrap}
-.plus{margin-left:7px;width:22px;height:22px;border-radius:50%;border:1px solid var(--sea);background:var(--sea-soft);color:var(--sea);font:700 15px/1 var(--body);display:inline-grid;place-items:center;padding:0;cursor:pointer;vertical-align:middle}
+.vi-p{color:var(--ink);font-weight:500}
+.plus{margin-left:5px;width:17px;height:17px;border-radius:50%;border:0;background:var(--sea-soft);color:var(--sea);font:600 13px/17px var(--body);display:inline-block;text-align:center;padding:0;cursor:pointer;vertical-align:-3px;transition:transform .15s}
+.plus:hover{transform:scale(1.15)}
 .wx-i{font-size:15px;line-height:1}.viewinfo .wx b{font-size:14px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
 .wx-s{color:var(--ink)}
 .wx-more b{color:var(--ink);font-weight:600}
@@ -382,7 +384,7 @@ const viewInfo=L.control({position:"topright"}); viewInfo.onAdd=()=>{const d=L.D
 function drawKHS(){
   const box=viewInfo.getContainer().querySelector(".vi"), b=map.getBounds();
   const courseIn=new Set(C.flatMap(c=>c.spots).filter(s=>b.contains([s.lat,s.lng])).map(s=>s.name)).size;
-  if(map.getZoom()<KHS_ZOOM){khsLayer.clearLayers(); box.innerHTML=`방문코스 <b>${courseIn}</b>곳<button class="plus" type="button" data-more-khs aria-label="주변 국가유산 더보기" title="주변 국가유산 더보기">+</button>`;
+  if(map.getZoom()<KHS_ZOOM){khsLayer.clearLayers(); box.innerHTML=`<span class="vi-p">${esc(wxPlace().name)}</span><button class="plus" type="button" data-more-khs aria-label="주변 국가유산 더보기" title="주변 국가유산 더보기">+</button>`; box.title=`이 화면 방문코스 ${courseIn}곳`;
     box.querySelector("[data-more-khs]").onclick=()=>{  // 기준점(내 위치 › 고른 길 › 대전)이 보이면 그곳, 아니면 보이는 지도 가운데를 국가유산 점이 보이게 확대
       const a=zoomAnchor().ll, v=visibleBounds(); map.setView(v.contains(a)?a:v.getCenter(),KHS_ZOOM);};
     return;}
@@ -393,7 +395,7 @@ function drawKHS(){
     const kh=getComputedStyle(document.documentElement).getPropertyValue("--kh").trim();
     khsLayer.clearLayers();
     inView.slice(0,KHS_MAX).forEach(h=>L.circleMarker([h.lat,h.lng],{renderer:khsRenderer,radius:5,color:"#fff",weight:1.5,fillColor:kh,fillOpacity:.9}).bindPopup(()=>khsPopup(h)).addTo(khsLayer));
-    box.innerHTML=`국가유산 <b>${inView.length}</b>곳 · 코스 ${courseIn}곳`; box.title=inView.length>KHS_MAX?`가운데서 가까운 ${KHS_MAX}곳만 점으로 표시`:"";
+    box.innerHTML=`<span class="vi-p">${esc(wxPlace().name)}</span> · 유산 <b>${inView.length}</b>곳`; box.title=inView.length>KHS_MAX?`가운데서 가까운 ${KHS_MAX}곳만 점으로 표시`:"";
   }).catch(()=>{box.textContent="국가유산 목록을 불러오지 못했어요.";});
 }
 let khsTimer=null; map.on("moveend",()=>{clearTimeout(khsTimer); khsTimer=setTimeout(drawKHS,150);});
@@ -969,10 +971,11 @@ let wxKey="", wxTimer=null;
 function wxPlace(){
   if(me) return {lat:me.lat,lng:me.lng,name:"내 위치"};
   const c=cur&&C.find(x=>x.key===cur);
-  if(c){const b=L.latLngBounds(c.spots.map(s=>[s.lat,s.lng])).getCenter(); return {lat:b.lat,lng:b.lng,name:shortTitle(c)};}
+  if(c){const b=L.latLngBounds(c.spots.map(s=>[s.lat,s.lng])).getCenter(); return {lat:b.lat,lng:b.lng,name:courseName(c)};}
   return {lat:DAEJEON[0],lng:DAEJEON[1],name:"대전"};
 }
-function wxUpdate(){clearTimeout(wxTimer); wxTimer=setTimeout(wxLoad,300);}
+function wxUpdate(){clearTimeout(wxTimer); wxTimer=setTimeout(wxLoad,300);
+  const n=viewInfo.getContainer().querySelector(".vi-p"); if(n) n.textContent=wxPlace().name;}  // 화면 안내의 길 이름도 같이
 async function wxLoad(){
   const p=wxPlace(), lat=p.lat.toFixed(2), lng=p.lng.toFixed(2), key=`${lat},${lng}`, box=wxBox();
   if(key===wxKey&&box.dataset.ok) return;
