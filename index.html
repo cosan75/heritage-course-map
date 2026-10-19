@@ -3,8 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; media-src https:; connect-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>국가유산 방문코스 지도</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw==" crossorigin="anonymous" referrerpolicy="no-referrer">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
 <style>
@@ -189,7 +191,7 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
   </aside>
   <div id="map"></div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="data.js"></script>
 <script>
 // 코스 색: 1/2구간으로 나뉜 길은 같은 계열의 진한색(1)/밝은색(2), 선 모양도 다르게
@@ -197,7 +199,9 @@ const COLOR={"1":"#a0522d","2":"#2f7fb0","3":"#7a4fa3","4":"#2e8b57","5":"#5f6b7
   "7":"#c0392b","8-1":"#c27a00","8-2":"#e0a93a","9-1":"#8a4d12","9-2":"#c58a3d","10":"#8e44ad",
   "11":"#1f4e9c","12":"#e0622a","13":"#3d6b4f"};
 const C=window.COURSES;
-const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+// 링크·이미지 주소는 http(s)와 이 사이트의 stamps/ 그림만 (javascript: 같은 주소는 막음)
+const url=u=>/^(https?:\/\/|stamps\/)/i.test(String(u||""))?esc(u):"#";
 const km=m=>m<1000?`${Math.round(m)}m`:`${(m/1000).toFixed(m<10000?1:0)}km`;
 function hav(a,b,c,d){const R=6371000,t=Math.PI/180,x=Math.sin((c-a)*t/2)**2+Math.cos(a*t)*Math.cos(c*t)*Math.sin((d-b)*t/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
 const partOf=c=>(c.key.match(/-(\d)$/)||[])[1];          // "8-2" → "2"
@@ -301,10 +305,11 @@ function status(s,now=new Date()){
 const CERT_IMG="https://my.heritage.go.kr/images/2025/contents/stamp/cert.svg";  // 해설사 방문 인증의 '인증완료' 배지
 // 도장: ① 나만의 국가유산 해설사 분류 스탬프 ② 캠페인 사이트 스탬프 그림 ③ 이름 도장 (못 불러오면 이름 도장)
 const sealName=s=>esc(s.name.replace(/\s*\(.*\)$/,"").replace(/ 천연보호구역$/,""));
-const sealHTML=s=>{const fb=`this.parentNode.className='seal';this.outerHTML='<span>${sealName(s)}</span>'`;
+function sealFail(img){const d=img.parentNode, sp=document.createElement("span"); sp.textContent=d.dataset.name; d.className="seal"+(d.classList.contains("thud")?" thud":""); d.replaceChildren(sp);}  // 그림을 못 불러오면 이름 도장으로
+const sealHTML=s=>{const fb="sealFail(this)";
   // 해설사 '방문 인증' 화면의 도장: 분류 그림 + 지정 종목 + 이름 + 인증완료 배지
-  if(s.myhStamp) return `<div class="seal myh" aria-hidden="true" title="${esc(s.myhStamp.cat)} 스탬프 · 인증완료"><img class="frame" src="${esc(s.myhStamp.img)}" alt="" onerror="${fb}"><b><i>${esc(s.myhStamp.kind)}</i>${sealName(s)}</b><img class="cert" src="${CERT_IMG}" alt="" onerror="this.remove()"></div>`;
-  return `<div class="seal" aria-hidden="true">${s.stampImg?`<img src="${esc(s.stampImg)}" alt="" onerror="${fb}">`:`<span>${sealName(s)}</span>`}<small>${s.stampImg?"":"STAMP"}</small></div>`;};
+  if(s.myhStamp) return `<div class="seal myh" aria-hidden="true" data-name="${sealName(s)}" title="${esc(s.myhStamp.cat)} 스탬프 · 인증완료"><img class="frame" src="${url(s.myhStamp.img)}" alt="" onerror="${fb}"><b><i>${esc(s.myhStamp.kind)}</i>${sealName(s)}</b><img class="cert" src="${CERT_IMG}" alt="" onerror="this.remove()"></div>`;
+  return `<div class="seal" aria-hidden="true" data-name="${sealName(s)}">${s.stampImg?`<img src="${url(s.stampImg)}" alt="" onerror="${fb}">`:`<span>${sealName(s)}</span>`}<small>${s.stampImg?"":"STAMP"}</small></div>`;};
 // 도장 글자를 도장 그림 안 글자 칸에 맞춰 줄인다 (10.5px → 최소 5.5px)
 function fitSeals(root){
   root.querySelectorAll(".seal.myh b").forEach(b=>{
@@ -343,7 +348,7 @@ function draw(noFit){
       m.on("click",()=>focusCard(c.key,s.num));
       markers[`${c.key}|${s.num}`]=m; pts.push([s.lat,s.lng]);
       if(cur&&showFood) s.restaurants.forEach(f=>L.marker([f.lat,f.lng],{icon:foodIcon,title:f.name,pane:"food"})
-        .bindPopup(`<b>${esc(f.name)}</b><br>${esc(kind(f))}<br>${esc(s.name)}에서 ${km(f.dist)}${f.addr?`<br>${esc(f.addr)}`:""}${(f.phone||f.tel)?`<br>전화: ${esc(f.phone||f.tel)}`:""}${f.photo?`<br><img src="${esc(f.photo)}" alt="" style="width:160px;border-radius:6px;margin-top:4px">`:""}`).addTo(foodLayer));
+        .bindPopup(`<b>${esc(f.name)}</b><br>${esc(kind(f))}<br>${esc(s.name)}에서 ${km(f.dist)}${f.addr?`<br>${esc(f.addr)}`:""}${(f.phone||f.tel)?`<br>전화: ${esc(f.phone||f.tel)}`:""}${f.photo?`<br><img src="${url(f.photo)}" alt="" style="width:160px;border-radius:6px;margin-top:4px">`:""}`).addTo(foodLayer));
     });
   });
   if(pts.length&&!noFit) map.fitBounds(pts,{padding:[30,30],maxZoom:13});
@@ -376,22 +381,22 @@ function list(){
     <div class="line">스탬프 <b>${esc(s.stamp||"현장 안내 확인")}</b>${s.d!=null?` · <span class="dist">${km(s.d)}</span>`:""}</div>
     <div class="acts"><button class="btn stampBtn" type="button" data-n="${esc(s.num)}" aria-pressed="${stamps.has(s.num)}">${stamps.has(s.num)?"✓ 스탬프 찍음":"스탬프 찍었어요"}</button>
       <a class="btn" href="${kakaoTo(s)}" target="_blank" rel="noopener">길찾기</a>
-      ${s.myh?`<button class="btn audioBtn" type="button" data-a="${esc(s.myh.audio.kr)}" data-t="${esc(s.name)}">▶ 음성 해설</button>`:""}</div>
+      ${s.myh?`<button class="btn audioBtn" type="button" data-a="${url(s.myh.audio.kr)}" data-t="${esc(s.name)}">▶ 음성 해설</button>`:""}</div>
     <details ${s.restaurants.length?"":"hidden"}><summary>주변 맛집 ${s.restaurants.length}곳</summary><ul class="rest">
-      ${s.restaurants.map(f=>`<li data-lat="${f.lat}" data-lng="${f.lng}">${f.photo?`<img src="${esc(f.photo)}" alt="" loading="lazy" onerror="this.remove()">`:""}<span>${esc(f.name)} <small>${esc(kind(f))}</small></span><small>${km(f.dist)}</small></li>`).join("")}</ul></details>
+      ${s.restaurants.map(f=>`<li data-lat="${f.lat}" data-lng="${f.lng}">${f.photo?`<img src="${url(f.photo)}" alt="" loading="lazy" onerror="this.remove()">`:""}<span>${esc(f.name)} <small>${esc(kind(f))}</small></span><small>${km(f.dist)}</small></li>`).join("")}</ul></details>
     <details ${s.nearby.length?"":"hidden"}><summary>주변 볼거리 ${s.nearby.length}곳 (1.5km 안 국가유산)</summary><ul class="rest near">
-      ${s.nearby.map(n=>`<li data-lat="${n.lat}" data-lng="${n.lng}" data-name="${esc(n.name)}" data-url="${esc(n.url)}"><span>${esc(n.name)} <small>${esc(n.kind)}</small></span><small>${km(n.dist)}</small></li>`).join("")}</ul></details>
+      ${s.nearby.map(n=>`<li data-lat="${n.lat}" data-lng="${n.lng}" data-name="${esc(n.name)}" data-url="${url(n.url)}"><span>${esc(n.name)} <small>${esc(n.kind)}</small></span><small>${km(n.dist)}</small></li>`).join("")}</ul></details>
     ${s.myh&&s.myh.events.length?`<details><summary>지역 행사 ${s.myh.events.length}건</summary><ul class="ev">
-      ${s.myh.events.map(e=>`<li><a href="${esc(e.url)}" target="_blank" rel="noopener">${esc(e.title)}</a><small>${esc(e.cat)}${e.when?` · ${esc(e.when)}`:""}${e.where?` · ${esc(e.where)}`:""}</small></li>`).join("")}</ul></details>`:""}
-    ${!s.myh&&s.campPhoto?`<details class="guide"><summary>사진</summary><img class="photo" src="${esc(s.campPhoto)}" alt="${esc(s.name)} — 방문 캠페인 사진" loading="lazy" onerror="this.remove()"></details>`:""}
+      ${s.myh.events.map(e=>`<li><a href="${url(e.url)}" target="_blank" rel="noopener">${esc(e.title)}</a><small>${esc(e.cat)}${e.when?` · ${esc(e.when)}`:""}${e.where?` · ${esc(e.where)}`:""}</small></li>`).join("")}</ul></details>`:""}
+    ${!s.myh&&s.campPhoto?`<details class="guide"><summary>사진</summary><img class="photo" src="${url(s.campPhoto)}" alt="${esc(s.name)} — 방문 캠페인 사진" loading="lazy" onerror="this.remove()"></details>`:""}
     ${s.myh?`<details class="guide"><summary>사진·해설</summary>
-      ${s.campPhoto?`<img class="photo" src="${esc(s.campPhoto)}" alt="${esc(s.name)} — 방문 캠페인 사진" loading="lazy" onerror="this.remove()">`:s.myh.photo?`<img class="photo" src="${esc(s.myh.photo)}" alt="${esc(s.name)}" loading="lazy">`:""}
-      ${s.myh.photos.length>(s.campPhoto?0:1)?`<div class="thumbs">${s.myh.photos.slice(s.campPhoto?0:1,6).map(p=>`<img src="${esc(p.src)}" alt="${esc(p.alt)}" title="${esc(p.alt)}" loading="lazy">`).join("")}</div>`:""}
+      ${s.campPhoto?`<img class="photo" src="${url(s.campPhoto)}" alt="${esc(s.name)} — 방문 캠페인 사진" loading="lazy" onerror="this.remove()">`:s.myh.photo?`<img class="photo" src="${url(s.myh.photo)}" alt="${esc(s.name)}" loading="lazy">`:""}
+      ${s.myh.photos.length>(s.campPhoto?0:1)?`<div class="thumbs">${s.myh.photos.slice(s.campPhoto?0:1,6).map(p=>`<img src="${url(p.src)}" alt="${esc(p.alt)}" title="${esc(p.alt)}" loading="lazy">`).join("")}</div>`:""}
       ${s.myh.khsName&&s.myh.khsName!==s.name?`<div class="line" style="margin-top:6px">해설 기준: ${esc(s.myh.khsName)}</div>`:""}
       <p class="desc">${esc(s.myh.desc).replace(/\n/g,"<br>")}</p>
-      <div class="acts" style="margin:0"><button class="btn audioBtn" type="button" data-a="${esc(s.myh.audio.en)}" data-t="${esc(s.name)} (English)">▶ English audio</button>
-        ${s.myh.video.map((v,i)=>`<a class="btn" href="${esc(v)}" target="_blank" rel="noopener">동영상${s.myh.video.length>1?" "+(i+1):""}</a>`).join("")}
-        <a class="btn" href="${esc(s.myh.url)}" target="_blank" rel="noopener">국가유산 해설사에서 보기</a></div></details>`:""}
+      <div class="acts" style="margin:0"><button class="btn audioBtn" type="button" data-a="${url(s.myh.audio.en)}" data-t="${esc(s.name)} (English)">▶ English audio</button>
+        ${s.myh.video.map((v,i)=>`<a class="btn" href="${url(v)}" target="_blank" rel="noopener">동영상${s.myh.video.length>1?" "+(i+1):""}</a>`).join("")}
+        <a class="btn" href="${url(s.myh.url)}" target="_blank" rel="noopener">국가유산 해설사에서 보기</a></div></details>`:""}
     <details><summary>자세히</summary>
       <dl>${s.tagline||s.designation?`<dt>소개</dt><dd>${[s.tagline,s.designation].filter(Boolean).map(esc).join(" · ")}</dd>`:""}${s.address?`<dt>위치</dt><dd>${esc(s.address)}</dd>`:""}${s.phone?`<dt>문의</dt><dd>${esc(s.phone)}</dd>`:""}${s.hours?`<dt>운영</dt><dd>${esc(s.hours)}${s.sched&&s.sched.note?` (${esc(s.sched.note)})`:""}</dd>`:""}
         ${s.directions?`<dt>가는 길</dt><dd>${esc(s.directions)}</dd>`:""}
@@ -420,7 +425,7 @@ function list(){
     const ll=[+li.dataset.lat,+li.dataset.lng];
     nearLayer.clearLayers();
     L.circleMarker(ll,{radius:8,color:"#fff",weight:2,fillColor:"#6b5b95",fillOpacity:1}).addTo(nearLayer)
-      .bindPopup(`<b>${esc(li.dataset.name)}</b><br><a href="${esc(li.dataset.url)}" target="_blank" rel="noopener">국가유산 해설사에서 보기</a>`).openPopup();
+      .bindPopup(`<b>${esc(li.dataset.name)}</b><br><a href="${url(li.dataset.url)}" target="_blank" rel="noopener">국가유산 해설사에서 보기</a>`).openPopup();
     map.setView(ll,16);
   });
   el.querySelectorAll(".rest:not(.near) li").forEach(li=>li.onclick=()=>{
