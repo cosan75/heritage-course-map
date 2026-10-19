@@ -199,6 +199,7 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
 .btn.ico svg{flex:none}
 .legend small{font-size:inherit;color:var(--muted)}
 .viewinfo small{color:var(--muted)}
+.viewinfo .lk{color:var(--sea);text-decoration:underline;cursor:pointer;background:none;border:0;padding:0;font:inherit;font-weight:600}
 /* 모바일: 지도는 화면 가득, 목록은 아래에서 끌어 올리는 시트(작게·반·크게) — 시트 안은 한 번에 스크롤 */
 @media (max-width:820px){
   html,body{overflow:hidden}
@@ -319,12 +320,15 @@ const myhUrl=h=>{const[kd,asno,ctcd,cpno]=h.code.split("|");return `https://my.h
 const khsPopup=h=>`<b>${esc(h.name)}</b><br>${esc(h.kind)}${me?` · 내 위치에서 ${km(hav(me.lat,me.lng,h.lat,h.lng))}`:""}<br><a href="${myhUrl(h)}" target="_blank" rel="noopener">국가유산 해설사에서 보기</a> · <a href="${kakaoTo(h)}" target="_blank" rel="noopener">길찾기</a>`;
 const khsRenderer=L.canvas({padding:.3}), khsLayer=L.layerGroup().addTo(map), nearestLayer=L.layerGroup().addTo(map);
 const KHS_ZOOM=11, KHS_MAX=400;  // 시·군 단위로 확대했을 때만, 화면 가운데에서 가까운 400곳까지
-const viewInfo=L.control({position:"topright"}); viewInfo.onAdd=()=>L.DomUtil.create("div","viewinfo"); viewInfo.addTo(map);
+const viewInfo=L.control({position:"topright"}); viewInfo.onAdd=()=>{const d=L.DomUtil.create("div","viewinfo"); L.DomEvent.disableClickPropagation(d); return d;}; viewInfo.addTo(map);
 // 지도 화면(확대·이동)에 맞춰 그 안의 국가유산을 점으로 표시
 function drawKHS(){
   const box=viewInfo.getContainer(), b=map.getBounds();
   const courseIn=new Set(C.flatMap(c=>c.spots).filter(s=>b.contains([s.lat,s.lng])).map(s=>s.name)).size;
-  if(map.getZoom()<KHS_ZOOM){khsLayer.clearLayers(); box.innerHTML=`방문코스 <b>${courseIn}</b>곳 · 확대하면 국가유산 점`; return;}
+  if(map.getZoom()<KHS_ZOOM){khsLayer.clearLayers(); box.innerHTML=`방문코스 <b>${courseIn}</b>곳 · <button class="lk" type="button" data-more-khs>주변 국가유산 더보기</button>`;
+    box.querySelector("[data-more-khs]").onclick=()=>{  // 기준점(내 위치 › 고른 길 › 대전)이 보이면 그곳, 아니면 보이는 지도 가운데를 국가유산 점이 보이게 확대
+      const a=zoomAnchor().ll, v=visibleBounds(); map.setView(v.contains(a)?a:v.getCenter(),KHS_ZOOM);};
+    return;}
   loadKHS().then(all=>{
     if(map.getZoom()<KHS_ZOOM) return;
     const c=map.getCenter(), inView=all.filter(h=>b.contains([h.lat,h.lng]));
