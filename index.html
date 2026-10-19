@@ -169,6 +169,7 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
 .src{font-size:11px;line-height:1.6;color:var(--muted);padding:8px max(16px,env(safe-area-inset-left,0px));border-top:1px solid var(--rule)}
 .src a{color:var(--muted)}
 .grab{display:none}
+.sheetBtn{display:none}
 .sbtn{display:none}
 .search{position:relative}
 .search input{width:100%;min-height:38px;border:1px solid var(--rule);border-radius:8px;background:var(--sheet);color:var(--ink);font:500 13.5px/1.3 var(--body);padding:0 12px 0 34px;
@@ -207,13 +208,13 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
     border-radius:16px 16px 0 0;box-shadow:0 -6px 24px rgb(0 0 0 / .18);overflow-y:auto;overscroll-behavior:contain;transition:height .28s cubic-bezier(.2,.8,.2,1)}
   aside.dragging{transition:none}
   .list{overflow:visible;min-height:auto}
-  .grab{display:block;position:sticky;top:0;z-index:3;width:100%;height:26px;border:0;padding:0;margin:0 0 -8px;background:var(--sheet);cursor:grab;touch-action:none}
-  .grab::before{content:"";display:block;width:42px;height:5px;border-radius:3px;background:var(--muted);opacity:.45;margin:9px auto 0}
+  .grab{display:block;position:sticky;top:0;z-index:3;width:100%;height:20px;border:0;padding:0;margin:0;background:var(--sheet);cursor:grab;touch-action:none}  /* 머리 버튼과 겹치지 않게 */
+  .grab::before{content:"";display:block;width:42px;height:5px;border-radius:3px;background:var(--muted);opacity:.45;margin:8px auto 0}
   .head h1{touch-action:none}
   .player{position:sticky;bottom:0;z-index:2}
   .leaflet-bottom{bottom:var(--sheet-vis,50dvh);transition:bottom .28s}
   /* 고정 머리: 제목 · 아이콘 버튼 · 코스 묶음을 한 줄로 */
-  .head{flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px 5px;padding-top:6px;padding-bottom:8px}
+  .head{flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px 5px;padding-top:2px;padding-bottom:8px}
   .head h1{font-size:14.5px;flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}  /* 남는 폭만 쓰고 버튼은 한 줄에 */
   .head .lg{display:none}
   .tools{display:contents}
@@ -223,6 +224,12 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
   .gps{order:10;flex-basis:100%;font-size:11.5px;line-height:1.45}
   #chips{order:11;flex-basis:100%;min-width:0}
   .sbtn{display:inline-flex}
+  .sheetBtn{display:inline-flex;position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:1003;align-items:center;gap:5px;
+    min-height:38px;padding:0 14px 0 11px;border-radius:19px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);font:600 12.5px/1 var(--body);
+    box-shadow:0 4px 14px rgb(0 0 0 / .2);cursor:pointer;transition:bottom .28s cubic-bezier(.2,.8,.2,1)}
+  .sheetBtn[hidden]{display:none!important}
+  .sheetBtn.up svg{transform:rotate(180deg)}
+  body:has(#player:not([hidden])) .sheetBtn:not(.up){bottom:calc(64px + env(safe-area-inset-bottom,0px))}  /* 음성 해설 막대 위로 */
   .search{order:9;flex-basis:100%;display:none}
   .head.searching .search{display:block}
   .chip{padding:3px 9px}
@@ -272,6 +279,7 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
   </aside>
   <div id="map"></div>
 </div>
+<button class="sheetBtn" id="sheetBtn" type="button" hidden><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg><span>목록 내리기</span></button>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="data.js"></script>
 <script>
@@ -593,6 +601,11 @@ function setSheet(s,keepScroll){
   document.documentElement.style.setProperty("--sheet-vis",Math.min(h,innerHeight*.6)+"px");
   L.Popup.prototype.options.autoPanPaddingBottomRight=L.point(10,Math.min(h,innerHeight*.6)+10);  // 팝업이 시트 밑에 숨지 않게
   grab.setAttribute("aria-expanded",s!=="peek");
+  // 아래 버튼: 펼쳐 있으면 '목록 내리기'(시트 안 오른쪽 아래), 작으면 '목록 올리기'(시트 바로 위)
+  const sb=document.getElementById("sheetBtn"), up=s==="peek";
+  sb.hidden=false; sb.classList.toggle("up",up); sb.querySelector("span").textContent=up?"목록 올리기":"목록 내리기";
+  sb.setAttribute("aria-label",up?"목록 올리기":"목록 내리기");
+  sb.style.bottom=up?`calc(${h+30}px + env(safe-area-inset-bottom,0px))`:"";  // 지도 출처 글 위로
   if(s==="peek"&&!keepScroll) aside.scrollTop=0;
 }
 const padB=(x=0)=>mobile()?Math.min(sheetH(sheet),innerHeight*.6)+30+x:30+x;  // 지도 맞춤 여백(아래)
@@ -634,6 +647,7 @@ let drag=null;
     setSheet(["peek","half","full"].sort((a,b)=>Math.abs(sheetH(a)-h)-Math.abs(sheetH(b)-h))[0],true);};
   el.addEventListener("pointerup",up); el.addEventListener("pointercancel",up);
 });
+document.getElementById("sheetBtn").onclick=()=>setSheet(sheet==="peek"?"half":"peek");
 addEventListener("resize",()=>setSheet(sheet,true));
 MQ.addEventListener("change",()=>setSheet(sheet,true));
 setSheet("half");
