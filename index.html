@@ -673,7 +673,7 @@ function qPlace(q){  // OpenStreetMap 지명 검색 (누를 때만, 대한민국
   fetch("https://nominatim.openstreetmap.org/search?"+new URLSearchParams({q,format:"jsonv2",countrycodes:"kr","accept-language":"ko",limit:"6"}))
     .then(r=>r.json()).then(a=>{
       qPlaces=a.map(p=>{const parts=p.display_name.split(", ").filter(x=>!/^\d{5}$|대한민국/.test(x));
-        return {t:"place",name:parts[0],sub:parts.slice(1,4).reverse().join(" "),lat:+p.lat,lng:+p.lon,bb:p.boundingbox.map(Number)};});
+        return {t:"place",name:parts[0],sub:parts.slice(1).reverse().slice(0,3).join(" "),lat:+p.lat,lng:+p.lon,bb:p.boundingbox.map(Number)};});
       const n0=qLocal(q).length; qRender(q); if(qPlaces.length){qSel=n0; qMark();}})
     .catch(()=>{qPlaces=[]; qRender(q);});
 }
