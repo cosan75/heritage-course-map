@@ -554,6 +554,29 @@ function setSheet(s,keepScroll){
   if(s==="peek"&&!keepScroll) aside.scrollTop=0;
 }
 const padB=(x=0)=>mobile()?Math.min(sheetH(sheet),innerHeight*.6)+30+x:30+x;  // 지도 맞춤 여백(아래)
+// 지도의 +/− 버튼은 기준점을 중심으로 확대·축소: 내 위치 › 고른 길 › 대전
+// (마우스 휠·두 손가락 확대는 손가락 위치 그대로)
+const DAEJEON=[36.3504,127.3845];
+function zoomAnchor(){
+  if(me) return {ll:L.latLng(me.lat,me.lng),why:"내 위치"};
+  const c=cur&&C.find(x=>x.key===cur);
+  if(c) return {ll:L.latLngBounds(c.spots.map(s=>[s.lat,s.lng])).getCenter(),why:c.title};
+  return {ll:L.latLng(DAEJEON),why:"대전"};
+}
+function visibleBounds(){  // 모바일은 시트에 가린 아래쪽을 뺀 지도 부분
+  const s=map.getSize(), h=mobile()?Math.max(60,s.y-Math.min(sheetH(sheet),innerHeight*.6)):s.y;
+  return L.latLngBounds(map.containerPointToLatLng([0,0]),map.containerPointToLatLng([s.x,h]));
+}
+function zoomBy(d){
+  const z=Math.max(map.getMinZoom(),Math.min(map.getMaxZoom(),map.getZoom()+d)), a=zoomAnchor().ll;
+  if(visibleBounds().contains(a)) map.setZoomAround(a,z);  // 보이는 곳에 있으면 그 점을 제자리에 두고
+  else{map.setView(a,z,{animate:false}); if(mobile()) map.panBy([0,Math.round(Math.min(sheetH(sheet),innerHeight*.6)/2)],{animate:false});}  // 안 보이면 그리로 옮겨서
+}
+map.zoomIn=function(d){zoomBy(d||1);return this;};
+map.zoomOut=function(d){zoomBy(-(d||1));return this;};
+const zc=map.getContainer();
+const zTitle=()=>{const w=zoomAnchor().why; zc.querySelector(".leaflet-control-zoom-in").title=`확대 (${w} 중심)`; zc.querySelector(".leaflet-control-zoom-out").title=`축소 (${w} 중심)`;};
+zc.querySelector(".leaflet-control-zoom").addEventListener("pointerenter",zTitle); zc.querySelector(".leaflet-control-zoom").addEventListener("focusin",zTitle);
 function showOnMap(ll,z){  // 지도로 보여 줄 때: 모바일은 시트를 낮추고 시트 위 보이는 부분 가운데로
   if(mobile()&&sheet!=="peek") setSheet("peek");
   map.setView(ll,z,{animate:false});
