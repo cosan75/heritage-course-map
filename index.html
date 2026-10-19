@@ -387,7 +387,8 @@ function chips(){
   document.getElementById("chips").innerHTML=(filter!=="2"?row(1):"")+(filter!=="1"?row(2):"")+
     `<div class="total">내 스탬프 <b>${got}</b> / ${allNums.length}곳</div>`;
   document.querySelectorAll("#chips .chip").forEach(b=>b.onclick=()=>select(cur===b.dataset.k?"":b.dataset.k));
-  const on=document.querySelector('#chips .chip[aria-pressed="true"]'); if(on) on.scrollIntoView({block:"nearest",inline:"center"});
+  const on=document.querySelector('#chips .chip[aria-pressed="true"]');  // 고른 칩이 보이게 — 칩 줄만 옆으로 (목록·시트는 움직이지 않게)
+  if(on){const row=on.parentElement; row.scrollLeft=on.offsetLeft-row.offsetLeft-(row.clientWidth-on.offsetWidth)/2;}
 }
 
 function popupHtml(c,s){
@@ -458,7 +459,9 @@ function bindCards(el){
     const add=!stamps.has(n), card=b.closest(".spot").id;
     add?stamps.add(n):stamps.delete(n); saveStamps();
     const open=[...el.querySelectorAll("details[open]")].map(d=>d.closest(".spot").id+"|"+[...d.parentNode.children].indexOf(d));
+    const keep=[aside.scrollTop,el.scrollTop];  // 다시 그려도 보던 자리 그대로
     chips(); refreshPins(); list();
+    aside.scrollTop=keep[0]; el.scrollTop=keep[1];
     open.forEach(k=>{const[id,i]=k.split("|"); const a=document.getElementById(id); if(a) a.children[+i].open=true;});  // 펼친 항목 유지
     if(add){const a=document.getElementById(card), sl=a&&a.querySelector(".seal");  // 쿵: 도장이 내려찍히고 카드가 살짝 흔들림
       if(sl){sl.classList.add("thud");  a.classList.add("thudcard"); setTimeout(()=>a.classList.remove("thudcard"),700); try{navigator.vibrate&&navigator.vibrate(40)}catch(e){}}}
