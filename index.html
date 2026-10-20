@@ -175,6 +175,7 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
 .player b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:40%}
 .src{font-size:11px;line-height:1.6;color:var(--muted);padding:8px max(16px,env(safe-area-inset-left,0px));border-top:1px solid var(--rule)}
 .src a{color:var(--muted)}
+#map{position:relative}  /* 좁은 화면(지도 고정)으로 열었다가 넓혀도 지도 조각이 왼쪽 목록을 덮지 않게 */
 .grab{display:none}
 .wx{display:inline-flex;align-items:baseline;gap:4px;background:none;border:0;padding:0 8px 0 0;border-right:1px solid var(--rule);color:var(--ink);font:500 12px/1.4 var(--body);cursor:pointer;white-space:nowrap}
 .wx:empty{display:none}
@@ -740,7 +741,7 @@ let drag=null;
 });
 document.getElementById("sheetBtn").onclick=()=>setSheet(sheet==="peek"?"half":"peek");
 addEventListener("resize",()=>setSheet(sheet,true));
-MQ.addEventListener("change",()=>setSheet(sheet,true));
+MQ.addEventListener("change",()=>{setSheet(sheet,true); setTimeout(()=>map.invalidateSize(),60);});  // 모바일↔PC 바뀔 때 지도 크기 다시 재기
 setSheet("half");
 
 // 지명·유산 검색: 방문코스 유산 · 전국 국가유산 · 시·군·구는 이 사이트 안에서 바로,
