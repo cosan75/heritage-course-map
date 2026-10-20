@@ -177,6 +177,7 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
 .src a{color:var(--muted)}
 #map{position:relative}  /* 좁은 화면(지도 고정)으로 열었다가 넓혀도 지도 조각이 왼쪽 목록을 덮지 않게 */
 .grab{display:none}
+.badge.plusb{color:var(--sea);border-color:var(--sea)}
 .fchk{display:inline-block;font:600 10px/1.6 var(--body);color:var(--ok);background:var(--ok-soft);border-radius:4px;padding:0 5px;margin-left:5px;vertical-align:1px}
 .fnote{color:var(--warn)}
 .wx{display:inline-flex;align-items:baseline;gap:4px;background:none;border:0;padding:0 8px 0 0;border-right:1px solid var(--rule);color:var(--ink);font:500 12px/1.4 var(--body);cursor:pointer;white-space:nowrap}
@@ -317,7 +318,7 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
     <button class="grab" id="grab" type="button" aria-label="목록 높이 바꾸기 (끌거나 누르기)" aria-expanded="true"></button>
     <div class="head">
       <h1>국가유산 방문코스<span class="lg"> 지도</span></h1>
-      <p class="sub">2026 방문 캠페인 · 방문코스 1(10개 길, 소릿길·왕가의 길은 1·2구간) + 방문코스 2(3개 길) · 105곳</p>
+      <p class="sub">2026 방문 캠페인 · 방문코스 1(10개 길, 소릿길·왕가의 길은 1·2구간) + 방문코스 2(3개 길) + 플러스 거점·유네스코 특별코스·홍보관 · 119곳</p>
       <div class="tools">
         <button class="btn primary ico" id="gpsBtn" type="button" aria-label="내 위치(GPS)" title="내 위치(GPS)"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span class="lg">내 위치(GPS)</span></button>
         <button class="btn on ico" id="foodBtn" type="button" aria-pressed="true" aria-label="주변 맛집" title="주변 맛집"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v8M4.5 2v5.5a2.5 2.5 0 0 0 5 0V2M7 10v12M17 22V2c-2.2 1.3-3.5 4-3.5 7.5V14H17"/></svg><span class="lg">주변 맛집</span></button>
@@ -344,12 +345,13 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
 </div>
 <button class="sheetBtn" id="sheetBtn" type="button" hidden><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg><span>목록 내리기</span></button>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="data.js?v=20261020"></script><!-- 자료를 바꾸면 날짜를 올린다(브라우저 저장본 대신 새 자료) -->
+<script src="data.js?v=20261020b"></script><!-- 자료를 바꾸면 날짜를 올린다(브라우저 저장본 대신 새 자료) -->
 <script>
 // 코스 색: 1/2구간으로 나뉜 길은 같은 계열의 진한색(1)/밝은색(2), 선 모양도 다르게
 const COLOR={"1":"#a0522d","2":"#2f7fb0","3":"#7a4fa3","4":"#2e8b57","5":"#5f6b78","6":"#8d7b5a",
   "7":"#c0392b","8-1":"#c27a00","8-2":"#e0a93a","9-1":"#8a4d12","9-2":"#c58a3d","10":"#8e44ad",
-  "11":"#1f4e9c","12":"#e0622a","13":"#3d6b4f"};
+  "11":"#1f4e9c","12":"#e0622a","13":"#3d6b4f","14":"#0f7c86","15":"#b03a68"};
+const groupName=g=>g===3?"특별·홍보관":`방문코스 ${g}`;
 const C=window.COURSES;
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 // 링크·이미지 주소는 http(s)와 이 사이트의 stamps/ 그림만 (javascript: 같은 주소는 막음)
@@ -366,7 +368,7 @@ map.createPane("food").style.zIndex=550;  // 맛집 점은 유산 번호 핀(mar
 const spotLayer=L.layerGroup().addTo(map), foodLayer=L.layerGroup().addTo(map), meLayer=L.layerGroup().addTo(map), nearLayer=L.layerGroup().addTo(map);
 const legend=L.control({position:"bottomleft"});
 legend.onAdd=()=>{const d=L.DomUtil.create("div","legend");
-  d.innerHTML='<span><i style="border-radius:6px"></i>코스 1<small> (01~98)</small></span><span><i style="border-radius:2px"></i>코스 2<small> (001~024)</small></span><span><i style="width:10px;height:10px;border-radius:50%;background:var(--food)"></i>맛집</span><span><i style="width:9px;height:9px;border-radius:50%;background:var(--kh)"></i>국가유산<small> (확대 시)</small></span>';return d};
+  d.innerHTML='<span><i style="border-radius:6px"></i>코스 1<small> (01~98)</small></span><span><i style="border-radius:2px"></i>코스 2<small> (001~024)</small></span><span><i style="border-radius:6px;background:#0f7c86"></i>특별<small> (U·H·P)</small></span><span><i style="width:10px;height:10px;border-radius:50%;background:var(--food)"></i>맛집</span><span><i style="width:9px;height:9px;border-radius:50%;background:var(--kh)"></i>국가유산<small> (확대 시)</small></span>';return d};
 legend.addTo(map);
 let cur="", filter="all", showFood=true, me=null, markers={}, pick=null;  // pick: 전체 지도에서 핀으로 고른 유산
 
@@ -507,7 +509,7 @@ function openPicker(){
       ${full?`<span class="pk-done">완주</span>`:`<span class="pk-c">${d}/${n}</span>`}</button>`;};
   const body=()=>`<div class="pk-seg">${[["all","전체"],["1","방문코스 1"],["2","방문코스 2"]].map(([f,l])=>`<button type="button" data-f="${f}" class="${filter===f?"on":""}">${l}</button>`).join("")}</div>
     <button type="button" class="pk-it pk-all${cur?"":" on"}" data-k=""><span class="pk-n"><b>${filter==="all"?"전체 길":`방문코스 ${filter} 전체`} 보기</b><small>${visible().reduce((a,c)=>a+c.spots.length,0)}곳 · 지도에 모두 표시</small></span></button>
-    ${[1,2].filter(g=>filter==="all"||String(g)===filter).map(g=>`<div class="pk-g">방문코스 ${g}</div>${C.filter(c=>c.group===g).map(row).join("")}`).join("")}`;
+    ${[1,2,3].filter(g=>filter==="all"||String(g)===filter).map(g=>`<div class="pk-g">${groupName(g)}</div>${C.filter(c=>c.group===g).map(row).join("")}`).join("")}`;
   const m=document.createElement("div"); m.id="picker"; m.className="pk"; m.setAttribute("role","dialog"); m.setAttribute("aria-modal","true"); m.setAttribute("aria-label","길 고르기");
   m.innerHTML=`<div class="pk-sheet"><button type="button" class="pk-grab" aria-label="닫기"></button>
     <div class="pk-hd"><b>길 고르기</b><span>내 스탬프 ${got} / ${allNums.length}곳</span></div><div class="pk-body">${body()}</div></div>`;
@@ -525,7 +527,7 @@ function openPicker(){
 }
 
 function popupHtml(c,s){
-  return `<b>${esc(s.num)}. ${esc(s.name)}</b>${stBadge(s)}${stamps.has(s.num)?" ✓":""}<br><span>${esc(c.title)} · 방문코스 ${c.group}${s.designation?` · ${esc(s.designation)}`:""}</span><br>
+  return `<b>${esc(s.num)}. ${esc(s.name)}</b>${stBadge(s)}${stamps.has(s.num)?" ✓":""}<br><span>${esc(c.title)} · ${groupName(c.group)}${s.designation?` · ${esc(s.designation)}`:""}</span><br>
   ${s.address?`위치: ${esc(s.address)}<br>`:""}${s.phone?`문의: ${esc(s.phone)}<br>`:""}${s.stamp?`스탬프: ${esc(s.stamp)}${s.field?" (현장 확인)":""}<br>`:""}${s.field&&s.field.closed?`휴무: ${esc(s.field.closed)}<br>`:""}${s.field&&s.field.note?`⚠ ${esc(s.field.note)}<br>`:""}${s.hours?`운영: ${esc(s.hours)}<br>`:""}
   ${s.geo==="approx"?"<em>※ 대략 위치</em><br>":""}
   <a href="${kakaoTo(s)}" target="_blank" rel="noopener">카카오맵 길찾기</a> · <a href="${naverFood(s)}" target="_blank" rel="noopener">네이버 주변 맛집</a>`;
@@ -556,7 +558,7 @@ function draw(noFit){
 const cardHTML=(c,s,col)=>`<article class="spot${stamps.has(s.num)?" done":""}" style="--c:${col}" id="card-${c.key}-${s.num}" data-k="${c.key}|${s.num}">
     <div class="num${c.group===2?" sq":""}">${esc(s.num)}</div>
     ${stamps.has(s.num)?sealHTML(s):""}
-    <h3>${esc(s.name)}${stBadge(s)}</h3>
+    <h3>${esc(s.name)}${s.plus?`<span class="badge plusb">플러스 거점</span>`:""}${stBadge(s)}</h3>
     <div class="line">스탬프 <b>${esc(s.stamp||"현장 안내 확인")}</b>${s.field?`<span class="fchk" title="직접 다니며 확인한 위치">현장 확인</span>`:""}${s.d!=null?` · <span class="dist">${km(s.d)}</span>`:""}</div>
     ${s.field&&s.field.note?`<div class="line fnote">⚠ ${esc(s.field.note)}</div>`:""}
     <div class="acts"><button class="btn stampBtn" type="button" data-n="${esc(s.num)}" aria-pressed="${stamps.has(s.num)}">${stamps.has(s.num)?"✓ 스탬프 찍음":"스탬프 찍었어요"}</button>
@@ -625,7 +627,7 @@ function list(){
     const pc=pick&&C.find(x=>x.key===pick.key), ps=pc&&pc.spots.find(x=>x.num===pick.num);
     const top=ps?`<div class="picked"><div class="label">지도에서 고른 유산 · <button class="lk" type="button" data-open="${pc.key}">${esc(pc.title)} 전체 보기</button> · <button class="lk" type="button" data-unpick>닫기</button></div>${cardHTML(pc,{...ps,d:me?hav(me.lat,me.lng,ps.lat,ps.lng):null},COLOR[pc.key])}</div>`:"";
     el.innerHTML=top+visible().map(c=>`<div class="course-info" style="--c:${COLOR[c.key]};cursor:pointer" data-k="${c.key}">
-      <h2>${esc(c.title)}<span class="badge">방문코스 ${c.group}</span><span class="badge">스탬프 ${done(c)}/${c.spots.length}</span></h2>
+      <h2>${esc(c.title)}<span class="badge">${groupName(c.group)}</span><span class="badge">스탬프 ${done(c)}/${c.spots.length}</span></h2>
       ${c.theme?`<div class="meta">${esc(c.theme)}</div>`:""}
       <div class="meta">${c.spots.length}곳: ${c.spots.map(s=>esc(s.name.split(" (")[0])).join(", ")}</div></div>`).join("");
     el.querySelectorAll(".course-info").forEach(d=>d.onclick=()=>select(d.dataset.k));
@@ -636,7 +638,7 @@ function list(){
   const c=C.find(x=>x.key===cur), col=COLOR[c.key];
   const spots=c.spots.map(s=>({...s}));
   if(me) spots.forEach(s=>s.d=hav(me.lat,me.lng,s.lat,s.lng)), spots.sort((a,b)=>a.d-b.d);
-  el.innerHTML=`<div class="course-info" style="--c:${col}"><h2>${esc(c.title)}<span class="badge">방문코스 ${c.group}</span><span class="badge">스탬프 ${done(c)}/${c.spots.length}</span></h2>
+  el.innerHTML=`<div class="course-info" style="--c:${col}"><h2>${esc(c.title)}<span class="badge">${groupName(c.group)}</span><span class="badge">스탬프 ${done(c)}/${c.spots.length}</span></h2>
     <div class="bar" aria-hidden="true"><i style="width:${Math.round(100*done(c)/c.spots.length)}%"></i></div>
     ${c.theme?`<div class="meta">${esc(c.theme)}</div>`:""}${c.regions?`<div class="meta">${esc(c.regions)}</div>`:""}
     ${c.parent?`<div class="meta">사이트의 「${esc(c.parent)}」을 2026 여행지도 기준 ${partOf(c)}구간으로 나눔</div>`:""}
