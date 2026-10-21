@@ -622,12 +622,11 @@ function render(){
   if(mode==="me") renderMe(); else if(mode==="food") renderFood(); else if(mode==="course") renderCourse(); else if(mode==="cert") renderCert();
   syncNav();
 }
-function goHome(fromPop){  // X: 창을 닫고 처음 화면(내 위치 주변 지도)으로
+function goHome(fromPop){  // X: 창을 닫고 처음 화면(전국 방문코스)으로
   if(!fromPop&&pushed){pushed=false; try{history.back();}catch(e){}}
   mode=""; stage=1; spotNum=""; searchLayer.clearLayers(); foodLayer.clearLayers();
-  if(cur){cur=""; draw();} else refreshPins();
-  setPanel("closed"); wxFollow="me"; wxUpdate();
-  if(me) showOnMap([me.lat,me.lng],Math.max(map.getZoom(),15));
+  setPanel("closed"); cur=""; draw(true);  // 처음 화면: 전국 방문코스 한눈에
+  wxFollow="me"; wxUpdate();
 }
 function goBack(){
   if(mode!=="course") return;
@@ -986,18 +985,17 @@ function startGeo(){
     nearCheck(me);
     if(first){first=false; listedAt=me;
       if(wxFollow==="me") wxUpdate();
-      if(!mode||mode==="me") showOnMap([me.lat,me.lng],16);
+      if(mode==="me") showOnMap([me.lat,me.lng],16);
       findNearest(me).then(r=>{
         if(!r) return; if(mode==="me") render();
         // 가장 가까운 유산이 화면 밖이면 내 위치와 함께 보이게 (너무 멀면 내 위치 중심 그대로)
-        if((!mode||mode==="me")&&r.h.d<15000&&!visibleBounds().contains([r.h.x.lat,r.h.x.lng])) fitTo(L.latLngBounds([[me.lat,me.lng],[r.h.x.lat,r.h.x.lng]]),16);
+        if(mode==="me"&&r.h.d<15000&&!visibleBounds().contains([r.h.x.lat,r.h.x.lng])) fitTo(L.latLngBounds([[me.lat,me.lng],[r.h.x.lat,r.h.x.lng]]),16);
         drawKHS();});
       if(mode==="me") render();}
     else if(hav(listedAt.lat,listedAt.lng,me.lat,me.lng)>50){listedAt=me; findNearest(me).then(()=>drawKHS()); if(mode==="me"||mode==="food"||(mode==="course"&&stage===2)){const k=pb.scrollTop; render(); pb.scrollTop=k;}}
   },err=>{
     geoMsg=err.code===1?"위치 권한이 꺼져 있어요. 주소창의 사이트 설정에서 위치를 허용해 주세요.":"위치를 가져오지 못했어요. 잠시 후 다시 눌러 주세요.";
     if(mode==="me") render();
-    if(!mode&&!me){toast(err.code===1?"위치 권한이 없어 전국 지도를 보여 드려요":"위치를 못 찾아 전국 지도를 보여 드려요"); draw(true);}
   },{enableHighAccuracy:true,maximumAge:10000,timeout:15000});
 }
 
@@ -1103,9 +1101,9 @@ async function wxLoad(){
 addEventListener("resize",()=>setPanel(pstate));
 MQ.addEventListener("change",()=>{setPanel(pstate); setTimeout(()=>map.invalidateSize(),60);});
 
-// ── 시작: 지도만 보이는 처음 화면 → 내 위치를 찾아 골목 수준으로 확대
+// ── 시작: 전국 방문코스가 한눈에 보이는 지도 (내 위치는 찾아 두고, 내 위치 아이콘을 누르면 그리로)
 setPanel("closed");
-draw();
+draw(true);  // 처음 화면: 전국 방문코스가 한눈에 보이게
 const fromHash=location.hash.replace("#c","");
 if(C.some(c=>c.key===fromHash)) openCourse(fromHash);
 wxUpdate(); drawKHS(); startGeo();
