@@ -258,7 +258,15 @@ dl.info dt{color:var(--muted)} dl.info dd{margin:0;min-width:0;user-select:text}
 .cert-top .big small{font:500 14px/1 var(--body);color:var(--muted);margin-left:4px}
 .cert-img{width:100%;border-radius:12px;border:1px solid var(--rule);display:block;background:var(--paper);aspect-ratio:1080/1350}
 .cert-acts{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
-.cr{padding:12px 0;border-bottom:1px solid var(--rule)}
+.cert-acts.one{flex-wrap:nowrap}.cert-acts.one .btn{flex:1;padding:8px 6px;white-space:nowrap}
+.cr{padding:0;border-bottom:1px solid var(--rule)}
+.cr summary{display:block;cursor:pointer;list-style:none;padding:12px 0}
+.cr summary::-webkit-details-marker{display:none}
+.cr .bar{display:block}
+.cr-h::after{content:"▾";color:var(--muted);margin-left:2px;transition:transform .2s}
+.cr[open] .cr-h::after{transform:rotate(180deg)}
+.cr[data-full] .cr-h::after{content:""}
+.cr[open] .cr-l{margin:0 0 12px}
 .cr-h{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .cr-h b{flex:1;font:600 14.5px/1.3 var(--body)}
 .cr-h span{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
@@ -840,15 +848,14 @@ function renderCert(){
   $("pTitle").innerHTML=`인증<small>도장 ${got} / ${allNums.length}</small>`;
   pb.innerHTML=`<div class="cert-top"><span class="big">${got}<small>/ ${allNums.length}곳</small></span><span style="font-size:13px;color:var(--muted)">완주한 길 ${C.filter(c=>c.spots.every(s=>stamps.has(s.num))).length} / ${C.length}</span></div>
     <img class="cert-img" id="certImg" alt="지금까지 찍은 도장 수와 길별 진행을 담은 인증서">
-    <div class="cert-acts"><button class="btn primary" type="button" data-share>인증서 공유</button><a class="btn" id="certSave" download="국가유산-도장수첩.png">그림 저장</a><button class="btn" type="button" data-backup>도장 백업·옮기기</button>${standalone()?"":`<button class="btn" type="button" data-install>홈 화면에 추가</button>`}</div>
+    <div class="cert-acts one"><button class="btn primary" type="button" data-share>인증서 공유</button><a class="btn" id="certSave" download="국가유산-도장수첩.png">그림 저장</a>${standalone()?"":`<button class="btn" type="button" data-install>홈 화면에 추가</button>`}</div>
     <div class="sec"><h3>길마다 남은 곳</h3>
     ${C.map(c=>{const d=done(c), n=c.spots.length, left=c.spots.filter(s=>!stamps.has(s.num));
-      return `<div class="cr${left.length?"":" full"}"><div class="cr-h"><span class="pk-d${c.group===2?" sq":""}" style="background:${COLOR[c.key]}"></span><b>${esc(courseName(c))}</b><span>${left.length?`${d}/${n}`:"완주"}</span></div>
-        <div class="bar"><i style="width:${Math.round(100*d/n)}%"></i></div>
-        ${left.length?`<div class="cr-l">${left.map(s=>`<button type="button" data-spot="${c.key}|${esc(s.num)}">${esc(s.name.split(" (")[0])}</button>`).join("")}</div>`:""}</div>`;}).join("")}</div>
+      return `<details class="cr${left.length?"":" full"}"${left.length?"":" data-full"}><summary><span class="cr-h"><span class="pk-d${c.group===2?" sq":""}" style="background:${COLOR[c.key]}"></span><b>${esc(courseName(c))}</b><span>${left.length?`${d}/${n} · 남은 곳 ${left.length}`:"완주"}</span></span>
+        <span class="bar"><i style="width:${Math.round(100*d/n)}%"></i></span></summary>
+        ${left.length?`<div class="cr-l">${left.map(s=>`<button type="button" data-spot="${c.key}|${esc(s.num)}">${esc(s.name.split(" (")[0])}</button>`).join("")}</div>`:""}</details>`;}).join("")}</div>
     <p class="src">출처: 해설·사진·지역 행사 <a href="https://my.heritage.go.kr/main/index.do" target="_blank" rel="noopener">나만의 국가유산 해설사</a> · 방문코스 1 <a href="https://eb.kh.or.kr:8000/" target="_blank" rel="noopener">국가유산 방문 캠페인 코스 사이트</a> · 방문코스 2 <a href="https://www.kh.or.kr/visit/resource/files/2026_%EA%B5%AD%EA%B0%80%EC%9C%A0%EC%82%B0_%EB%B0%A9%EB%AC%B8%EC%BD%94%EC%8A%A4_%EC%97%AC%ED%96%89%EC%A7%80%EB%8F%84.pdf" target="_blank" rel="noopener">2026 여행지도 PDF</a>·<a href="https://www.kh.or.kr/visit/kor/bbsctt/view.do?key=2407110057&amp;bbscttSn=2609180015" target="_blank" rel="noopener">스탬프 위치 공지</a> · 좌표: 국가유산청 오픈API·OpenStreetMap · 맛집: 한국관광공사 TourAPI·© OpenStreetMap 기여자 · 날씨: <a href="https://api.met.no/" target="_blank" rel="noopener">MET Norway</a>(CC BY 4.0) · 도장 기록은 이 휴대폰에만 저장돼요.</p>`;
   pb.querySelectorAll("[data-spot]").forEach(b=>b.onclick=()=>{const[k,n]=b.dataset.spot.split("|"); openSpot(k,n);});
-  pb.querySelector("[data-backup]").onclick=openBackup;
   const ins=pb.querySelector("[data-install]"); if(ins) ins.onclick=openInstall;
   certImage().then(async cv=>{
     const im=$("certImg"); if(!im) return; const u=cv.toDataURL("image/png"); im.src=u; $("certSave").href=u;
@@ -893,9 +900,7 @@ function modal(html){
 let toastT=null;
 function toast(t){let d=$("toast"); if(!d){d=document.createElement("div"); d.id="toast"; d.className="toast"; d.setAttribute("role","status"); document.body.appendChild(d);}
   d.textContent=t; d.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>{d.hidden=true;},3200);}
-
-// 스탬프 백업·옮기기: 찍은 번호를 짧은 코드·링크로 (휴대폰을 바꾸거나 브라우저 기록을 지워도 되살림)
-const backupCode=()=>"HCM1."+[...stamps].sort().join(".");
+// 예전에 만든 옮기기 링크(#s=…)·백업 코드(HCM1.…)로 열면 도장을 합칠지 묻는다
 function readCode(s){
   const m=String(s||"").trim().match(/HCM1\.([0-9A-Z.]*)/)||String(s||"").match(/[#&]s=([0-9A-Z.]+)/);
   if(!m) return null; return m[1].split(".").filter(n=>allNums.includes(n));
@@ -905,19 +910,6 @@ function mergeStamps(nums,from){
   if(!add.length){alert(`${from}의 도장 ${nums.length}곳은 이미 모두 찍혀 있어요.`); return;}
   if(!confirm(`${from}에서 도장 ${add.length}곳을 더할까요? (지금 찍힌 ${stamps.size}곳은 그대로 둡니다)`)) return;
   add.forEach(n=>stamps.add(n)); saveStamps(); afterStamp();
-}
-function openBackup(){
-  const link=location.origin+location.pathname+"#s="+[...stamps].sort().join(".");
-  const m=modal(`<h3>도장 백업·옮기기</h3>
-    <p class="mt">찍은 도장은 이 브라우저에만 저장돼요. 휴대폰을 바꾸거나 기록을 지우기 전에 코드나 링크를 저장해 두세요. (찍힌 ${stamps.size}곳)</p>
-    <label class="lbl">백업 코드<textarea readonly rows="2">${esc(backupCode())}</textarea></label>
-    <div class="acts2"><button type="button" class="btn primary" data-copy="code">코드 복사</button><button type="button" class="btn" data-copy="link">옮기기 링크 복사</button></div>
-    <label class="lbl">다른 곳의 코드 불러오기<textarea rows="2" placeholder="HCM1.01.02… 를 붙여 넣기" data-in></textarea></label>
-    <div class="acts2"><button type="button" class="btn" data-load>불러오기(합치기)</button></div>`);
-  m.querySelectorAll("[data-copy]").forEach(b=>b.onclick=async()=>{const v=b.dataset.copy==="code"?backupCode():link;
-    try{await navigator.clipboard.writeText(v); b.textContent="복사됨";}catch(e){prompt("복사해 두세요",v);}});
-  m.querySelector("[data-load]").onclick=()=>{const nums=readCode(m.querySelector("[data-in]").value);
-    if(!nums){alert("백업 코드(HCM1.…)나 옮기기 링크를 붙여 넣어 주세요."); return;} mergeStamps(nums,"붙여 넣은 코드"); m.remove();};
 }
 (function(){const nums=readCode(location.hash); if(nums&&nums.length){history.replaceState(null,"",location.pathname+location.search); setTimeout(()=>mergeStamps(nums,"옮기기 링크"),400);}})();
 
