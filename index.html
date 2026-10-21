@@ -229,8 +229,11 @@ dl.info dt{color:var(--muted)} dl.info dd{margin:0;min-width:0;user-select:text}
 .desc{margin:6px 0;line-height:1.75;font-size:13.5px}
 .ev{list-style:none;margin:0 0 8px;padding:0;display:flex;flex-direction:column;gap:8px;font-size:13px}
 .ev li{display:flex;flex-direction:column}.ev small{color:var(--muted)}.ev a{color:var(--ink);font-weight:500}
-.pn{display:flex;justify-content:space-between;gap:8px;margin-top:14px}
-.pn button{flex:1}
+.pn-t{font:600 13px/1.3 var(--body);margin:16px 0 6px}
+.pn-t small{font-weight:500;color:var(--muted);margin-left:4px;font-size:11.5px}
+.pn{display:flex;gap:8px}
+.pn button{flex:1;flex-direction:column;gap:2px;padding:8px 10px}
+.pn button small{color:var(--me);font-weight:600;font-variant-numeric:tabular-nums}
 
 /* 도장 (찍은 곳의 장소 카드 오른쪽 위) */
 .seal{position:absolute;top:0;right:0;width:84px;height:84px;border-radius:50%;box-shadow:0 0 0 2.5px var(--seal),inset 0 0 0 5px var(--sheet),inset 0 0 0 6.5px var(--seal);
@@ -801,7 +804,8 @@ function renderSpot(c,s){
         <dt>GPS</dt><dd style="font-variant-numeric:tabular-nums">${s.lat.toFixed(5)}, ${s.lng.toFixed(5)}${s.geo==="approx"?" (대략)":""}</dd></dl>
         <div class="cert-acts"><a class="btn" href="${kakaoFrom(s)}" target="_blank" rel="noopener">여기서 출발</a><a class="btn" href="${naverFood(s)}" target="_blank" rel="noopener">네이버 주변 맛집</a></div></details>
     </div>
-    <div class="pn">${idx>0?`<button class="btn" type="button" data-go="${esc(c.spots[idx-1].num)}">‹ ${esc(c.spots[idx-1].name.split(" (")[0])}</button>`:"<span></span>"}${idx<c.spots.length-1?`<button class="btn" type="button" data-go="${esc(c.spots[idx+1].num)}">${esc(c.spots[idx+1].name.split(" (")[0])} ›</button>`:"<span></span>"}</div>
+    ${(()=>{const nx=c.spots.filter(x=>x.num!==s.num).map(x=>({x,d:hav(s.lat,s.lng,x.lat,x.lng)})).sort((a,b)=>a.d-b.d).slice(0,2);  // 같은 길에서 이곳과 가까운 두 곳
+      return nx.length?`<div class="pn-t">가까운 거리에 있는 국가유산 <small>같은 길에서 이곳과 가까운 순</small></div><div class="pn">${nx.map(({x,d})=>`<button class="btn" type="button" data-go="${esc(x.num)}"><span>${esc(x.name.split(" (")[0])}</span><small>${km(d)}</small></button>`).join("")}</div>`:"";})()}
   </article>`;
   fitSeals(pb);
   pb.querySelector("[data-stamp]").onclick=()=>{if(stamps.has(s.num)){if(!confirm(`${s.name} 도장을 지울까요?`)) return; stamps.delete(s.num); saveStamps(); afterStamp();} else stampNow(s.num);};
