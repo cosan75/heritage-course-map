@@ -316,8 +316,11 @@ dl.info dt{color:var(--muted)} dl.info dd{margin:0;min-width:0;user-select:text}
 .sp svg{width:17px;height:17px;color:#fff;transform:rotate(45deg)}
 .sp.sq{border-radius:7px 7px 7px 2px}
 .sp b{position:absolute;top:-9px;right:-11px;transform:rotate(45deg);background:var(--sheet);color:var(--ink);border-radius:8px;font:700 10px/15px var(--body);padding:0 4px;box-shadow:0 1px 3px rgb(0 0 0 / .3);font-variant-numeric:tabular-nums;white-space:nowrap}
-.sp.done{background:var(--seal)}
-.sp.done::after{content:"✓";position:absolute;bottom:-6px;left:-6px;transform:rotate(45deg);width:16px;height:16px;border-radius:50%;background:#fff;color:var(--seal);font:900 11px/16px var(--body);text-align:center;box-shadow:0 1px 3px rgb(0 0 0 / .3)}
+/* 도장 받은 곳: 작고 옅은 회색으로 물러나서, 남은 핀이 점점 줄어드는 게 보이게 (고른 곳은 다시 또렷하게) */
+.sp.done{background:#9aa0a6;opacity:.5;transform:rotate(-45deg) scale(.6);transform-origin:0 100%;box-shadow:0 1px 2px rgb(0 0 0 / .2);border-width:1.5px}
+.sp.done b{display:none}
+.sp.done.sel{opacity:1;background:var(--seal);transform:rotate(-45deg)}
+.sp.done.sel b{display:block}
 .sp.sel{box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 35%,transparent),0 2px 8px rgb(0 0 0 / .4)}
 .fk{width:24px;height:24px;border-radius:50%;background:var(--food);color:#fff;display:grid;place-items:center;border:2px solid #fff;box-shadow:0 1px 4px rgb(0 0 0 / .35)}
 .fk svg{width:13px;height:13px}
@@ -589,14 +592,14 @@ function draw(fit){
     if(cur) L.polyline(c.spots.map(s=>[s.lat,s.lng]),{color:COLOR[c.key],weight:3,opacity:.7,dashArray:dashOf(c)}).addTo(spotLayer);
     c.spots.forEach(s=>{
       if(!cur&&seen.has(s.num)) return; seen.add(s.num);  // 왕가의 길 1·2에 같이 있는 종묘 같은 곳은 핀 하나
-      const m=L.marker([s.lat,s.lng],{icon:spotIcon(c,s,mode==="course"&&stage===3&&spotNum===s.num&&cur===c.key),title:s.name,riseOnHover:true}).addTo(spotLayer);
+      const m=L.marker([s.lat,s.lng],{icon:spotIcon(c,s,mode==="course"&&stage===3&&spotNum===s.num&&cur===c.key),title:s.name,riseOnHover:true,zIndexOffset:stamps.has(s.num)?-1000:0}).addTo(spotLayer);  // 받은 곳은 남은 핀 밑으로
       m.on("click",()=>openSpot(c.key,s.num));
       markers[`${c.key}|${s.num}`]=m; pts.push([s.lat,s.lng]);
     });
   });
   if(fit&&pts.length) fitTo(L.latLngBounds(pts),13);
 }
-const refreshPins=()=>{for(const k in markers){const[ck,num]=k.split("|"),x=spotOf(ck,num); markers[k].setIcon(spotIcon(x.c,x.s,mode==="course"&&stage===3&&spotNum===num&&cur===ck));}};
+const refreshPins=()=>{for(const k in markers){const[ck,num]=k.split("|"),x=spotOf(ck,num); markers[k].setIcon(spotIcon(x.c,x.s,mode==="course"&&stage===3&&spotNum===num&&cur===ck)).setZIndexOffset(stamps.has(num)?-1000:0);}};
 
 // 맛집 표시: 지금 창의 맛집만 지도에
 const foodIcon=f=>L.divIcon({className:"",html:`<div class="fk${rates[fKey(f)]?" ate":""}">${I.fork}</div>`,iconSize:[24,24],iconAnchor:[12,12],popupAnchor:[0,-12]});
