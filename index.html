@@ -458,7 +458,7 @@ const I={
   area:'<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20z"/></svg>'
 };
 
-const map=L.map("map",{zoomControl:false}).setView([36.3,127.8],7);
+const map=L.map("map",{zoomControl:false,zoomSnap:.25})  /* 0.25 단계로 맞춰 우리나라가 화면에 꽉 차게 */.setView([36.3,127.8],7);
 L.control.zoom({position:"topright"}).addTo(map);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}).addTo(map);
 map.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>');
@@ -603,7 +603,7 @@ function draw(fit){
       markers[`${c.key}|${s.num}`]=m; pts.push([s.lat,s.lng]);
     });
   });
-  if(fit&&pts.length) fitTo(L.latLngBounds(pts),13);
+  if(fit&&pts.length) fitTo(cur?L.latLngBounds(pts):KOREA,13);  // 전체 화면은 늘 우리나라(제주~강원)가 꽉 차게
 }
 const refreshPins=()=>{for(const k in markers){const[ck,num]=k.split("|"),x=spotOf(ck,num); markers[k].setIcon(spotIcon(x.c,x.s,mode==="course"&&stage===3&&spotNum===num&&cur===ck)).setZIndexOffset(stamps.has(num)?-1000:0);}};
 
@@ -642,6 +642,7 @@ function drawKHS(){
 }
 let khsTimer=null; map.on("moveend",()=>{clearTimeout(khsTimer); khsTimer=setTimeout(drawKHS,150);});
 const DAEJEON=[36.3504,127.3845];
+const KOREA=L.latLngBounds([[33.15,125.9],[38.45,129.6]]);  // 제주~강원 (서해·일본 쪽 바다는 덜 보이게)
 function zoomAnchor(){  // 확대 기준점: 내 위치 › 고른 길 › 대전
   if(me) return L.latLng(me.lat,me.lng);
   const c=cur&&C.find(x=>x.key===cur);
@@ -674,7 +675,9 @@ addEventListener("popstate",()=>{if(!pushed) return; pushed=false;
   if(mode==="course"&&stage>1&&pstate!=="closed"){goBack(); ensurePush();} else goHome(true);});
 function openMode(m,s){
   if(mode!==m){mode=m; if(m==="course"&&!cur) stage=1;}
+  const wasClosed=pstate==="closed";
   render(); setPanel(s||"full"); pb.scrollTop=0; ensurePush();
+  if(!mobile()&&wasClosed&&!cur&&map.getZoom()<=8) fitTo(KOREA,13);  // PC: 왼쪽 창이 열리면 우리나라를 창 오른쪽에 다시 맞춤
 }
 function render(){
   $("pTitle").innerHTML=esc(TITLES[mode]||"");
@@ -701,7 +704,7 @@ $("doneOnly").onclick=()=>{  // 도장 받은 곳만 보기 ↔ 모두 보기
   if(!doneOnly&&!n){toast("아직 도장 받은 곳이 없어요"); return;}
   doneOnly=!doneOnly; document.body.classList.toggle("done-only",doneOnly); $("doneOnly").setAttribute("aria-pressed",String(doneOnly));
   goHome();  // 고른 길·동선·맛집 표시를 걷고 처음 화면으로
-  fitTo(L.latLngBounds(uniqSpots.map(x=>[x.s.lat,x.s.lng])),13);  // 처음 화면처럼 전국 지도에서 (받은 곳이 어디까지 퍼졌는지 한눈에)
+  fitTo(KOREA,13);  // 처음 화면처럼 전국 지도에서 (받은 곳이 어디까지 퍼졌는지 한눈에)
   if(doneOnly) toast(`도장 받은 ${n}곳만 보여요`);
 };
 $("pBack").onclick=()=>goBack();
