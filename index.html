@@ -33,7 +33,7 @@
 <title>국가유산 도장깨기</title>
 <link rel="stylesheet" href="vendor/leaflet.css" integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw==" crossorigin="anonymous" referrerpolicy="no-referrer">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&amp;text=%EB%8F%84%EC%9E%A5%EA%B9%A8%EA%B8%B0&amp;display=swap"><!-- 제목 "도장깨기" 네 글자만 -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&amp;text=%EB%8F%84%EC%9E%A5%EA%B9%A8%EA%B8%B0%EC%99%84%EC%A3%BC&amp;display=swap"><!-- 제목 "도장깨기"와 "완주" 글자만 -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" media="print" onload="this.media='all'"><!-- 글꼴이 늦어도 화면은 먼저 -->
 <style>
 /* 카카오맵처럼: 지도가 화면 전부. 위에 검색창, 아래에 아이콘 줄, 필요할 때만 아래에서 올라오는 창(반·크게).
@@ -336,6 +336,14 @@ dl.info dt{color:var(--muted)} dl.info dd{margin:0;min-width:0;user-select:text}
 .player b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:34%}
 .player .ib{border:0;background:none;width:32px;height:32px;cursor:pointer}
 .toast{padding:10px 14px;font-size:13px;text-align:center;width:auto;max-width:calc(100vw - 24px)}
+.fin-box{background:var(--sheet);color:var(--ink);border-radius:20px;padding:26px 20px 18px;width:min(360px,100%);display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.fin-box h3{font:700 19px/1.35 var(--display);margin:4px 0 0}
+.fin-box .mt{color:var(--muted);font-size:13px;margin:0}
+.fin-box .acts2{display:flex;gap:8px;margin-top:6px}
+.fin-seal{width:150px;height:150px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--seal);
+  box-shadow:0 0 0 5px var(--seal),inset 0 0 0 8px var(--sheet),inset 0 0 0 10px var(--seal);transform:rotate(-12deg);animation:thud .6s cubic-bezier(.2,.9,.3,1.25) both}
+.fin-seal b{font:400 40px/1 "Jua",var(--display);letter-spacing:.04em}
+.fin-seal small{font:600 11px/1.3 var(--body);max-width:110px}
 .modal{position:fixed;inset:0;z-index:3000;background:rgb(0 0 0 / .45);display:grid;place-items:center;padding:16px}
 .sheet-box{background:var(--sheet);color:var(--ink);border-radius:16px;padding:18px;width:min(460px,100%);max-height:calc(100dvh - 32px);overflow:auto;display:flex;flex-direction:column;gap:10px}
 .sheet-box h3{font:700 1.05rem/1.3 var(--body);margin:0}
@@ -453,7 +461,7 @@ const spotLayer=L.layerGroup().addTo(map), foodLayer=L.layerGroup().addTo(map), 
   khsLayer=L.layerGroup().addTo(map), nearestLayer=L.layerGroup().addTo(map), searchLayer=L.layerGroup().addTo(map);
 
 // ── 상태: 지금 열린 창(mode)·창 높이(pstate)·고른 길(cur)·길 창 단계(stage 1 목록 / 2 길 안 유산 / 3 장소 카드)
-let mode="", pstate="closed", cur="", stage=1, spotNum="", filter="all", me=null, markers={}, nearest=null, wxFollow="me";
+let openOnly=false, mode="", pstate="closed", cur="", stage=1, spotNum="", filter="all", me=null, markers={}, nearest=null, wxFollow="me";
 let saved=""; try{saved=localStorage.getItem("hcm-course")||""}catch(e){}
 
 // 스탬프 체크: 이 브라우저에만 저장. 같은 번호(예: 83 종묘)는 왕가의 길 1·2에서 함께 체크된다
@@ -722,15 +730,16 @@ const hRow=(x,i)=>x.t==="spot"
   :`<button class="row" type="button" data-khs="${i}"><span class="ri">${I.roof}</span><span class="rt"><b>${esc(x.h.name)}</b><small>${esc(x.h.kind)}</small></span><span class="rd">${km(x.d)}</span></button>`;
 let geoMsg="";
 function renderMe(){
-  if(!me){pb.innerHTML=`<div class="empty">${I.pin}<span>${esc(geoMsg||"내 위치를 찾는 중이에요…")}</span><button class="btn primary" type="button" data-geo>위치 다시 찾기</button></div>`;
-    pb.querySelector("[data-geo]").onclick=()=>startGeo(); return;}
   if(!KHS) loadKHS().then(()=>{if(mode==="me") renderMe();}).catch(()=>{});
-  const her=nearHeritage(me,10), fd=nearFoods(me,8);
-  $("pTitle").innerHTML=`내 위치<small>정확도 ±${Math.round(me.acc)}m</small>`;
-  pb.innerHTML=`<div class="sec"><h3>가까운 국가유산</h3>${her.map(hRow).join("")}</div>
+  const pt=me||visibleBounds().getCenter();  // 위치가 없으면 지금 보이는 지도 가운데를 기준으로
+  const her=nearHeritage(pt,10), fd=nearFoods(pt,8);
+  $("pTitle").innerHTML=me?`내 위치<small>정확도 ±${Math.round(me.acc)}m</small>`:`지도 가운데<small>내 위치 대신</small>`;
+  pb.innerHTML=(me?"":`<div class="rt-geo"><span>${esc(geoMsg||"내 위치를 찾는 중이에요…")} 그동안 지도 가운데에서 가까운 곳을 보여 드려요.</span><button class="btn primary" type="button" data-geo>위치 다시 찾기</button></div>`)+
+    `<div class="sec"><h3>가까운 국가유산</h3>${her.map(hRow).join("")}</div>
     <div class="sec"><h3>가까운 식당 <button type="button" data-allfood>맛집 더 보기 ›</button></h3>${fd.map(fRow).join("")||`<p class="empty">가까운 식당 자료가 없어요</p>`}</div>`;
   bindRows(her); bindFoods(fd); showFoods(fd);
   pb.querySelector("[data-allfood]").onclick=()=>openMode("food","full");
+  const gb=pb.querySelector("[data-geo]"); if(gb) gb.onclick=()=>{gb.textContent="위치 찾는 중…"; startGeo();};
 }
 function bindRows(list){
   pb.querySelectorAll("[data-spot]").forEach(b=>b.onclick=()=>{const[k,n]=b.dataset.spot.split("|"); openSpot(k,n);});
@@ -778,7 +787,8 @@ function renderCourse(){
   const c=C.find(x=>x.key===cur); if(!c){stage=1; return renderPicker();}
   if(stage===3) return renderSpot(c,c.spots.find(s=>s.num===spotNum));
   $("pTitle").innerHTML=`${esc(courseName(c))}<small>${done(c)}/${c.spots.length}</small>`;
-  const spots=c.spots.map(s=>({...s,d:me?hav(me.lat,me.lng,s.lat,s.lng):null}));
+  const all=c.spots.map(s=>({...s,d:me?hav(me.lat,me.lng,s.lat,s.lng):null})), shut=all.filter(s=>(status(s)||{}).cls==="shut");
+  const spots=openOnly?all.filter(s=>!shut.includes(s)):all;
   if(me) spots.sort((a,b)=>a.d-b.d);
   const rts=routes(c);
   pb.innerHTML=`<div class="cinfo"><div class="bar" aria-hidden="true"><i style="width:${Math.round(100*done(c)/c.spots.length)}%"></i></div>
@@ -789,11 +799,13 @@ function renderCourse(){
       <ol class="rt-l">${r.path.map((x,j)=>`<li><span class="num${c.group===2?" sq":""}" style="--c:${COLOR[c.key]}">${esc(x.num)}</span><span>${esc(x.name.split(" (")[0])}</span>${(()=>{const a=j?r.path[j-1]:r.from; return a?`<a href="${kakaoLeg(a,x)}" target="_blank" rel="noopener">${km(hav(a.lat,a.lng,x.lat,x.lng))} 길찾기</a>`:"<small>출발</small>";})()}</li>`).join("")}</ol>
       <button class="btn" type="button" data-route="${i}" style="width:100%;margin:0 0 12px">지도에 동선 그리기</button></details>`).join("")}
       <p class="rt-note">직선거리로 순서를 정했어요. 실제 길 거리·시간은 구간마다 카카오맵 길찾기로 확인하세요.</p></div>`:""}
-    <div class="sec"><h3>${me?"내 위치에서 가까운 순":"유산 목록"}</h3></div>`+
+    <div class="sec"><h3>${me?"내 위치에서 가까운 순":"유산 목록"}</h3><div class="seg"><button type="button" data-open="0" class="${openOnly?"":"on"}">모두 ${all.length}</button><button type="button" data-open="1" class="${openOnly?"on":""}">지금 갈 수 있는 곳 ${all.length-shut.length}</button></div></div>`+
+    (openOnly&&shut.length?`<p class="rt-note" style="margin:0 0 4px">오늘 휴무이거나 운영 시간이 아닌 ${shut.length}곳을 뺐어요. (공휴일·설·추석은 반영하지 않아요)</p>`:"")+
     spots.map(s=>`<button class="row" type="button" data-n="${esc(s.num)}"><span class="num${c.group===2?" sq":""}${stamps.has(s.num)?" done":""}" style="--c:${COLOR[c.key]}">${esc(s.num)}</span>
       <span class="rt"><b>${esc(s.name)}</b><small>${stBadge(s)} ${esc(s.stamp||"")}</small></span>${stamps.has(s.num)?`<span class="tag got">인증</span>`:""}${s.d!=null?`<span class="rd">${km(s.d)}</span>`:""}</button>`).join("")+
     (c.foods&&c.foods.length?`<div class="sec"><h3>지역 먹거리</h3><div class="foods">${c.foods.map(f=>`<span title="${esc(f.desc)}">${esc(f.name)}</span>`).join("")}</div></div>`:"");
   pb.querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>openSpot(c.key,b.dataset.n));
+  pb.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{openOnly=b.dataset.open==="1"; const k=pb.scrollTop; render(); pb.scrollTop=k;});
   pb.querySelectorAll("[data-route]").forEach(b=>b.onclick=()=>drawRoute(c,rts[+b.dataset.route]));
   const gb=pb.querySelector("[data-geo]"); if(gb) gb.onclick=()=>{gb.textContent="위치 찾는 중…"; startGeo();};
 }
@@ -844,7 +856,7 @@ function renderPicker(){
   $("pTitle").innerHTML=`길 고르기<small>내 도장 ${gotN()} / ${allNums.length}</small>`;
   const row=c=>{const d=done(c),n=c.spots.length,full=d===n;
     return `<button type="button" class="pk-it${saved===c.key?" on":""}" data-k="${c.key}"><span class="pk-d${c.group===2?" sq":""}" style="background:${COLOR[c.key]}"></span>
-      <span class="pk-n"><b>${esc(courseName(c))}</b>${d?`<span class="bar"><i style="width:${Math.round(100*d/n)}%"></i></span>`:`<small>${n}곳</small>`}</span>
+      <span class="pk-n"><b>${esc(courseName(c))}</b><small>${esc([c.theme,`${n}곳`].filter(Boolean).join(" · "))}</small>${d?`<span class="bar"><i style="width:${Math.round(100*d/n)}%"></i></span>`:""}</span>
       ${full?`<span class="pk-done">완주</span>`:`<span class="pk-c">${d}/${n}</span>`}</button>`;};
   pb.innerHTML=`<div class="seg">${[["all","전체"],["1","방문코스 1"],["2","방문코스 2"],["3","특별·홍보관"]].map(([f,l])=>`<button type="button" data-f="${f}" class="${filter===f?"on":""}">${l}</button>`).join("")}</div>
     ${[1,2,3].filter(g=>filter==="all"||String(g)===filter).map(g=>`<div class="pk-g">${groupName(g)}</div>${C.filter(c=>c.group===g).map(row).join("")}`).join("")}`;
@@ -925,10 +937,24 @@ function afterStamp(){
 }
 function stampNow(n){
   if(stamps.has(n)) return;
+  const was=new Set(C.filter(c=>c.spots.every(s=>stamps.has(s.num))).map(c=>c.key));
   stamps.add(n); saveStamps(); afterStamp();
+  const fin=C.filter(c=>!was.has(c.key)&&c.spots.every(s=>stamps.has(s.num)));
+  if(fin.length) setTimeout(()=>celebrate(fin),900);  // 도장이 쿵 찍힌 다음에
   const sl=pb.querySelector(".pc .seal"), a=pb.querySelector(".pc");
   if(sl){sl.classList.add("thud"); a.classList.add("thudcard"); setTimeout(()=>a.classList.remove("thudcard"),700);}  // 쿵: 도장이 내려찍히고 카드가 살짝 흔들림
   try{navigator.vibrate&&navigator.vibrate(40)}catch(e){}
+}
+
+function celebrate(list){
+  const done1=C.filter(c=>c.spots.every(s=>stamps.has(s.num))).length;
+  const m=document.createElement("div"); m.className="modal fin"; m.setAttribute("role","dialog"); m.setAttribute("aria-modal","true"); m.setAttribute("aria-label","길 완주");
+  m.innerHTML=`<div class="fin-box"><div class="fin-seal" aria-hidden="true"><b>완주</b><small>${esc(list.map(courseName).join(" · "))}</small></div>
+    <h3>${esc(list.map(courseName).join(", "))} 완주!</h3><p class="mt">${list.reduce((a,c)=>a+c.spots.length,0)}곳 도장을 다 모았어요. 지금까지 완주한 길 ${done1} / ${C.length}</p>
+    <div class="acts2"><button type="button" class="btn primary" data-go>인증서 보기</button><button type="button" class="btn" data-close>닫기</button></div></div>`;
+  m.onclick=e=>{if(e.target===m||e.target.closest("[data-close]")) m.remove(); if(e.target.closest("[data-go]")){m.remove(); openMode("cert","full");}};
+  document.body.appendChild(m);
+  try{navigator.vibrate&&navigator.vibrate([60,80,120])}catch(e){}
 }
 
 // ── 4) 인증: 도장 모음 인증서 + 길마다 아직 못 받은 곳
@@ -943,7 +969,8 @@ function renderCert(){
       return `<details class="cr${left.length?"":" full"}"${left.length?"":" data-full"}><summary><span class="cr-h"><span class="pk-d${c.group===2?" sq":""}" style="background:${COLOR[c.key]}"></span><b>${esc(courseName(c))}</b><span>${left.length?`${d}/${n} · 남은 곳 ${left.length}`:"완주"}</span></span>
         <span class="bar"><i style="width:${Math.round(100*d/n)}%"></i></span></summary>
         ${left.length?`<div class="cr-l">${left.map(s=>`<button type="button" data-spot="${c.key}|${esc(s.num)}">${esc(s.name.split(" (")[0])}</button>`).join("")}</div>`:""}</details>`;}).join("")}</div>
-    <p class="src">출처: 해설·사진·지역 행사 <a href="https://my.heritage.go.kr/main/index.do" target="_blank" rel="noopener">나만의 국가유산 해설사</a> · 방문코스 1 <a href="https://eb.kh.or.kr:8000/" target="_blank" rel="noopener">국가유산 방문 캠페인 코스 사이트</a> · 방문코스 2 <a href="https://www.kh.or.kr/visit/resource/files/2026_%EA%B5%AD%EA%B0%80%EC%9C%A0%EC%82%B0_%EB%B0%A9%EB%AC%B8%EC%BD%94%EC%8A%A4_%EC%97%AC%ED%96%89%EC%A7%80%EB%8F%84.pdf" target="_blank" rel="noopener">2026 여행지도 PDF</a>·<a href="https://www.kh.or.kr/visit/kor/bbsctt/view.do?key=2407110057&amp;bbscttSn=2609180015" target="_blank" rel="noopener">스탬프 위치 공지</a> · 좌표: 국가유산청 오픈API·OpenStreetMap · 맛집: 한국관광공사 TourAPI·© OpenStreetMap 기여자 · 날씨: <a href="https://api.met.no/" target="_blank" rel="noopener">MET Norway</a>(CC BY 4.0) · 도장 기록은 이 휴대폰에만 저장돼요.</p>`;
+    <p class="src">출처: 해설·사진·지역 행사 <a href="https://my.heritage.go.kr/main/index.do" target="_blank" rel="noopener">나만의 국가유산 해설사</a> · 방문코스 1 <a href="https://eb.kh.or.kr:8000/" target="_blank" rel="noopener">국가유산 방문 캠페인 코스 사이트</a> · 방문코스 2 <a href="https://www.kh.or.kr/visit/resource/files/2026_%EA%B5%AD%EA%B0%80%EC%9C%A0%EC%82%B0_%EB%B0%A9%EB%AC%B8%EC%BD%94%EC%8A%A4_%EC%97%AC%ED%96%89%EC%A7%80%EB%8F%84.pdf" target="_blank" rel="noopener">2026 여행지도 PDF</a>·<a href="https://www.kh.or.kr/visit/kor/bbsctt/view.do?key=2407110057&amp;bbscttSn=2609180015" target="_blank" rel="noopener">스탬프 위치 공지</a> · 좌표: 국가유산청 오픈API·OpenStreetMap · 맛집: 한국관광공사 TourAPI·© OpenStreetMap 기여자 · 날씨: <a href="https://api.met.no/" target="_blank" rel="noopener">MET Norway</a>(CC BY 4.0) · 도장 기록은 이 휴대폰에만 저장돼요.</p>
+    <a class="btn" style="width:100%;margin-top:10px" href="https://github.com/cosan75/heritage-course-map/issues/new" target="_blank" rel="noopener">불편한 점·의견 알려 주기</a>`;
   pb.querySelectorAll("[data-spot]").forEach(b=>b.onclick=()=>{const[k,n]=b.dataset.spot.split("|"); openSpot(k,n);});
   const ins=pb.querySelector("[data-install]"); if(ins) ins.onclick=openInstall;
   certImage().then(async cv=>{
