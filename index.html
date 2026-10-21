@@ -79,7 +79,8 @@ button{font:inherit;color:inherit}
 .brand{display:flex;align-items:center;gap:5px;border:0;background:none;padding:0 2px 0 0;margin-left:-8px;cursor:pointer;flex:none;color:var(--ink)}
 .brand img{height:26px;width:auto;display:block;transform:rotate(-4deg)}
 .brand span{display:flex;flex-direction:column;align-items:center;line-height:1;text-align:center}
-.brand small{font:600 9.5px/1 var(--body);color:var(--muted);letter-spacing:.06em}
+.brand small{font:700 11.5px/1 var(--body);color:var(--ink);letter-spacing:.02em}
+.brand small::before{content:"‘";color:var(--seal);margin-right:1px}.brand small::after{content:"’";color:var(--seal);margin-left:1px}  /* ‘국가유산’ — 따옴표만 인주색으로 */
 .brand b{font:400 18px/1 "Jua",var(--body);color:var(--seal);letter-spacing:.01em;margin-top:2px;white-space:nowrap}
 .brand:focus-visible{outline:2px solid var(--sea);outline-offset:2px;border-radius:8px}
 .sdiv{width:1px;height:22px;background:var(--rule);flex:none;margin:0 2px}
