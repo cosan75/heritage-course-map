@@ -97,7 +97,7 @@ button{font:inherit;color:inherit}
 .nav button:focus-visible{outline:2px solid var(--sea);outline-offset:-4px}
 .nav .cnt{position:absolute;top:8px;left:calc(50% + 6px);min-width:18px;height:16px;padding:0 4px;border-radius:8px;background:var(--seal);color:#fff;font:600 10px/16px var(--body);font-variant-numeric:tabular-nums}
 #updown svg{transition:transform .25s}
-body[data-p="full"] #updown svg{transform:rotate(180deg)}
+body:not([data-p="closed"]) #updown svg{transform:rotate(180deg)}
 
 /* 날씨 (왼쪽 아래) · 주변 유산 더보기 (오른쪽 아래) */
 .wxc{position:fixed;z-index:1050;left:12px;bottom:calc(var(--navh) + var(--pv) + 12px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:6px;
@@ -523,7 +523,7 @@ function setPanel(s){
   pstate=s; panel.dataset.s=s; document.body.dataset.p=s;
   if(mobile()) panel.style.height=panelH(s)+"px"; else panel.style.height="";
   setVars();
-  const ud=$("updown"); ud.setAttribute("aria-label",s==="full"?"창 내리기":"창 올리기");
+  const ud=$("updown"); ud.setAttribute("aria-label",s==="closed"?"창 올리기":"창 내리기");
   if(s==="closed"&&document.activeElement&&panel.contains(document.activeElement)) document.activeElement.blur();
   syncNav();
 }
@@ -648,9 +648,10 @@ nav.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{
   if(m==="course"&&cur&&mode!=="course") stage=spotNum?3:2;
   openMode(m,"full");
 });
-$("updown").onclick=()=>{  // 창 올리기·내리기: 닫힘 → 반 → 크게 → 반
-  if(pstate==="closed"){if(!mode){mode=cur?"course":"me"; if(mode==="course") stage=2;} render(); setPanel("half"); ensurePush(); return;}
-  setPanel(pstate==="full"?"half":"full");
+$("updown").onclick=()=>{  // 창 올리기·내리기 2단계: 내리면 지도만(보던 창은 기억), 올리면 검색창 밑까지
+  if(pstate!=="closed"){setPanel("closed"); return;}
+  if(!mode){mode=cur?"course":"me"; if(mode==="course") stage=spotNum?3:2;}
+  render(); setPanel("full"); ensurePush();
 };
 
 // 손가락으로 쓸어 올리기·내리기 (창 머리는 언제나, 내용은 맨 위에서 아래로 쓸 때·반 높이에서 위로 쓸 때)
