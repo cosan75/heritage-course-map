@@ -44,16 +44,16 @@
   --display:"Gowun Batang","Noto Serif KR",serif;
   --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
   --shadow:0 2px 10px rgb(0 0 0 / .16);
-  --navh:58px; --pv:0px; --topb:64px;
+  --navh:76px; --pv:0px; --topb:64px; --navbg:#f1f2f4;  /* --navh: 아이콘 줄 58 + 아래·위 틈 */
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --paper:#15181b; --sheet:#1d2125; --ink:#e9e8e2; --muted:#a2a79f; --rule:#343a3f;
   --sea:#7fb0d6; --sea-soft:#1e2c37; --seal:#ef6a5c; --seal-soft:#3a1f1c; --food:#f08f4e; --me:#66a6ff;
-  --ok:#82d3a2; --ok-soft:#1b3326; --warn:#f0bf6c; --warn-soft:#382c16; --kh:#b3a6dc; --star:#f5b83d; color-scheme:dark}}
+  --ok:#82d3a2; --ok-soft:#1b3326; --warn:#f0bf6c; --warn-soft:#382c16; --kh:#b3a6dc; --star:#f5b83d; --navbg:#2a2f34; color-scheme:dark}}
 :root[data-theme="dark"]{
   --paper:#15181b; --sheet:#1d2125; --ink:#e9e8e2; --muted:#a2a79f; --rule:#343a3f;
   --sea:#7fb0d6; --sea-soft:#1e2c37; --seal:#ef6a5c; --seal-soft:#3a1f1c; --food:#f08f4e; --me:#66a6ff;
-  --ok:#82d3a2; --ok-soft:#1b3326; --warn:#f0bf6c; --warn-soft:#382c16; --kh:#b3a6dc; --star:#f5b83d; color-scheme:dark}
+  --ok:#82d3a2; --ok-soft:#1b3326; --warn:#f0bf6c; --warn-soft:#382c16; --kh:#b3a6dc; --star:#f5b83d; --navbg:#2a2f34; color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{height:100%;margin:0;overflow:hidden}
@@ -88,8 +88,8 @@ button{font:inherit;color:inherit}
 #qres li.empty{color:var(--muted);cursor:default;background:none;justify-content:center;font-size:13px}
 
 /* 아래: 아이콘 줄 */
-.nav{position:fixed;z-index:1200;left:0;right:0;bottom:0;height:calc(var(--navh) + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);
-  background:var(--sheet);border-top:1px solid var(--rule);display:grid;grid-template-columns:repeat(5,1fr)}
+.nav{position:fixed;z-index:1200;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));height:58px;border-radius:20px;  /* 떠 있는 둥근 아이콘 줄 */
+  background:var(--navbg);box-shadow:0 4px 16px rgb(0 0 0 / .18);display:grid;grid-template-columns:repeat(5,1fr)}
 .nav button{border:0;background:none;display:grid;place-items:center;cursor:pointer;color:var(--muted);position:relative}
 .nav button svg{width:26px;height:26px}
 .nav button[aria-current="true"]{color:var(--sea)}
@@ -114,7 +114,7 @@ body[data-p="full"] #updown svg{transform:rotate(180deg)}
 body[data-p="full"] .wxc,body[data-p="full"] .fab,body[data-p="full"] .wxp{display:none}
 
 /* 아래에서 올라오는 창 */
-.panel{position:fixed;z-index:1150;left:0;right:0;bottom:calc(var(--navh) + env(safe-area-inset-bottom,0px));height:0;background:var(--sheet);border-radius:18px 18px 0 0;
+.panel{position:fixed;z-index:1150;left:10px;right:10px;bottom:calc(var(--navh) + env(safe-area-inset-bottom,0px));height:0;background:var(--sheet);border-radius:20px;
   box-shadow:0 -4px 18px rgb(0 0 0 / .14);display:flex;flex-direction:column;transition:height .28s cubic-bezier(.2,.8,.2,1);overflow:hidden}
 .panel.drag{transition:none}
 .panel[data-s="closed"]{visibility:hidden}
@@ -316,9 +316,9 @@ dl.info dt{color:var(--muted)} dl.info dd{margin:0;min-width:0;user-select:text}
 
 /* PC: 왼쪽에 검색창·창·아이콘 줄을 한 줄기로 (지도는 오른쪽까지 전부) */
 @media (min-width:821px){
-  :root{--pw:400px}
+  :root{--pw:400px;--navh:58px}
   .top{right:auto;width:var(--pw)}
-  .nav{left:12px;right:auto;bottom:12px;width:var(--pw);border:0;border-radius:16px;box-shadow:var(--shadow);height:var(--navh);padding:0}
+  .nav{left:12px;right:auto;bottom:12px;width:var(--pw);border-radius:16px}
   .panel{left:12px;right:auto;width:var(--pw);top:calc(var(--topb) + 4px);bottom:calc(var(--navh) + 20px);height:auto!important;border-radius:16px;box-shadow:var(--shadow);transition:none}
   .panel[data-s="closed"]{display:none}
   .ph{cursor:default}.ph::before{display:none}
@@ -514,7 +514,6 @@ function visibleBounds(){const g=vis(); return L.latLngBounds(map.containerPoint
 function setVars(){
   const r=document.documentElement.style;
   r.setProperty("--pv",pv()+"px"); r.setProperty("--topb",Math.round(topB())+"px");
-  r.setProperty("--navh",(mobile()?58:58)+"px");
   const g=vis();
   L.Popup.prototype.options.autoPanPaddingTopLeft=L.point(g.l+10,g.t+10);  // 팝업이 창·검색창 밑에 숨지 않게
   L.Popup.prototype.options.autoPanPaddingBottomRight=L.point(10,innerHeight-g.b+10);
