@@ -322,7 +322,7 @@ dl.info dt{color:var(--muted)} dl.info dd{margin:0;min-width:0;user-select:text}
 .sp.done.sel{opacity:1;background:var(--seal);transform:rotate(-45deg)}
 .sp.done.sel b{display:block}
 /* '도장 받은 곳만' 켜면: 받은 곳 핀만, 다시 또렷한 인주색 + ✓ */
-.sbox .ib.only[aria-pressed="true"]{background:var(--seal);color:#fff}
+.sbox .ib.only[aria-pressed="true"]{background:var(--sea-soft);color:var(--sea)}  /* 켜졌을 때 연한 파랑 */
 body.done-only .sp.done{opacity:1;background:var(--seal);transform:rotate(-45deg)}
 body.done-only .sp.done::after{content:"✓";position:absolute;bottom:-6px;left:-6px;transform:rotate(45deg);width:16px;height:16px;border-radius:50%;background:#fff;color:var(--seal);font:900 11px/16px var(--body);text-align:center;box-shadow:0 1px 3px rgb(0 0 0 / .3)}
 .sp.sel{box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 35%,transparent),0 2px 8px rgb(0 0 0 / .4)}
