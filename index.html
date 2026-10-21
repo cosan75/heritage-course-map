@@ -31,9 +31,9 @@
 })();
 </script>
 <title>국가유산 방문코스 지도</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="vendor/leaflet.css" integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw==" crossorigin="anonymous" referrerpolicy="no-referrer">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" media="print" onload="this.media='all'"><!-- 글꼴이 늦어도 화면은 먼저 -->
 <style>
 /* 레이아웃: 여권 스탬프 수첩 — 왼쪽(모바일은 아래) 종이 패널에 코스·유산 목록, 오른쪽(모바일은 위) 지도.
    색: 여행지도 PDF의 종이·먹·바다선 파랑. 인주색(--seal)은 '찍은 스탬프' 한 곳에만 쓴다. */
@@ -176,6 +176,7 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
 .src{font-size:11px;line-height:1.6;color:var(--muted);padding:8px max(16px,env(safe-area-inset-left,0px));border-top:1px solid var(--rule)}
 .src a{color:var(--muted)}
 #map{position:relative}  /* 좁은 화면(지도 고정)으로 열었다가 넓혀도 지도 조각이 왼쪽 목록을 덮지 않게 */
+.leaflet-container img.leaflet-tile{mix-blend-mode:plus-lighter}  /* 확대 배율이 100%가 아닐 때 타일 사이 흰 줄 없애기 */
 .grab{display:none}
 .badge.plusb{color:var(--sea);border-color:var(--sea)}
 .fchk{display:inline-block;font:600 10px/1.6 var(--body);color:var(--ok);background:var(--ok-soft);border-radius:4px;padding:0 5px;margin-left:5px;vertical-align:1px}
@@ -344,7 +345,7 @@ summary{cursor:pointer;color:var(--sea);padding:2px 0}
   <div id="map"></div>
 </div>
 <button class="sheetBtn" id="sheetBtn" type="button" hidden><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg><span>목록 내리기</span></button>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" integrity="sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="vendor/leaflet.js" integrity="sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="data.js?v=20261020b"></script><!-- 자료를 바꾸면 날짜를 올린다(브라우저 저장본 대신 새 자료) -->
 <script>
 // 코스 색: 1/2구간으로 나뉜 길은 같은 계열의 진한색(1)/밝은색(2), 선 모양도 다르게
