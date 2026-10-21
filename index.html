@@ -321,6 +321,10 @@ dl.info dt{color:var(--muted)} dl.info dd{margin:0;min-width:0;user-select:text}
 .sp.done b{display:none}
 .sp.done.sel{opacity:1;background:var(--seal);transform:rotate(-45deg)}
 .sp.done.sel b{display:block}
+/* '도장 받은 곳만' 켜면: 받은 곳 핀만, 다시 또렷한 인주색 + ✓ */
+.sbox .ib.only[aria-pressed="true"]{background:var(--seal);color:#fff}
+body.done-only .sp.done{opacity:1;background:var(--seal);transform:rotate(-45deg)}
+body.done-only .sp.done::after{content:"✓";position:absolute;bottom:-6px;left:-6px;transform:rotate(45deg);width:16px;height:16px;border-radius:50%;background:#fff;color:var(--seal);font:900 11px/16px var(--body);text-align:center;box-shadow:0 1px 3px rgb(0 0 0 / .3)}
 .sp.sel{box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 35%,transparent),0 2px 8px rgb(0 0 0 / .4)}
 .fk{width:24px;height:24px;border-radius:50%;background:var(--food);color:#fff;display:grid;place-items:center;border:2px solid #fff;box-shadow:0 1px 4px rgb(0 0 0 / .35)}
 .fk svg{width:13px;height:13px}
@@ -391,6 +395,7 @@ dl.info dt{color:var(--muted)} dl.info dd{margin:0;min-width:0;user-select:text}
     <svg class="sic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
     <input id="q" type="search" placeholder="유산·지역 검색" aria-label="유산·지역 검색" autocomplete="off" enterkeyhint="search" aria-controls="qres" aria-autocomplete="list">
     <button class="ib" id="qx" type="button" aria-label="검색어 지우기" hidden><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <button class="ib only" id="doneOnly" type="button" aria-pressed="false" aria-label="도장 받은 곳만 보기" title="도장 받은 곳만 보기"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="m8.2 12.2 2.6 2.6 5-5.3"/></svg></button>
   </div>
   <ul id="qres" role="listbox" hidden></ul>
 </div>
@@ -464,7 +469,7 @@ const spotLayer=L.layerGroup().addTo(map), foodLayer=L.layerGroup().addTo(map), 
   khsLayer=L.layerGroup().addTo(map), nearestLayer=L.layerGroup().addTo(map), searchLayer=L.layerGroup().addTo(map);
 
 // ── 상태: 지금 열린 창(mode)·창 높이(pstate)·고른 길(cur)·길 창 단계(stage 1 목록 / 2 길 안 유산 / 3 장소 카드)
-let openOnly=false, mode="", pstate="closed", cur="", stage=1, spotNum="", filter="all", me=null, markers={}, nearest=null, wxFollow="me";
+let doneOnly=false, openOnly=false, mode="", pstate="closed", cur="", stage=1, spotNum="", filter="all", me=null, markers={}, nearest=null, wxFollow="me";
 let saved=""; try{saved=localStorage.getItem("hcm-course")||""}catch(e){}
 
 // 스탬프 체크: 이 브라우저에만 저장. 같은 번호(예: 83 종묘)는 왕가의 길 1·2에서 함께 체크된다
@@ -591,6 +596,7 @@ function draw(fit){
   shown.forEach(c=>{
     if(cur) L.polyline(c.spots.map(s=>[s.lat,s.lng]),{color:COLOR[c.key],weight:3,opacity:.7,dashArray:dashOf(c)}).addTo(spotLayer);
     c.spots.forEach(s=>{
+      if(doneOnly&&!stamps.has(s.num)) return;  // '도장 받은 곳만'
       if(!cur&&seen.has(s.num)) return; seen.add(s.num);  // 왕가의 길 1·2에 같이 있는 종묘 같은 곳은 핀 하나
       const m=L.marker([s.lat,s.lng],{icon:spotIcon(c,s,mode==="course"&&stage===3&&spotNum===s.num&&cur===c.key),title:s.name,riseOnHover:true,zIndexOffset:stamps.has(s.num)?-1000:0}).addTo(spotLayer);  // 받은 곳은 남은 핀 밑으로
       m.on("click",()=>openSpot(c.key,s.num));
@@ -690,6 +696,12 @@ function goBack(){
 }
 $("pX").onclick=()=>goHome();
 $("brand").onclick=()=>goHome();
+$("doneOnly").onclick=()=>{  // 도장 받은 곳만 보기 ↔ 모두 보기
+  const n=gotN();
+  if(!doneOnly&&!n){toast("아직 도장 받은 곳이 없어요"); return;}
+  doneOnly=!doneOnly; document.body.classList.toggle("done-only",doneOnly); $("doneOnly").setAttribute("aria-pressed",String(doneOnly));
+  draw(); if(doneOnly){toast(`도장 받은 ${n}곳만 보여요`); if(mobile()) setPanel("closed"); const pts=Object.values(markers).map(m=>m.getLatLng()); if(pts.length) fitTo(L.latLngBounds(pts),12);}
+};
 $("pBack").onclick=()=>goBack();
 nav.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{
   const m=b.dataset.m;
