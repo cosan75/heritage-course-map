@@ -700,7 +700,9 @@ $("doneOnly").onclick=()=>{  // 도장 받은 곳만 보기 ↔ 모두 보기
   const n=gotN();
   if(!doneOnly&&!n){toast("아직 도장 받은 곳이 없어요"); return;}
   doneOnly=!doneOnly; document.body.classList.toggle("done-only",doneOnly); $("doneOnly").setAttribute("aria-pressed",String(doneOnly));
-  draw(); if(doneOnly){toast(`도장 받은 ${n}곳만 보여요`); if(mobile()) setPanel("closed"); const pts=Object.values(markers).map(m=>m.getLatLng()); if(pts.length) fitTo(L.latLngBounds(pts),12);}
+  goHome();  // 고른 길·동선·맛집 표시를 걷고 처음 화면으로
+  fitTo(L.latLngBounds(uniqSpots.map(x=>[x.s.lat,x.s.lng])),13);  // 처음 화면처럼 전국 지도에서 (받은 곳이 어디까지 퍼졌는지 한눈에)
+  if(doneOnly) toast(`도장 받은 ${n}곳만 보여요`);
 };
 $("pBack").onclick=()=>goBack();
 nav.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{
