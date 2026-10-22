@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://gc.zgo.at; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; media-src https:; connect-src 'self' https://nominatim.openstreetmap.org https://api.met.no https://heritage-course-map.goatcounter.com; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://gc.zgo.at; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src https:; connect-src 'self' https://nominatim.openstreetmap.org https://api.met.no https://heritage-course-map.goatcounter.com; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -170,6 +170,11 @@ body[data-p="full"] .wxc,body[data-p="full"] .wxp{display:none}
 /* 맛집 줄 */
 .frow{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--rule);cursor:pointer;align-items:flex-start}
 .frow .fimg{width:72px;height:72px;border-radius:10px;object-fit:cover;flex:none;background:var(--paper);display:grid;place-items:center;color:var(--food)}
+.fwrap{position:relative;flex:none;width:72px;height:72px}
+.fwrap .fimg{width:72px;height:72px}
+.ph-add{position:absolute;right:-6px;bottom:-6px;width:28px;height:28px;border-radius:50%;border:2px solid var(--sheet);background:var(--sea);color:#fff;display:grid;place-items:center;cursor:pointer;padding:0;box-shadow:0 1px 4px rgb(0 0 0 / .25)}
+.ph-add svg{width:15px;height:15px}
+.mine{position:absolute;left:4px;top:4px;font:600 9.5px/1.5 var(--body);background:rgb(0 0 0 / .55);color:#fff;border-radius:4px;padding:0 4px}
 .frow .fimg svg{width:26px;height:26px;opacity:.75}
 .frow .ft{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .frow .ft b{font:600 15px/1.35 var(--body)}
@@ -430,7 +435,7 @@ body.done-only .sp.done::after{content:"✓";position:absolute;bottom:-6px;left:
   <button type="button" data-m="me" aria-label="내 위치" title="내 위치"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.6" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
   <button type="button" data-m="course" aria-label="지도(방문코스)" title="지도(방문코스)"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20z"/><path d="M9 4v13.5M15 6.5V20"/></svg></button>
   <button type="button" data-m="food" aria-label="맛집" title="맛집"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v8M4.5 2v5.5a2.5 2.5 0 0 0 5 0V2M7 10v12M17 22V2c-2.2 1.3-3.5 4-3.5 7.5V14H17"/></svg></button>
-  <button type="button" id="camBtn" aria-label="인증샷 찍기" title="인증샷 찍기"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h2l1.6-2h5.8l1.6 2h2A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><circle cx="12" cy="12.5" r="3.8"/></svg></button><input type="file" id="camIn" accept="image/*" capture="environment" hidden>
+  <button type="button" id="camBtn" aria-label="인증샷 찍기" title="인증샷 찍기"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h2l1.6-2h5.8l1.6 2h2A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><circle cx="12" cy="12.5" r="3.8"/></svg></button><input type="file" id="camIn" accept="image/*" capture="environment" hidden><input type="file" id="fpIn" accept="image/*" capture="environment" hidden>
   <button type="button" data-m="cert" aria-label="인증" title="인증"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9.5" r="6.5"/><path d="m9.2 9.6 2 2 3.8-4"/><path d="m8.5 15.2-1.6 6.3 5.1-2.4 5.1 2.4-1.6-6.3"/></svg><span class="cnt" id="cnt" hidden></span></button>
   <button type="button" id="updown" aria-label="창 올리기" title="창 올리기·내리기"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 6-6 6 6"/></svg></button>
 </nav>
@@ -448,7 +453,7 @@ const groupName=g=>g===3?"특별·홍보관":`방문코스 ${g}`;
 const C=window.COURSES;
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 // 링크·이미지 주소는 http(s)와 이 사이트의 stamps/ 그림만 (javascript: 같은 주소는 막음)
-const url=u=>/^(https?:\/\/|stamps\/)/i.test(String(u||""))?esc(u):"#";
+const url=u=>/^(https?:\/\/|stamps\/|blob:)/i.test(String(u||""))?esc(u):"#";  // blob: = 내가 찍은 식당 사진(이 기기 안)
 const km=m=>m<1000?`${Math.round(m)}m`:`${(m/1000).toFixed(m<10000?1:0)}km`;
 function hav(a,b,c,d){const R=6371000,t=Math.PI/180,x=Math.sin((c-a)*t/2)**2+Math.cos(a*t)*Math.cos(c*t)*Math.sin((d-b)*t/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
 const partOf=c=>(c.key.match(/-(\d)$/)||[])[1];          // "8-2" → "2"
@@ -473,6 +478,7 @@ const I={
   share:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="m8.2 10.8 7.6-4.1M8.2 13.2l7.6 4.1"/></svg>',
   tel:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 3.5h3.5l1.7 4.3-2.2 1.4a11 11 0 0 0 6.8 6.8l1.4-2.2 4.3 1.7V19a1.5 1.5 0 0 1-1.6 1.5A16.5 16.5 0 0 1 3.5 5.1 1.5 1.5 0 0 1 5 3.5z"/></svg>',
   more:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M8 9.5h8M8 14.5h5"/></svg>',
+  cam:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h2l1.6-2h5.8l1.6 2h2A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><circle cx="12" cy="12.5" r="3.8"/></svg>',
   area:'<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20z"/></svg>'
 };
 
@@ -513,7 +519,23 @@ const kakaoFrom=s=>`https://map.kakao.com/link/from/${encodeURIComponent(s.name)
 const CUI={korean:"한식",chinese:"중식",japanese:"일식",western:"양식",italian:"이탈리아",pizza:"피자",burger:"버거",chicken:"치킨",fried_chicken:"치킨",noodle:"국수",noodles:"국수",
   coffee_shop:"커피",coffee:"커피",bakery:"빵",cake:"케이크",dessert:"디저트",barbecue:"고기구이",bbq:"고기구이",seafood:"해산물",sushi:"초밥",ramen:"라멘",kimbap:"김밥",tea:"차",regional:"향토"};
 const kind=f=>({restaurant:"음식점",cafe:"카페",fast_food:"패스트푸드"}[f.kind]||"음식점")+(f.cuisine?` · ${[...new Set(f.cuisine.split(/[;,]\s*/).map(x=>CUI[x.trim()]||x.trim()))].join(", ")}`:"");
-const foodRank=f=>f.d*(f.photo?1:2);  // 사진이 있는 집을 앞으로
+const foodRank=f=>f.d*(fPhoto(f)?1:2);  // 사진이 있는 집을 앞으로
+// ── 내 식당 사진: 사진 없는 집(또는 바꾸고 싶은 집)에 직접 찍은 사진을 붙인다. 이 휴대폰 안(IndexedDB)에만 두고 아무 데도 보내지 않는다
+const myPh=new Map();  // 식당 키 → blob: 주소
+const phDB=(()=>{let db=null; const open=()=>db||(db=new Promise((ok,no)=>{try{const r=indexedDB.open("hcm",1); r.onupgradeneeded=()=>r.result.createObjectStore("foodPhoto"); r.onsuccess=()=>ok(r.result); r.onerror=()=>no(r.error);}catch(e){no(e);}}));
+  const st=(m)=>open().then(d=>d.transaction("foodPhoto",m).objectStore("foodPhoto"));
+  const go=q=>new Promise((ok,no)=>{q.onsuccess=()=>ok(q.result); q.onerror=()=>no(q.error);});
+  return {set:(k,v)=>st("readwrite").then(o=>go(o.put(v,k))), del:k=>st("readwrite").then(o=>go(o.delete(k))),
+    all:()=>st("readonly").then(o=>Promise.all([go(o.getAllKeys()),go(o.getAll())]))};})();
+phDB.all().then(([ks,vs])=>{ks.forEach((k,i)=>myPh.set(k,URL.createObjectURL(vs[i]))); if(ks.length&&(mode==="food"||mode==="me")){const t=pb.scrollTop; render(); pb.scrollTop=t;}}).catch(()=>{});
+const fPhoto=f=>myPh.get(fKey(f))||f.photo||"";
+let phKey="";
+async function savePhoto(file){
+  const im=await createImageBitmap(file), z=Math.min(1,520/Math.max(im.width,im.height)), cv=document.createElement("canvas");
+  cv.width=Math.round(im.width*z); cv.height=Math.round(im.height*z); cv.getContext("2d").drawImage(im,0,0,cv.width,cv.height);
+  const b=await new Promise(r=>cv.toBlob(r,"image/jpeg",.82)); await phDB.set(phKey,b);
+  if(myPh.has(phKey)) URL.revokeObjectURL(myPh.get(phKey)); myPh.set(phKey,URL.createObjectURL(b));
+}
 
 // ── 오늘 운영 상태 (스탬프 이용 가능 시간 기준, 공휴일은 반영 안 함)
 const toMin=t=>{const[h,m]=t.split(":").map(Number);return h*60+m};
@@ -628,7 +650,7 @@ const refreshPins=()=>{for(const k in markers){const[ck,num]=k.split("|"),x=spot
 
 // 맛집 표시: 지금 창의 맛집만 지도에
 const foodIcon=f=>L.divIcon({className:"",html:`<div class="fk${rates[fKey(f)]?" ate":""}">${I.fork}</div>`,iconSize:[24,24],iconAnchor:[12,12],popupAnchor:[0,-12]});
-const foodPopup=f=>`<b>${esc(f.name)}</b>${rates[fKey(f)]?` <span style="color:var(--star)">${"★".repeat(rates[fKey(f)])}</span>`:""}<br>${f.menu?`대표 ${esc(f.menu)}<br>`:""}${me?`내 위치에서 ${km(hav(me.lat,me.lng,f.lat,f.lng))}`:esc(f.at?`${f.at} 근처`:"")}${f.photo?`<img class="pp-img" src="${url(f.photo)}" alt="" loading="lazy" onerror="this.remove()">`:""}<br><a href="${naverOf(f)}" target="_blank" rel="noopener">네이버 지도에서 보기</a> · <a href="${kakaoTo(f)}" target="_blank" rel="noopener">길찾기</a>`;
+const foodPopup=f=>`<b>${esc(f.name)}</b>${rates[fKey(f)]?` <span style="color:var(--star)">${"★".repeat(rates[fKey(f)])}</span>`:""}<br>${f.menu?`대표 ${esc(f.menu)}<br>`:""}${me?`내 위치에서 ${km(hav(me.lat,me.lng,f.lat,f.lng))}`:esc(f.at?`${f.at} 근처`:"")}${fPhoto(f)?`<img class="pp-img" src="${url(fPhoto(f))}" alt="" loading="lazy" onerror="this.remove()">`:""}<br><a href="${naverOf(f)}" target="_blank" rel="noopener">네이버 지도에서 보기</a> · <a href="${kakaoTo(f)}" target="_blank" rel="noopener">길찾기</a>`;
 let foodMarks={};
 function showFoods(arr){
   foodLayer.clearLayers(); foodMarks={};
@@ -790,13 +812,19 @@ function bindRows(list){
 const stars=f=>{const k=fKey(f), r=rates[k]||0;
   return `<span class="stars" data-rate="${esc(k)}" role="group" aria-label="내 별점"><em>내 별점</em>${[1,2,3,4,5].map(i=>`<button type="button" data-v="${i}" class="${i<=r?"on":""}" aria-label="${i}점" aria-pressed="${i<=r}">★</button>`).join("")}</span>`;};
 const fRow=(f,i)=>`<div class="frow${rates[fKey(f)]?" ate":""}" data-fi="${i}">
-  ${f.photo?`<img class="fimg" src="${url(f.photo)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'fimg',innerHTML:I.fork}))">`:`<span class="fimg">${I.fork}</span>`}
+  <span class="fwrap">${fPhoto(f)?`<img class="fimg" src="${url(fPhoto(f))}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'fimg',innerHTML:I.fork}))">`:`<span class="fimg">${I.fork}</span>`}
+    ${myPh.has(fKey(f))?`<span class="mine">내 사진</span>`:""}<button type="button" class="ph-add" data-ph="${esc(fKey(f))}" aria-label="${myPh.has(fKey(f))?"내 사진 바꾸기·지우기":"내가 찍은 사진 넣기"}" title="${myPh.has(fKey(f))?"내 사진 바꾸기·지우기":"내가 찍은 사진 넣기"}">${I.cam}</button></span>
   <div class="ft"><b>${esc(f.name)}</b>${f.menu?`<span class="mn">${esc(f.menu)}</span>`:""}<small>${esc(kind(f))}${f.at?` · ${esc(f.at.split(" (")[0])} 근처`:""}</small>${stars(f)}</div>
   <div class="fr">${f.d!=null?`<span class="rd">${km(f.d)}</span>`:""}<a class="nv" href="${naverOf(f)}" target="_blank" rel="noopener" aria-label="네이버 지도에서 ${esc(f.name)}" title="네이버 지도">N</a></div></div>`;
 function bindFoods(list){
   pb.querySelectorAll(".frow").forEach(r=>r.onclick=e=>{
     if(e.target.closest("a,button")) return;
     const f=list[+r.dataset.fi]; setPanel(MAPV()); showOnMap([f.lat,f.lng],17); const m=foodMarks[fKey(f)]; if(m) m.openPopup();});
+  pb.querySelectorAll(".ph-add").forEach(b=>b.onclick=async e=>{
+    e.stopPropagation(); phKey=b.dataset.ph;
+    if(myPh.has(phKey)&&confirm("내가 넣은 사진을 지울까요?\n(취소를 누르면 새로 찍어 바꿀 수 있어요)")){
+      await phDB.del(phKey).catch(()=>{}); URL.revokeObjectURL(myPh.get(phKey)); myPh.delete(phKey); const t=pb.scrollTop; render(); pb.scrollTop=t; return;}
+    $("fpIn").click();});
   pb.querySelectorAll(".stars").forEach(sp=>sp.querySelectorAll("button").forEach(b=>b.onclick=e=>{
     e.stopPropagation(); const k=sp.dataset.rate, v=+b.dataset.v;
     if(rates[k]===v) delete rates[k]; else rates[k]=v; saveRates();
@@ -894,13 +922,13 @@ function mealPlan(r){
   const slots=[]; for(let d=0;d<2&&slots.length<3;d++) MEALS.forEach(([n,h,m])=>{const t=new Date(); t.setDate(t.getDate()+d); t.setHours(h,m,0,0); if(t>Date.now()&&slots.length<3) slots.push({n:(d?"내일 ":"")+n,t:+t});});
   slots.forEach(sl=>{
     let j=0; arr.forEach((a,i)=>{if(Math.abs(a-sl.t)<Math.abs(arr[j]-sl.t)) j=i;});
-    const x=r.path[j], f=(x.restaurants||[]).filter(f=>!used.has(fKey(f))).sort((a,b)=>(!b.photo-!a.photo)||(!b.menu-!a.menu)||(a.dist-b.dist))[0];
+    const x=r.path[j], f=(x.restaurants||[]).filter(f=>!used.has(fKey(f))).sort((a,b)=>(!fPhoto(b)-!fPhoto(a))||(!b.menu-!a.menu)||(a.dist-b.dist))[0];
     if(f){used.add(fKey(f)); out.push({...sl,x,f});}
   });
   return out;
 }
 const mealHTML=ms=>ms.length?`<div class="meal"><b class="meal-h">삼시세끼 맛집 <small>지금 출발하면 그 시간쯤 있을 곳 근처</small></b>${ms.map(m=>`<a class="meal-it" href="${naverOf(m.f)}" target="_blank" rel="noopener">
-    ${m.f.photo?`<img src="${url(m.f.photo)}" alt="" loading="lazy" onerror="this.remove()">`:`<span class="fimg">${I.fork}</span>`}
+    ${fPhoto(m.f)?`<img src="${url(fPhoto(m.f))}" alt="" loading="lazy" onerror="this.remove()">`:`<span class="fimg">${I.fork}</span>`}
     <span class="rt-t"><small>${esc(m.n)} ${new Date(m.t).getHours()}:${String(new Date(m.t).getMinutes()).padStart(2,"0")} · ${esc(m.x.name.split(" (")[0])} ${km(m.f.dist)}</small><b>${esc(m.f.name)}</b>${m.f.menu?`<small class="mn">${esc(m.f.menu)}</small>`:""}</span><span class="nv" aria-hidden="true">N</span></a>`).join("")}</div>`:"";
 const spotCol=x=>x._col||COLOR[((uniqSpots.find(y=>y.s.num===x.num)||{}).c||{}).key]||"var(--sea)";
 function routeBox(r,i){
@@ -1023,7 +1051,7 @@ function renderSpot(c,s){
       <button class="act" type="button" data-more aria-expanded="false">${I.more}<span>자세히</span></button>
     </div>
     <div class="more" id="more" hidden>
-      ${rest.length?`<details><summary>주변 맛집<small>${rest.length}곳</small></summary><ul class="rest" data-list="food">${rest.map((f,i)=>`<li data-i="${i}">${f.photo?`<img src="${url(f.photo)}" alt="" loading="lazy" onerror="this.remove()">`:""}<span>${esc(f.name)}${f.menu?` <small>${esc(f.menu)}</small>`:""}</span><small>${km(f.dist)}</small></li>`).join("")}</ul></details>`:""}
+      ${rest.length?`<details><summary>주변 맛집<small>${rest.length}곳</small></summary><ul class="rest" data-list="food">${rest.map((f,i)=>`<li data-i="${i}">${fPhoto(f)?`<img src="${url(fPhoto(f))}" alt="" loading="lazy" onerror="this.remove()">`:""}<span>${esc(f.name)}${f.menu?` <small>${esc(f.menu)}</small>`:""}</span><small>${km(f.dist)}</small></li>`).join("")}</ul></details>`:""}
       ${near.length?`<details><summary>주변 볼거리<small>1.5km 안 ${near.length}곳</small></summary><ul class="rest" data-list="near">${near.map((n,i)=>`<li data-i="${i}"><span>${esc(n.name)} <small>${esc(n.kind)}</small></span><small>${km(n.dist)}</small></li>`).join("")}</ul></details>`:""}
       ${ev.length?`<details><summary>지역 행사<small>${ev.length}건</small></summary><ul class="ev">${ev.map(e=>`<li><a href="${url(e.url)}" target="_blank" rel="noopener">${esc(e.title)}</a><small>${esc(e.cat)}${e.when?` · ${esc(e.when)}`:""}${e.where?` · ${esc(e.where)}`:""}</small></li>`).join("")}</ul></details>`:""}
       ${s.myh?`<details><summary>해설</summary>${s.myh.khsName&&s.myh.khsName!==s.name?`<p class="desc" style="color:var(--muted)">해설 기준: ${esc(s.myh.khsName)}</p>`:""}<p class="desc">${esc(s.myh.desc).replace(/\n/g,"<br>")}</p>
@@ -1077,6 +1105,8 @@ function shotSpot(){
   return b&&b.s;
 }
 $("camBtn").onclick=()=>$("camIn").click();
+$("fpIn").onchange=async e=>{const f=e.target.files[0]; e.target.value=""; if(!f||!phKey) return;
+  try{await savePhoto(f); gc("food-photo","식당 사진 넣기"); toast("사진을 넣었어요 (이 휴대폰에만 저장)"); const t=pb.scrollTop; render(); pb.scrollTop=t;}catch(err){toast("사진을 저장하지 못했어요");}};
 $("camIn").onchange=async e=>{
   const f=e.target.files[0]; e.target.value=""; if(!f) return;
   const m=modal(`<h3>인증샷</h3><p class="mt">만드는 중…</p>`);
