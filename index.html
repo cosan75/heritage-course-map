@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; media-src https:; connect-src 'self' https://nominatim.openstreetmap.org https://api.met.no; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://gc.zgo.at; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; media-src https:; connect-src 'self' https://nominatim.openstreetmap.org https://api.met.no https://heritage-course-map.goatcounter.com; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -265,6 +265,8 @@ a.row{text-decoration:none;color:inherit}
 .meal-it img,.meal-it .fimg{width:52px;height:52px;border-radius:8px;object-fit:cover;flex:none;display:grid;place-items:center;background:var(--rule);color:var(--food)}
 .meal-it .fimg svg{width:22px;height:22px}
 .meal-it .mn{color:var(--ink)}.meal-it .mn::before{content:"대표 ";color:var(--food);font-weight:600}
+.visits{margin:0 0 4px;font-size:12px;color:var(--sea);font-weight:600}
+.visits:empty{display:none}
 .rt-note{font-size:11.5px;color:var(--muted);margin:2px 0 0}
 .rt-pin{width:22px;height:22px;border-radius:50%;background:var(--sheet);color:var(--c);box-shadow:inset 0 0 0 2px var(--c),0 1px 3px rgb(0 0 0 / .3);font:800 11.5px/22px var(--body);text-align:center}
 .pn-t{font:600 13px/1.3 var(--body);margin:16px 0 6px}
@@ -433,6 +435,8 @@ body.done-only .sp.done::after{content:"✓";position:absolute;bottom:-6px;left:
   <button type="button" id="updown" aria-label="창 올리기" title="창 올리기·내리기"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 6-6 6 6"/></svg></button>
 </nav>
 
+<!-- 방문자 세기: GoatCounter (쿠키 없음, 개인을 알아보지 않음) -->
+<script data-goatcounter="https://heritage-course-map.goatcounter.com/count" async src="https://gc.zgo.at/count.v4.js" integrity="sha384-nRw6qfbWyJha9LhsOtSb2YJDyZdKvvCFh0fJYlkquSFjUxp9FVNugbfy8q1jdxI+" crossorigin="anonymous"></script>
 <script src="vendor/leaflet.js" integrity="sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="data.js?v=20261021b"></script><!-- 자료를 바꾸면 날짜를 올린다(브라우저 저장본 대신 새 자료) -->
 <script>
@@ -453,6 +457,10 @@ const shortTitle=c=>c.title.replace(/ [12]$/,"");
 const courseName=c=>`${shortTitle(c)}${partOf(c)?` ${partOf(c)}구간`:""}`;
 const cssv=k=>getComputedStyle(document.documentElement).getPropertyValue(k).trim();
 const $=id=>document.getElementById(id);
+// 어느 기능을 얼마나 쓰는지·공유를 몇 번 했는지 (GoatCounter 이벤트, 이름만 보냄)
+const gc=(path,title)=>{try{window.goatcounter&&window.goatcounter.count&&window.goatcounter.count({path,title:title||path,event:true});}catch(e){}};
+document.addEventListener("click",e=>{const a=e.target.closest("a[href]"); if(!a) return;
+  if(a.href.includes("map.kakao.com")) gc("out-kakao","카카오맵 길찾기"); else if(a.href.includes("map.naver.com")) gc("out-naver","네이버 지도"); else if(a.href.includes("kh.or.kr")) gc("out-notice","캠페인 공지");},true);
 
 // 아이콘 (지도 표시·목록 공통)
 const I={
@@ -685,7 +693,7 @@ function ensurePush(){if(!pushed){try{history.pushState({hcm:1},"");}catch(e){} 
 addEventListener("popstate",()=>{if(!pushed) return; pushed=false;
   if(mode==="course"&&stage>1&&pstate!=="closed"){goBack(); ensurePush();} else goHome(true);});
 function openMode(m,s){
-  if(mode!==m){mode=m; if(m==="course"&&!cur) stage=1;}
+  if(mode!==m){mode=m; if(m==="course"&&!cur) stage=1; gc("panel-"+m,TITLES[m]);}
   const wasClosed=pstate==="closed";
   render(); setPanel(s||"full"); pb.scrollTop=0; ensurePush();
   if(!mobile()&&wasClosed&&!cur&&map.getZoom()<=8) fitTo(KOREA,13);  // PC: 왼쪽 창이 열리면 우리나라를 창 오른쪽에 다시 맞춤
@@ -1041,6 +1049,7 @@ function renderSpot(c,s){
 }
 function shareSpot(s){
   const link=location.origin+location.pathname, text=`${s.name} — 국가유산 도장깨기`;
+  gc("share-spot","장소 공유");
   if(navigator.share) navigator.share({title:s.name,text,url:link}).catch(()=>{});
   else{try{navigator.clipboard.writeText(`${text} ${link}`); toast("주소를 복사했어요");}catch(e){prompt("복사하세요",link);}}
 }
@@ -1088,7 +1097,8 @@ $("camIn").onchange=async e=>{
     m.querySelector(".mt").outerHTML=`<img class="cert-img" style="aspect-ratio:auto" src="${u}" alt="인증샷">
       <div class="acts2">${navigator.canShare&&navigator.canShare({files:[file]})?`<button type="button" class="btn primary" data-sh>공유하기</button>`:""}<a class="btn" download="국가유산-인증샷.jpg" href="${u}">사진 저장</a>${near?`<button type="button" class="btn redb" data-st>여기 도장도 찍기</button>`:""}</div>
       <p class="mt">사진은 이 휴대폰 안에서만 만들어지고 어디로도 보내지지 않아요.${s?"":" 유산 가까이(1.5km 안)에서 찍거나 장소 카드를 연 채로 찍으면 이름이 들어가요."}</p>`;
-    const sh=m.querySelector("[data-sh]"); if(sh) sh.onclick=()=>navigator.share({files:[file],title:"국가유산 도장깨기"}).catch(()=>{});
+    gc("shot","인증샷 만들기");
+    const sh=m.querySelector("[data-sh]"); if(sh) sh.onclick=()=>gc("share-shot","인증샷 공유")||navigator.share({files:[file],title:"국가유산 도장깨기"}).catch(()=>{});
     const st=m.querySelector("[data-st]"); if(st) st.onclick=()=>{m.remove(); openSpot(spotCourseOf(s).key,s.num); stampNow(s.num);};
   }catch(err){m.querySelector(".mt").textContent="사진을 열지 못했어요. 다시 찍어 주세요.";}
 };
@@ -1108,7 +1118,8 @@ function celebrate(list){
 function renderCert(){
   const got=gotN();
   $("pTitle").innerHTML=`인증<small>도장 ${got} / ${allNums.length}</small>`;
-  pb.innerHTML=`<div class="cert-top"><span class="big">${got}<small>/ ${allNums.length}곳</small></span><span style="font-size:13px;color:var(--muted)">완주한 길 ${C.filter(c=>c.spots.every(s=>stamps.has(s.num))).length} / ${C.length}</span></div>
+  fetch("https://heritage-course-map.goatcounter.com/counter/TOTAL.json").then(r=>r.ok?r.json():null).then(j=>{const v=$("visits"); if(j&&v&&j.count!=="0") v.textContent=`지금까지 ${j.count}번 열렸어요 · 다녀간 사람 ${j.count_unique}명`;}).catch(()=>{});
+  pb.innerHTML=`<p class="visits" id="visits"></p><div class="cert-top"><span class="big">${got}<small>/ ${allNums.length}곳</small></span><span style="font-size:13px;color:var(--muted)">완주한 길 ${C.filter(c=>c.spots.every(s=>stamps.has(s.num))).length} / ${C.length}</span></div>
     <img class="cert-img" id="certImg" alt="지금까지 찍은 도장 수와 길별 진행을 담은 인증서">
     <div class="cert-acts one"><button class="btn primary" type="button" data-share>인증서 공유</button><a class="btn" id="certSave" download="국가유산-도장수첩.png">그림 저장</a>${standalone()?"":`<button class="btn" type="button" data-install>홈 화면에 추가</button>`}</div>
     <div class="sec"><h3>길마다 남은 곳</h3>
@@ -1123,6 +1134,7 @@ function renderCert(){
     const im=$("certImg"); if(!im) return; const u=cv.toDataURL("image/png"); im.src=u; $("certSave").href=u;
     const blob=await new Promise(r=>cv.toBlob(r,"image/png")), file=new File([blob],"국가유산-도장수첩.png",{type:"image/png"});
     pb.querySelector("[data-share]").onclick=()=>{
+      gc("share-cert","인증서 공유");
       if(navigator.canShare&&navigator.canShare({files:[file]})) navigator.share({files:[file],title:"국가유산 도장깨기",text:"국가유산 도장깨기 https://cosan75.github.io/heritage-course-map/"}).catch(()=>{});
       else $("certSave").click();};
   });
