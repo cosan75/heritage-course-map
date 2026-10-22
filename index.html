@@ -100,7 +100,7 @@ button{font:inherit;color:inherit}
 
 /* 아래: 아이콘 줄 */
 .nav{position:fixed;z-index:1200;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));height:58px;border-radius:20px;  /* 떠 있는 둥근 아이콘 줄 */
-  background:var(--navbg);box-shadow:0 4px 16px rgb(0 0 0 / .18);display:grid;grid-template-columns:repeat(5,1fr)}
+  background:var(--navbg);box-shadow:0 4px 16px rgb(0 0 0 / .18);display:grid;grid-template-columns:repeat(6,1fr)}
 .nav button{border:0;background:none;display:grid;place-items:center;cursor:pointer;color:var(--muted);position:relative}
 .nav button svg{width:26px;height:26px}
 .nav button[aria-current="true"]{color:var(--sea)}
@@ -159,7 +159,7 @@ body[data-p="full"] .wxc,body[data-p="full"] .wxp{display:none}
 .btn{border:1px solid var(--rule);background:var(--sheet);color:var(--ink);border-radius:10px;padding:8px 14px;font:500 13px/1.3 var(--body);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:38px}
 .btn:hover{border-color:var(--muted)}
 .btn.primary{background:var(--sea);border-color:var(--sea);color:#fff}
-.btn.seal{background:var(--seal);border-color:var(--seal);color:#fff}
+.btn.redb{background:var(--seal);border-color:var(--seal);color:#fff}
 .seg{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px 0 8px;position:sticky;top:0;background:var(--sheet);z-index:2}
 .seg::-webkit-scrollbar{display:none}
 .seg button{font:500 13px/1 var(--body);padding:8px 13px;border-radius:999px;border:1px solid var(--rule);background:var(--sheet);cursor:pointer;white-space:nowrap}
@@ -246,7 +246,7 @@ dl.info dt{color:var(--muted)} dl.info dd{margin:0;min-width:0;user-select:text}
 .rt-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .rt-t b{font:600 14px/1.3 var(--body)}
 .rt-t small{font-size:11.5px;color:var(--muted);line-height:1.45}
-.rt-box[open] .rt-t small{display:none}
+.rt-box[open] summary .rt-t small{display:none}
 .rt-l{list-style:none;margin:0;padding:0 0 10px}
 .rt-l li{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px dotted var(--rule);font-size:13.5px}
 .rt-l li .num{width:30px;height:22px;line-height:22px;font-size:11px}
@@ -256,6 +256,15 @@ dl.info dt{color:var(--muted)} dl.info dd{margin:0;min-width:0;user-select:text}
 .rt-geo{display:flex;align-items:center;gap:10px;background:var(--sea-soft);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:12.5px}
 .rt-geo span{flex:1}
 .rt-geo .btn{min-height:34px;padding:6px 10px;white-space:nowrap}
+a.row{text-decoration:none;color:inherit}
+.trip-go{display:flex;align-items:center;gap:10px;width:100%;border:1px solid var(--sea);background:var(--sea-soft);border-radius:12px;padding:11px 12px;margin:2px 0 10px;text-align:left;cursor:pointer;color:var(--ink)}
+.rt-box .rd{display:flex;flex-direction:column;align-items:flex-end;gap:2px}.rt-box .rd small{font-weight:500;color:var(--muted);font-size:11px}
+.meal{border-top:1px dotted var(--rule);padding:8px 0 6px;display:flex;flex-direction:column;gap:6px}
+.meal-h{font:600 13px/1.3 var(--body)}.meal-h small{font-weight:500;color:var(--muted);font-size:11px;margin-left:4px}
+.meal-it{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);background:var(--paper);border-radius:10px;padding:6px 8px}
+.meal-it img,.meal-it .fimg{width:52px;height:52px;border-radius:8px;object-fit:cover;flex:none;display:grid;place-items:center;background:var(--rule);color:var(--food)}
+.meal-it .fimg svg{width:22px;height:22px}
+.meal-it .mn{color:var(--ink)}.meal-it .mn::before{content:"대표 ";color:var(--food);font-weight:600}
 .rt-note{font-size:11.5px;color:var(--muted);margin:2px 0 0}
 .rt-pin{width:22px;height:22px;border-radius:50%;background:var(--sheet);color:var(--c);box-shadow:inset 0 0 0 2px var(--c),0 1px 3px rgb(0 0 0 / .3);font:800 11.5px/22px var(--body);text-align:center}
 .pn-t{font:600 13px/1.3 var(--body);margin:16px 0 6px}
@@ -419,6 +428,7 @@ body.done-only .sp.done::after{content:"✓";position:absolute;bottom:-6px;left:
   <button type="button" data-m="me" aria-label="내 위치" title="내 위치"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.6" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
   <button type="button" data-m="course" aria-label="지도(방문코스)" title="지도(방문코스)"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20z"/><path d="M9 4v13.5M15 6.5V20"/></svg></button>
   <button type="button" data-m="food" aria-label="맛집" title="맛집"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v8M4.5 2v5.5a2.5 2.5 0 0 0 5 0V2M7 10v12M17 22V2c-2.2 1.3-3.5 4-3.5 7.5V14H17"/></svg></button>
+  <button type="button" id="camBtn" aria-label="인증샷 찍기" title="인증샷 찍기"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h2l1.6-2h5.8l1.6 2h2A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><circle cx="12" cy="12.5" r="3.8"/></svg></button><input type="file" id="camIn" accept="image/*" capture="environment" hidden>
   <button type="button" data-m="cert" aria-label="인증" title="인증"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9.5" r="6.5"/><path d="m9.2 9.6 2 2 3.8-4"/><path d="m8.5 15.2-1.6 6.3 5.1-2.4 5.1 2.4-1.6-6.3"/></svg><span class="cnt" id="cnt" hidden></span></button>
   <button type="button" id="updown" aria-label="창 올리기" title="창 올리기·내리기"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 6-6 6 6"/></svg></button>
 </nav>
@@ -576,6 +586,7 @@ function setVars(){
 }
 // 창 높이: closed(지도만) · half(지도와 반씩) · full(검색창 밑까지)
 function setPanel(s){
+  if(pstate==="closed"&&s!=="closed") lastView=visibleBounds();
   pstate=s; panel.dataset.s=s; document.body.dataset.p=s;
   if(mobile()) panel.style.height=panelH(s)+"px"; else panel.style.height="";
   setVars();
@@ -592,7 +603,7 @@ function syncNav(){
 const spotIcon=(c,s,sel)=>L.divIcon({className:"",html:`<div class="sp${c.group===2?" sq":""}${stamps.has(s.num)?" done":""}${sel?" sel":""}" style="--c:${COLOR[c.key]}">${I.roof}${cur?`<b>${esc(s.num)}</b>`:""}</div>`,iconSize:[32,32],iconAnchor:[16,30],popupAnchor:[0,-28]});
 function draw(fit){
   spotLayer.clearLayers(); markers={};
-  const shown=cur?C.filter(c=>c.key===cur):C, pts=[], seen=new Set();
+  const shown=cur?C.filter(c=>c.key===cur):C.filter(c=>filter==="all"||String(c.group)===filter), pts=[], seen=new Set();  // 길 고르기의 묶음(방문코스 1·2·특별)도 지도에
   shown.forEach(c=>{
     if(cur) L.polyline(c.spots.map(s=>[s.lat,s.lng]),{color:COLOR[c.key],weight:3,opacity:.7,dashArray:dashOf(c)}).addTo(spotLayer);
     c.spots.forEach(s=>{
@@ -603,7 +614,7 @@ function draw(fit){
       markers[`${c.key}|${s.num}`]=m; pts.push([s.lat,s.lng]);
     });
   });
-  if(fit&&pts.length) fitTo(cur?L.latLngBounds(pts):KOREA,13);  // 전체 화면은 늘 우리나라(제주~강원)가 꽉 차게
+  if(fit&&pts.length) fitTo(cur||filter!=="all"?L.latLngBounds(pts):KOREA,13);  // 전체 화면은 늘 우리나라(제주~강원)가 꽉 차게
 }
 const refreshPins=()=>{for(const k in markers){const[ck,num]=k.split("|"),x=spotOf(ck,num); markers[k].setIcon(spotIcon(x.c,x.s,mode==="course"&&stage===3&&spotNum===num&&cur===ck)).setZIndexOffset(stamps.has(num)?-1000:0);}};
 
@@ -668,7 +679,7 @@ function findNearest(pt){
 }
 
 // ── 창 열기·닫기
-const TITLES={me:"내 위치",food:"맛집",course:"방문코스",cert:"인증"};
+const TITLES={me:"내 위치",food:"맛집",course:"방문코스",cert:"인증",trip:"이 화면 동선",notice:"공지·안내"};
 let pushed=false;  // 휴대폰 '뒤로' 단추: 앱을 나가지 않고 창을 닫거나 한 단계 뒤로
 function ensurePush(){if(!pushed){try{history.pushState({hcm:1},"");}catch(e){} pushed=true;}}
 addEventListener("popstate",()=>{if(!pushed) return; pushed=false;
@@ -682,13 +693,13 @@ function openMode(m,s){
 function render(){
   $("pTitle").innerHTML=esc(TITLES[mode]||"");
   $("pBack").hidden=!(mode==="course"&&stage>1);
-  if(mode==="me") renderMe(); else if(mode==="food") renderFood(); else if(mode==="course") renderCourse(); else if(mode==="cert") renderCert();
+  if(mode==="me") renderMe(); else if(mode==="food") renderFood(); else if(mode==="course") renderCourse(); else if(mode==="cert") renderCert(); else if(mode==="trip") renderTrip(); else if(mode==="notice") renderNotice();
   syncNav();
 }
 function goHome(fromPop){  // X: 창을 닫고 처음 화면(전국 방문코스)으로
   if(!fromPop&&pushed){pushed=false; try{history.back();}catch(e){}}
   mode=""; stage=1; spotNum=""; searchLayer.clearLayers(); foodLayer.clearLayers(); routeLayer.clearLayers();
-  setPanel("closed"); cur=""; draw(true);  // 처음 화면: 전국 방문코스 한눈에
+  setPanel("closed"); cur=""; filter="all"; draw(true);  // 처음 화면: 전국 방문코스 한눈에
   wxFollow="me"; wxUpdate();
 }
 function goBack(){
@@ -698,7 +709,7 @@ function goBack(){
   pb.scrollTop=0;
 }
 $("pX").onclick=()=>goHome();
-$("brand").onclick=()=>goHome();
+$("brand").onclick=()=>openMode("notice","full");
 $("doneOnly").onclick=()=>{  // 도장 받은 곳만 보기 ↔ 모두 보기
   const n=gotN();
   if(!doneOnly&&!n){toast("아직 도장 받은 곳이 없어요"); return;}
@@ -772,7 +783,7 @@ const stars=f=>{const k=fKey(f), r=rates[k]||0;
   return `<span class="stars" data-rate="${esc(k)}" role="group" aria-label="내 별점"><em>내 별점</em>${[1,2,3,4,5].map(i=>`<button type="button" data-v="${i}" class="${i<=r?"on":""}" aria-label="${i}점" aria-pressed="${i<=r}">★</button>`).join("")}</span>`;};
 const fRow=(f,i)=>`<div class="frow${rates[fKey(f)]?" ate":""}" data-fi="${i}">
   ${f.photo?`<img class="fimg" src="${url(f.photo)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'fimg',innerHTML:I.fork}))">`:`<span class="fimg">${I.fork}</span>`}
-  <div class="ft"><b>${esc(f.name)}</b>${f.menu?`<span class="mn">${esc(f.menu)}</span>`:""}<small>${esc(kind(f))}${f.at?` · ${esc(f.at)} 근처`:""}</small>${stars(f)}</div>
+  <div class="ft"><b>${esc(f.name)}</b>${f.menu?`<span class="mn">${esc(f.menu)}</span>`:""}<small>${esc(kind(f))}${f.at?` · ${esc(f.at.split(" (")[0])} 근처`:""}</small>${stars(f)}</div>
   <div class="fr">${f.d!=null?`<span class="rd">${km(f.d)}</span>`:""}<a class="nv" href="${naverOf(f)}" target="_blank" rel="noopener" aria-label="네이버 지도에서 ${esc(f.name)}" title="네이버 지도">N</a></div></div>`;
 function bindFoods(list){
   pb.querySelectorAll(".frow").forEach(r=>r.onclick=e=>{
@@ -785,17 +796,16 @@ function bindFoods(list){
 }
 let foodTab="near";
 function renderFood(){
-  const c=cur&&C.find(x=>x.key===cur);
-  const base=me&&!c?{lat:me.lat,lng:me.lng,name:"내 위치"}:c?{...L.latLngBounds(c.spots.map(s=>[s.lat,s.lng])).getCenter(),name:courseName(c)}:{...visibleBounds().getCenter(),name:"지도 가운데"};
+  const sp=cur&&spotNum&&(spotOf(cur,spotNum)||{}).s, v=(lastView||visibleBounds()).getCenter();
+  const base=sp?{lat:sp.lat,lng:sp.lng,name:sp.name.split(" (")[0]}:me?{lat:me.lat,lng:me.lng,name:"내 위치"}:{lat:v.lat,lng:v.lng,name:"지도 가운데"};
   let list;
-  if(foodTab==="ate") list=FOODS.filter(f=>rates[fKey(f)]).map(f=>({...f,d:me?hav(me.lat,me.lng,f.lat,f.lng):null})).sort((a,b)=>rates[fKey(b)]-rates[fKey(a)]);
-  else if(c){const m=new Map(); c.spots.forEach(s=>(s.restaurants||[]).forEach(f=>{if(!m.has(fKey(f))) m.set(fKey(f),{...f,at:s.name,d:me?hav(me.lat,me.lng,f.lat,f.lng):f.dist});})); list=[...m.values()].sort((a,b)=>foodRank(a)-foodRank(b));}
+  if(foodTab==="ate") list=FOODS.filter(f=>rates[fKey(f)]).map(f=>({...f,d:hav(base.lat,base.lng,f.lat,f.lng)})).sort((a,b)=>rates[fKey(b)]-rates[fKey(a)]);
   else list=nearFoods(base,25);
   $("pTitle").innerHTML=`맛집<small>${foodTab==="ate"?"먹어 본 곳":esc(base.name)+" 주변"}</small>`;
   const nAte=FOODS.filter(f=>rates[fKey(f)]).length;
-  pb.innerHTML=`<div class="seg"><button type="button" data-t="near" class="${foodTab==="near"?"on":""}">${c?esc(courseName(c)):"가까운 곳"}</button><button type="button" data-t="ate" class="${foodTab==="ate"?"on":""}">★ 먹어 본 곳 ${nAte}</button></div>
+  pb.innerHTML=`<p class="rt-note" style="margin:0 0 6px">기준: <b>${esc(base.name)}</b>${sp?" (보던 장소 카드)":me?"":" (내 위치를 켜면 내 위치 기준)"} — 거리는 여기서 잰 직선거리예요.</p><div class="seg"><button type="button" data-t="near" class="${foodTab==="near"?"on":""}">가까운 곳</button><button type="button" data-t="ate" class="${foodTab==="ate"?"on":""}">★ 먹어 본 곳 ${nAte}</button></div>
     ${list.map(fRow).join("")||`<div class="empty">${foodTab==="ate"?"먹어 본 곳에 별을 주면 여기에 모여요":"맛집 자료가 없어요"}</div>`}
-    <div class="sec"><a class="btn" style="width:100%;margin-top:12px" href="https://map.naver.com/p/search/${encodeURIComponent((base.name==="내 위치"||base.name==="지도 가운데"?"":base.name+" ")+"맛집")}" target="_blank" rel="noopener">네이버 지도에서 맛집 더 찾기</a></div>
+    <div class="sec"><a class="btn" style="width:100%;margin-top:12px" href="${sp?naverFood(sp):`https://map.naver.com/p/search/${encodeURIComponent("맛집")}`}" target="_blank" rel="noopener">네이버 지도에서 맛집 더 찾기</a></div>
     <p class="src">맛집 자료: 한국관광공사 TourAPI</p>`;
   pb.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{foodTab=b.dataset.t; render(); pb.scrollTop=0;});
   bindFoods(list); showFoods(list);
@@ -815,11 +825,8 @@ function renderCourse(){
   pb.innerHTML=`<div class="cinfo"><div class="bar" aria-hidden="true"><i style="width:${Math.round(100*done(c)/c.spots.length)}%"></i></div>
     ${c.theme?`<div class="meta">${esc(c.theme)}</div>`:""}</div>
     ${rts.length?`<div class="sec"><h3>추천 동선 <small style="font-weight:500">${me?"내 위치에서 출발, 가장 짧은 순서":"가장 짧은 순서"}</small></h3>
-      ${me?"":`<div class="rt-geo"><span>내 위치를 허용하면 지금 있는 곳에서 출발하는 동선을 짜 드려요.</span><button class="btn primary" type="button" data-geo>내 위치 켜기</button></div>`}${rts.map((r,i)=>`<details class="rt-box">
-      <summary><span class="rt-n">${i+1}</span><span class="rt-t"><b>${esc(r.label)}</b><small>${r.from?"내 위치 → ":""}${r.path.map(x=>esc(x.name.split(" (")[0])).join(" → ")}</small></span><span class="rd">약 ${km(r.len)}</span></summary>
-      <ol class="rt-l">${r.path.map((x,j)=>`<li><span class="num${c.group===2?" sq":""}" style="--c:${COLOR[c.key]}">${esc(x.num)}</span><span>${esc(x.name.split(" (")[0])}</span>${(()=>{const a=j?r.path[j-1]:r.from; return a?`<a href="${kakaoLeg(a,x)}" target="_blank" rel="noopener">${km(hav(a.lat,a.lng,x.lat,x.lng))} 길찾기</a>`:"<small>출발</small>";})()}</li>`).join("")}</ol>
-      <button class="btn" type="button" data-route="${i}" style="width:100%;margin:0 0 12px">지도에 동선 그리기</button></details>`).join("")}
-      <p class="rt-note">직선거리로 순서를 정했어요. 실제 길 거리·시간은 구간마다 카카오맵 길찾기로 확인하세요.</p></div>`:""}
+      ${me?"":`<div class="rt-geo"><span>내 위치를 허용하면 지금 있는 곳에서 출발하는 동선을 짜 드려요.</span><button class="btn primary" type="button" data-geo>내 위치 켜기</button></div>`}${rts.map(routeBox).join("")}
+      <p class="rt-note">직선거리로 순서를 정하고, 시간은 차로 이동(직선거리의 1.4배, 시속 60km)·한 곳에 1시간으로 어림했어요. 실제 길은 구간마다 카카오맵 길찾기로 확인하세요.</p></div>`:""}
     <div class="sec"><h3>${me?"내 위치에서 가까운 순":"유산 목록"}</h3><div class="seg"><button type="button" data-open="0" class="${openOnly?"":"on"}">모두 ${all.length}</button><button type="button" data-open="1" class="${openOnly?"on":""}">지금 갈 수 있는 곳 ${all.length-shut.length}</button></div></div>`+
     (openOnly&&shut.length?`<p class="rt-note" style="margin:0 0 4px">오늘 휴무이거나 운영 시간이 아닌 ${shut.length}곳을 뺐어요. (공휴일·설·추석은 반영하지 않아요)</p>`:"")+
     spots.map(s=>`<button class="row" type="button" data-n="${esc(s.num)}"><span class="num${c.group===2?" sq":""}${stamps.has(s.num)?" done":""}" style="--c:${COLOR[c.key]}">${esc(s.num)}</span>
@@ -827,21 +834,22 @@ function renderCourse(){
     (c.foods&&c.foods.length?`<div class="sec"><h3>지역 먹거리</h3><div class="foods">${c.foods.map(f=>`<span title="${esc(f.desc)}">${esc(f.name)}</span>`).join("")}</div></div>`:"");
   pb.querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>openSpot(c.key,b.dataset.n));
   pb.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{openOnly=b.dataset.open==="1"; const k=pb.scrollTop; render(); pb.scrollTop=k;});
-  pb.querySelectorAll("[data-route]").forEach(b=>b.onclick=()=>drawRoute(c,rts[+b.dataset.route]));
+  pb.querySelectorAll("[data-route]").forEach(b=>b.onclick=()=>drawRoute(COLOR[c.key],rts[+b.dataset.route]));
   const gb=pb.querySelector("[data-geo]"); if(gb) gb.onclick=()=>{gb.textContent="위치 찾는 중…"; startGeo();};
 }
 // 추천 동선: 길의 유산을 한 번씩 들르는 가장 짧은 순서(직선거리, 12곳 이하라 전부 따져 봄)
 // 내 위치가 있으면 내 위치에서 출발: ① 전체 유산 ② 아직 도장 안 받은 곳만(받은 곳이 있을 때) 또는 '가까운 곳부터 차례로'
 // 내 위치가 없으면 ① 가장 짧은 순서 ② 그 반대쪽 끝에서 시작
-function shortest(pts,from){  // from: 고정 출발점(없으면 어디서 시작해도 됨)
+function shortest(pts,from,back){  // from: 고정 출발점(없으면 어디서 시작해도 됨), back: 끝나고 from으로 돌아오기
   const n=pts.length, D=pts.map(a=>pts.map(b=>hav(a.lat,a.lng,b.lat,b.lng))), full=(1<<n)-1;
   const dp=Array.from({length:1<<n},()=>new Float64Array(n).fill(Infinity)), par=Array.from({length:1<<n},()=>new Int8Array(n).fill(-1));
   for(let k=0;k<n;k++) dp[1<<k][k]=from?hav(from.lat,from.lng,pts[k].lat,pts[k].lng):0;
   for(let m=1;m<=full;m++) for(let j=0;j<n;j++){const v=dp[m][j]; if(v===Infinity) continue;
     for(let k=0;k<n;k++) if(!(m&1<<k)){const w=v+D[j][k], mm=m|1<<k; if(w<dp[mm][k]){dp[mm][k]=w; par[mm][k]=j;}}}
-  let e=0; for(let j=1;j<n;j++) if(dp[full][j]<dp[full][e]) e=j;
+  const endCost=j=>dp[full][j]+(back&&from?hav(pts[j].lat,pts[j].lng,from.lat,from.lng):0);
+  let e=0; for(let j=1;j<n;j++) if(endCost(j)<endCost(e)) e=j;
   const path=[]; for(let m=full,j=e;j>=0;){path.unshift(pts[j]); const pj=par[m][j]; m&=~(1<<j); j=pj;}
-  return {len:dp[full][e],path,from:from||null};
+  return {len:endCost(e),path,from:from||null,back:!!(back&&from)};
 }
 function nearestFirst(pts,from){  // 가까운 곳부터 차례로(매번 지금 자리에서 가장 가까운 곳)
   const left=[...pts], path=[]; let at=from, len=0;
@@ -863,26 +871,110 @@ function routes(c){
   const a=shortest(c.spots), end=a.path[a.path.length-1];
   return [{...a,label:"가장 짧은 순서"},{...a,path:[...a.path].reverse(),label:`${end.name.split(" (")[0]}에서 시작(반대 방향)`}];
 }
+// 동선 시간 어림: 직선거리×1.4를 시속 60km로, 한 곳에서 1시간 머문다고 보고
+const DRIVE=m=>m*1.4/1000;  // 분
+const hm=min=>{min=Math.round(min); return min<60?`${min}분`:`${Math.floor(min/60)}시간${min%60?` ${min%60}분`:""}`;};
+function timeline(r){
+  const t=[]; let at=r.from, now=Date.now();
+  r.path.forEach(x=>{if(at) now+=DRIVE(hav(at.lat,at.lng,x.lat,x.lng))*60e3; t.push(now); now+=60*60e3; at=x;});
+  if(r.back) now+=DRIVE(hav(at.lat,at.lng,r.from.lat,r.from.lng))*60e3;
+  return {arr:t,end:now};
+}
+// 삼시세끼: 지금부터 다음 세 끼(아침 8시·점심 12시 30분·저녁 6시 30분)를 동선에서 그 시간에 있을 곳 근처 맛집으로
+function mealPlan(r){
+  const {arr}=timeline(r), out=[], used=new Set(), MEALS=[["아침",8,0],["점심",12,30],["저녁",18,30]];
+  const slots=[]; for(let d=0;d<2&&slots.length<3;d++) MEALS.forEach(([n,h,m])=>{const t=new Date(); t.setDate(t.getDate()+d); t.setHours(h,m,0,0); if(t>Date.now()&&slots.length<3) slots.push({n:(d?"내일 ":"")+n,t:+t});});
+  slots.forEach(sl=>{
+    let j=0; arr.forEach((a,i)=>{if(Math.abs(a-sl.t)<Math.abs(arr[j]-sl.t)) j=i;});
+    const x=r.path[j], f=(x.restaurants||[]).filter(f=>!used.has(fKey(f))).sort((a,b)=>(!b.photo-!a.photo)||(!b.menu-!a.menu)||(a.dist-b.dist))[0];
+    if(f){used.add(fKey(f)); out.push({...sl,x,f});}
+  });
+  return out;
+}
+const mealHTML=ms=>ms.length?`<div class="meal"><b class="meal-h">삼시세끼 맛집 <small>지금 출발하면 그 시간쯤 있을 곳 근처</small></b>${ms.map(m=>`<a class="meal-it" href="${naverOf(m.f)}" target="_blank" rel="noopener">
+    ${m.f.photo?`<img src="${url(m.f.photo)}" alt="" loading="lazy" onerror="this.remove()">`:`<span class="fimg">${I.fork}</span>`}
+    <span class="rt-t"><small>${esc(m.n)} ${new Date(m.t).getHours()}:${String(new Date(m.t).getMinutes()).padStart(2,"0")} · ${esc(m.x.name.split(" (")[0])} ${km(m.f.dist)}</small><b>${esc(m.f.name)}</b>${m.f.menu?`<small class="mn">${esc(m.f.menu)}</small>`:""}</span><span class="nv" aria-hidden="true">N</span></a>`).join("")}</div>`:"";
+const spotCol=x=>x._col||COLOR[((uniqSpots.find(y=>y.s.num===x.num)||{}).c||{}).key]||"var(--sea)";
+function routeBox(r,i){
+  const last=r.path[r.path.length-1], T=timeline(r);
+  return `<details class="rt-box">
+      <summary><span class="rt-n">${i+1}</span><span class="rt-t"><b>${esc(r.label)}</b><small>${r.from?"내 위치 → ":""}${r.path.map(x=>esc(x.name.split(" (")[0])).join(" → ")}${r.back?" → 내 위치":""}</small></span><span class="rd">약 ${km(r.len)}<small>${hm((T.end-Date.now())/60e3)}</small></span></summary>
+      <ol class="rt-l">${r.path.map((x,j)=>`<li><span class="num" style="--c:${spotCol(x)}">${esc(x.num)}</span><span>${esc(x.name.split(" (")[0])}</span>${(()=>{const a=j?r.path[j-1]:r.from; return a?`<a href="${kakaoLeg(a,x)}" target="_blank" rel="noopener">${km(hav(a.lat,a.lng,x.lat,x.lng))} 길찾기</a>`:"<small>출발</small>";})()}</li>`).join("")}
+        ${r.back?`<li><span class="num" style="--c:var(--me)">⌂</span><span>내 위치로 돌아오기</span><a href="${kakaoLeg(last,r.from)}" target="_blank" rel="noopener">${km(hav(last.lat,last.lng,r.from.lat,r.from.lng))} 길찾기</a></li>`:""}</ol>
+      ${mealHTML(mealPlan(r))}
+      <button class="btn" type="button" data-route="${i}" style="width:100%;margin:0 0 12px">지도에 동선 그리기</button></details>`;
+}
 const kakaoLeg=(a,b)=>`https://map.kakao.com/link/from/${encodeURIComponent(a.name)},${a.lat},${a.lng}/to/${encodeURIComponent(b.name)},${b.lat},${b.lng}`;
 const routeLayer=L.layerGroup().addTo(map);
-function drawRoute(c,r){  // 동선을 지도에 굵은 선과 들르는 차례 번호로
+function drawRoute(col,r){  // 동선을 지도에 굵은 선과 들르는 차례 번호로
   routeLayer.clearLayers();
-  const ll=(r.from?[r.from,...r.path]:r.path).map(x=>[x.lat,x.lng]);
+  const ll=(r.from?[r.from,...r.path,...(r.back?[r.from]:[])]:r.path).map(x=>[x.lat,x.lng]);
   L.polyline(ll,{color:"#fff",weight:9,opacity:.9,interactive:false}).addTo(routeLayer);
-  L.polyline(ll,{color:COLOR[c.key],weight:5,opacity:1,interactive:false}).addTo(routeLayer);
-  r.path.forEach((x,i)=>L.marker([x.lat,x.lng],{icon:L.divIcon({className:"",html:`<div class="rt-pin" style="--c:${COLOR[c.key]}">${i+1}</div>`,iconSize:[22,22],iconAnchor:[11,-4]}),interactive:false,zIndexOffset:900}).addTo(routeLayer));
+  L.polyline(ll,{color:col,weight:5,opacity:1,interactive:false}).addTo(routeLayer);
+  r.path.forEach((x,i)=>L.marker([x.lat,x.lng],{icon:L.divIcon({className:"",html:`<div class="rt-pin" style="--c:${col}">${i+1}</div>`,iconSize:[22,22],iconAnchor:[11,-4]}),interactive:false,zIndexOffset:900}).addTo(routeLayer));
   setPanel(MAPV()); fitTo(L.latLngBounds(ll),13);
 }
+// ── 이 화면 동선: 창을 열기 직전 지도에 보이던 방문지(도장 안 받은 곳 우선)를 내 위치에서 출발해 다시 내 위치로
+let lastView=null;
+function tripSpots(){
+  const b=lastView||map.getBounds();
+  const all=uniqSpots.map(x=>x.s).filter(s=>b.contains([s.lat,s.lng])&&(cur?C.find(c=>c.key===cur).spots.includes(s):filter==="all"||String(spotCourseOf(s).group)===filter));
+  const left=all.filter(s=>!stamps.has(s.num));
+  return {all:mergeSame(all),left:mergeSame(left).length,use:mergeSame(left.length>1?left:all)};
+}
+// 두 길에 함께 있는 같은 곳(예: 공주 마곡사 22·31)은 한 번만 들르게 — 100m 안이면 한 곳으로
+function mergeSame(list){
+  const out=[];
+  list.forEach(s=>{const o=out.find(x=>hav(x.lat,x.lng,s.lat,s.lng)<100); if(o){if(!o.num.split("·").includes(s.num)) o.num+="·"+s.num;} else out.push({...s,_col:COLOR[spotCourseOf(s).key]});});
+  return out;
+}
+const spotCourseOf=s=>(uniqSpots.find(y=>y.s===s)||{}).c||{};
+let tripCache=null;
+function renderTrip(){
+  const t=tripSpots(), base=me?{name:"내 위치",lat:me.lat,lng:me.lng}:null;
+  let pts=t.use, cut=0;
+  const ref=base||(lastView||map.getBounds()).getCenter();
+  if(pts.length>12){cut=pts.length; pts=[...pts].sort((a,b)=>hav(ref.lat,ref.lng,a.lat,a.lng)-hav(ref.lat,ref.lng,b.lat,b.lng)).slice(0,12);}
+  $("pTitle").innerHTML=`이 화면 동선<small>${pts.length}곳</small>`;
+  if(pts.length<2){pb.innerHTML=`<div class="empty">${I.area}<span>지도를 움직여 방문지 핀이 2곳 넘게 보이게 한 뒤 다시 눌러 주세요.</span></div>`; return;}
+  const a={...shortest(pts,base,true),label:me?"내 위치에서 출발해 다시 내 위치로":"가장 짧은 순서"};
+  const rs=[a]; if(base){const r=nearestFirst(pts,base); r.back=true; r.len+=hav(r.path[r.path.length-1].lat,r.path[r.path.length-1].lng,base.lat,base.lng); if(!sameOrder(r,a)) rs.push({...r,label:"가까운 곳부터 차례로 돌고 돌아오기"});}
+  tripCache=rs;
+  pb.innerHTML=(me?"":`<div class="rt-geo"><span>내 위치를 허용하면 지금 있는 곳에서 출발해 다시 돌아오는 동선을 짜 드려요.</span><button class="btn primary" type="button" data-geo>내 위치 켜기</button></div>`)+
+    `<p class="rt-note" style="margin:4px 0 10px">${t.left<t.all.length&&t.left>1?`지도에 보이던 ${t.all.length}곳 중 도장 안 받은 ${t.left}곳`:`지도에 보이던 ${t.all.length}곳`}${cut?` 중 ${me?"내 위치":"가운데"}에서 가까운 12곳`:""}으로 짰어요. 지도를 옮기거나 확대한 뒤 다시 열면 그 화면 기준으로 바뀌어요.</p>`+
+    rs.map(routeBox).join("")+`<p class="rt-note">직선거리로 순서를 정하고, 시간은 차로 이동(직선거리의 1.4배, 시속 60km)·한 곳에 1시간으로 어림했어요. 실제 길은 구간마다 카카오맵 길찾기로 확인하세요.</p>`;
+  const bx=pb.querySelector(".rt-box"); if(bx) bx.open=true;
+  pb.querySelectorAll("[data-route]").forEach(b=>b.onclick=()=>drawRoute(cssv("--sea"),rs[+b.dataset.route]));
+  const gb=pb.querySelector("[data-geo]"); if(gb) gb.onclick=()=>{gb.textContent="위치 찾는 중…"; startGeo();};
+}
+
+// ── 제목(캐릭터)을 누르면: 캠페인 공지·여권 신청 같은 바뀌는 소식으로 가는 길
+const NOTICES=[
+  ["공지사항 (새 소식은 여기)","https://www.kh.or.kr/visit/kor/bbsctt/list.do?key=2407110057","국가유산 방문 캠페인 누리집 공지 목록"],
+  ["방문자 여권 신청 방법","https://www.kh.or.kr/visit/kor/bbsctt/view.do?key=2407110057&bbscttSn=2412130002","온라인 신청 · 택배/홍보관 수령"],
+  ["여권 투어 바뀐 점","https://www.kh.or.kr/visit/kor/bbsctt/view.do?key=2407110057&bbscttSn=2609010001","가족여권 · 기념품 · 오프라인 수령처"],
+  ["방문코스2 스탬프 위치","https://www.kh.or.kr/visit/kor/bbsctt/view.do?key=2407110057&bbscttSn=2609180015","거점별 스탬프 상세 위치"],
+  ["국가유산 방문 캠페인 누리집","https://www.kh.or.kr/visit","코스 · 이벤트 · 홍보관"]];
+function renderNotice(){
+  $("pTitle").innerHTML="공지·안내<small>국가유산 방문 캠페인</small>";
+  pb.innerHTML=NOTICES.map(([t,u,d])=>`<a class="row" href="${url(u)}" target="_blank" rel="noopener"><span class="ri" style="background:var(--sea)">${I.more}</span><span class="rt"><b>${esc(t)}</b><small>${esc(d)}</small></span><span aria-hidden="true">↗</span></a>`).join("")+
+    `<p class="rt-note" style="margin-top:10px">공지는 캠페인 누리집에서 바로 열려요(이 지도는 내용을 바꾸지 않아요).</p><button class="btn" type="button" data-home style="width:100%;margin-top:10px">처음 지도 화면으로</button>`;
+  pb.querySelector("[data-home]").onclick=()=>goHome();
+}
+
 function renderPicker(){
   $("pTitle").innerHTML=`길 고르기<small>내 도장 ${gotN()} / ${allNums.length}</small>`;
   const row=c=>{const d=done(c),n=c.spots.length,full=d===n;
     return `<button type="button" class="pk-it${saved===c.key?" on":""}" data-k="${c.key}"><span class="pk-d${c.group===2?" sq":""}" style="background:${COLOR[c.key]}"></span>
       <span class="pk-n"><b>${esc(courseName(c))}</b><small>${esc([c.theme,`${n}곳`].filter(Boolean).join(" · "))}</small>${d?`<span class="bar"><i style="width:${Math.round(100*d/n)}%"></i></span>`:""}</span>
       ${full?`<span class="pk-done">완주</span>`:`<span class="pk-c">${d}/${n}</span>`}</button>`;};
-  pb.innerHTML=`<div class="seg">${[["all","전체"],["1","방문코스 1"],["2","방문코스 2"],["3","특별·홍보관"]].map(([f,l])=>`<button type="button" data-f="${f}" class="${filter===f?"on":""}">${l}</button>`).join("")}</div>
+  const vt=tripSpots();
+  pb.innerHTML=`${vt.all.length>1?`<button type="button" class="trip-go" data-trip><span class="rt-n">⟲</span><span class="rt-t"><b>지금 지도에 보이는 방문지로 동선 짜기</b><small>${vt.all.length}곳${vt.left<vt.all.length?` 중 도장 안 받은 ${vt.left}곳`:""} · ${me?"내 위치에서 출발해 다시 내 위치로":"내 위치를 켜면 왕복 동선"}</small></span><span aria-hidden="true">›</span></button>`:""}
+    <div class="seg">${[["all","전체"],["1","방문코스 1"],["2","방문코스 2"],["3","특별·홍보관"]].map(([f,l])=>`<button type="button" data-f="${f}" class="${filter===f?"on":""}">${l}</button>`).join("")}</div>
     ${[1,2,3].filter(g=>filter==="all"||String(g)===filter).map(g=>`<div class="pk-g">${groupName(g)}</div>${C.filter(c=>c.group===g).map(row).join("")}`).join("")}`;
-  pb.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{filter=b.dataset.f; renderPicker();});
+  pb.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{filter=b.dataset.f; renderPicker(); draw(true);});
   pb.querySelectorAll(".pk-it").forEach(b=>b.onclick=()=>openCourse(b.dataset.k));
+  const tg=pb.querySelector("[data-trip]"); if(tg) tg.onclick=()=>openMode("trip","full");
 }
 function openCourse(k){  // 길을 고르면 지도와 반씩
   cur=k; saved=k; stage=2; spotNum=""; mode="course"; routeLayer.clearLayers();
@@ -967,6 +1059,39 @@ function stampNow(n){
   if(sl){sl.classList.add("thud"); a.classList.add("thudcard"); setTimeout(()=>a.classList.remove("thudcard"),700);}  // 쿵: 도장이 내려찍히고 카드가 살짝 흔들림
   try{navigator.vibrate&&navigator.vibrate(40)}catch(e){}
 }
+
+// 인증샷: 지금 있는 곳(또는 보던 장소 카드)의 유산 이름을 사진에 얹는다
+function shotSpot(){
+  if(cur&&spotNum&&mode==="course"&&stage===3) return (spotOf(cur,spotNum)||{}).s;
+  if(!me) return null;
+  let b=null; uniqSpots.forEach(({s})=>{const d=hav(me.lat,me.lng,s.lat,s.lng); if(d<1500&&(!b||d<b.d)) b={d,s};});
+  return b&&b.s;
+}
+$("camBtn").onclick=()=>$("camIn").click();
+$("camIn").onchange=async e=>{
+  const f=e.target.files[0]; e.target.value=""; if(!f) return;
+  const m=modal(`<h3>인증샷</h3><p class="mt">만드는 중…</p>`);
+  try{
+    const im=await createImageBitmap(f), s=shotSpot(), W=1080, H=Math.round(Math.min(1440,Math.max(810,W*im.height/im.width)));
+    const cv=document.createElement("canvas"); cv.width=W; cv.height=H; const g=cv.getContext("2d");
+    const sc=Math.max(W/im.width,H/im.height); g.drawImage(im,(W-im.width*sc)/2,(H-im.height*sc)/2,im.width*sc,im.height*sc);
+    const gr=g.createLinearGradient(0,H-330,0,H); gr.addColorStop(0,"rgba(0,0,0,0)"); gr.addColorStop(1,"rgba(0,0,0,.72)"); g.fillStyle=gr; g.fillRect(0,H-330,W,330);
+    try{await document.fonts.ready;}catch(_){}
+    const day=new Date(), sans='"IBM Plex Sans KR",sans-serif';
+    g.fillStyle="#fff"; g.textAlign="left"; g.font=`700 58px "Gowun Batang",serif`; g.fillText(s?s.name.split(" (")[0]:"국가유산 도장깨기",56,H-130);
+    g.font=`500 32px ${sans}`; g.globalAlpha=.9; g.fillText(`${s?courseName(spotCourseOf(s))+" · ":""}${day.getFullYear()}.${day.getMonth()+1}.${day.getDate()} ${day.getHours()}:${String(day.getMinutes()).padStart(2,"0")}`,56,H-74); g.globalAlpha=1;
+    g.save(); g.translate(W-150,H-170); g.rotate(-.18); g.strokeStyle="#ef5a4c"; g.fillStyle="#ef5a4c"; g.lineWidth=6; g.beginPath(); g.arc(0,0,92,0,Math.PI*2); g.stroke(); g.lineWidth=2.5; g.beginPath(); g.arc(0,0,80,0,Math.PI*2); g.stroke();
+    g.textAlign="center"; g.textBaseline="middle"; g.font=`400 46px "Jua",${sans}`; g.fillText("도장깨기",0,-6); g.font=`600 20px ${sans}`; g.fillText("국가유산",0,38); g.restore();
+    try{const ch=new Image(); ch.src="icons/btn-more.png"; await ch.decode(); g.drawImage(ch,56,H-250,124,60);}catch(_){}
+    const u=cv.toDataURL("image/jpeg",.9), blob=await new Promise(r=>cv.toBlob(r,"image/jpeg",.9)), file=new File([blob],"국가유산-인증샷.jpg",{type:"image/jpeg"});
+    const near=s&&!stamps.has(s.num)&&me&&hav(me.lat,me.lng,s.lat,s.lng)<300;
+    m.querySelector(".mt").outerHTML=`<img class="cert-img" style="aspect-ratio:auto" src="${u}" alt="인증샷">
+      <div class="acts2">${navigator.canShare&&navigator.canShare({files:[file]})?`<button type="button" class="btn primary" data-sh>공유하기</button>`:""}<a class="btn" download="국가유산-인증샷.jpg" href="${u}">사진 저장</a>${near?`<button type="button" class="btn redb" data-st>여기 도장도 찍기</button>`:""}</div>
+      <p class="mt">사진은 이 휴대폰 안에서만 만들어지고 어디로도 보내지지 않아요.${s?"":" 유산 가까이(1.5km 안)에서 찍거나 장소 카드를 연 채로 찍으면 이름이 들어가요."}</p>`;
+    const sh=m.querySelector("[data-sh]"); if(sh) sh.onclick=()=>navigator.share({files:[file],title:"국가유산 도장깨기"}).catch(()=>{});
+    const st=m.querySelector("[data-st]"); if(st) st.onclick=()=>{m.remove(); openSpot(spotCourseOf(s).key,s.num); stampNow(s.num);};
+  }catch(err){m.querySelector(".mt").textContent="사진을 열지 못했어요. 다시 찍어 주세요.";}
+};
 
 function celebrate(list){
   const done1=C.filter(c=>c.spots.every(s=>stamps.has(s.num))).length;
@@ -1121,7 +1246,7 @@ function startGeo(){
         // 가장 가까운 유산이 화면 밖이면 내 위치와 함께 보이게 (너무 멀면 내 위치 중심 그대로)
         if(mode==="me"&&r.h.d<15000&&!visibleBounds().contains([r.h.x.lat,r.h.x.lng])) fitTo(L.latLngBounds([[me.lat,me.lng],[r.h.x.lat,r.h.x.lng]]),16);
         drawKHS();});
-      if(mode==="me"||(mode==="course"&&stage===2)){const k=pb.scrollTop; render(); pb.scrollTop=k;}}  // 길 화면이면 내 위치 출발 동선으로 다시
+      if(mode==="me"||mode==="trip"||(mode==="course"&&stage===2)){const k=pb.scrollTop; render(); pb.scrollTop=k;}}  // 길 화면이면 내 위치 출발 동선으로 다시
     else if(hav(listedAt.lat,listedAt.lng,me.lat,me.lng)>50){listedAt=me; findNearest(me).then(()=>drawKHS()); if(mode==="me"||mode==="food"||(mode==="course"&&stage===2)){const k=pb.scrollTop; render(); pb.scrollTop=k;}}
   },err=>{
     geoMsg=err.code===1?"위치 권한이 꺼져 있어요. 주소창의 사이트 설정에서 위치를 허용해 주세요.":"위치를 가져오지 못했어요. 잠시 후 다시 눌러 주세요.";
