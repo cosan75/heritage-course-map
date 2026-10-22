@@ -276,8 +276,13 @@ a.row{text-decoration:none;color:inherit}
 .meal-it img,.meal-it .fimg{width:52px;height:52px;border-radius:8px;object-fit:cover;flex:none;display:grid;place-items:center;background:var(--rule);color:var(--food)}
 .meal-it .fimg svg{width:22px;height:22px}
 .meal-it .mn{color:var(--ink)}.meal-it .mn::before{content:"대표 ";color:var(--food);font-weight:600}
-.visits{margin:0 0 4px;font-size:12px;color:var(--sea);font-weight:600}
-.visits:empty{display:none}
+.stats{position:fixed;z-index:1090;left:14px;top:calc(var(--topb) + 6px);display:flex;gap:6px;flex-wrap:wrap;max-width:calc(100vw - 28px)}
+.stats span,.stats button{display:inline-flex;align-items:center;gap:4px;height:26px;padding:0 9px;border-radius:13px;border:0;background:rgb(255 255 255 / .92);color:var(--ink);
+  font:600 11.5px/1 var(--body);box-shadow:0 1px 4px rgb(0 0 0 / .15);font-variant-numeric:tabular-nums;white-space:nowrap}
+.stats small{font-weight:500;color:var(--muted)}
+.stats button{cursor:pointer}.stats button[aria-pressed="true"]{color:var(--seal)}
+body:not([data-p="closed"]) .stats{display:none}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .stats span,:root:not([data-theme="light"]) .stats button{background:rgb(29 33 37 / .92)}}
 .rt-note{font-size:11.5px;color:var(--muted);margin:2px 0 0}
 .rt-pin{width:22px;height:22px;border-radius:50%;background:var(--sheet);color:var(--c);box-shadow:inset 0 0 0 2px var(--c),0 1px 3px rgb(0 0 0 / .3);font:800 11.5px/22px var(--body);text-align:center}
 .pn-t{font:600 13px/1.3 var(--body);margin:16px 0 6px}
@@ -422,6 +427,7 @@ body.done-only .sp.done::after{content:"✓";position:absolute;bottom:-6px;left:
   <ul id="qres" role="listbox" hidden></ul>
 </div>
 
+<div class="stats" id="stats" hidden aria-label="이 지도 통계"></div>
 <button class="wxc" id="wx" type="button" aria-expanded="false" aria-label="오늘 날씨"><span class="wx-i" aria-hidden="true">·</span><b></b><small></small></button>
 <div class="wxp" id="wxPop" hidden></div>
 
@@ -791,6 +797,23 @@ function goBack(){
 }
 $("pX").onclick=()=>goHome();
 $("brand").onclick=()=>openMode("notice","full");
+// 검색창 밑 통계 (GoatCounter 공개 숫자): 조회 = 열린 횟수, 방문 = 다녀간 사람, 좋아요 = 이 단추, 공유 = 앱 안 공유 단추
+let liked=false; try{liked=localStorage.getItem("hcm-liked")==="1"}catch(e){}
+const gcNum=path=>fetch(`https://heritage-course-map.goatcounter.com/counter/${path}.json`).then(r=>r.ok?r.json():null).catch(()=>null);
+const toN=v=>+String((v&&v.count)||"0").replace(/\D/g,"");
+const fmt=n=>n>=10000?(n/10000).toFixed(n<100000?1:0)+"만":n.toLocaleString("ko-KR");
+async function loadStats(){
+  const [tot,lk,s1,s2,s3]=await Promise.all(["TOTAL","like","share-spot","share-cert","share-shot"].map(gcNum));
+  if(!tot) return;
+  const views=toN(tot), people=+String(tot.count_unique||"0").replace(/\D/g,""), likes=toN(lk), shares=toN(s1)+toN(s2)+toN(s3);
+  const el=$("stats"); if(!views) return;
+  el.innerHTML=`<span title="이 지도가 열린 횟수">👁 ${fmt(views)}<small>조회</small></span><span title="다녀간 사람 수">👤 ${fmt(people)}<small>방문</small></span>
+    <button type="button" data-like aria-pressed="${liked}" title="${liked?"좋아요를 눌렀어요":"이 지도가 마음에 들면"}">${liked?"♥":"♡"} ${fmt(likes)}<small>좋아요</small></button>${shares?`<span title="앱 안 공유 단추를 누른 횟수">↗ ${fmt(shares)}<small>공유</small></span>`:""}`;
+  el.hidden=false;
+  el.querySelector("[data-like]").onclick=e=>{if(liked) return; liked=true; try{localStorage.setItem("hcm-liked","1")}catch(_){} gc("like","좋아요");
+    const b=e.currentTarget; b.setAttribute("aria-pressed","true"); b.innerHTML=`♥ ${fmt(likes+1)}<small>좋아요</small>`; toast("좋아요 고마워요!");};
+}
+loadStats();
 $("doneOnly").onclick=()=>{  // 도장 받은 곳만 보기 ↔ 모두 보기
   const n=gotN();
   if(!doneOnly&&!n){toast("아직 도장 받은 곳이 없어요"); return;}
@@ -1203,8 +1226,7 @@ function celebrate(list){
 function renderCert(){
   const got=gotN();
   $("pTitle").innerHTML=`인증<small>도장 ${got} / ${allNums.length}</small>`;
-  fetch("https://heritage-course-map.goatcounter.com/counter/TOTAL.json").then(r=>r.ok?r.json():null).then(j=>{const v=$("visits"); if(j&&v&&j.count!=="0") v.textContent=`지금까지 ${j.count}번 열렸어요 · 다녀간 사람 ${j.count_unique}명`;}).catch(()=>{});
-  pb.innerHTML=`<p class="visits" id="visits"></p><div class="cert-top"><span class="big">${got}<small>/ ${allNums.length}곳</small></span><span style="font-size:13px;color:var(--muted)">완주한 길 ${C.filter(c=>c.spots.every(s=>stamps.has(s.num))).length} / ${C.length}</span></div>
+  pb.innerHTML=`<div class="cert-top"><span class="big">${got}<small>/ ${allNums.length}곳</small></span><span style="font-size:13px;color:var(--muted)">완주한 길 ${C.filter(c=>c.spots.every(s=>stamps.has(s.num))).length} / ${C.length}</span></div>
     <img class="cert-img" id="certImg" alt="지금까지 찍은 도장 수와 길별 진행을 담은 인증서">
     <div class="cert-acts one"><button class="btn primary" type="button" data-share>인증서 공유</button><a class="btn" id="certSave" download="국가유산-도장수첩.png">그림 저장</a>${standalone()?"":`<button class="btn" type="button" data-install>홈 화면에 추가</button>`}</div>
     <div class="sec"><h3>길마다 남은 곳</h3>
