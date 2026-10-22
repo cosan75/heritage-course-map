@@ -805,14 +805,14 @@ const toN=v=>+String((v&&v.count)||"0").replace(/\D/g,"");
 const fmt=n=>n>=10000?(n/10000).toFixed(n<100000?1:0)+"만":n.toLocaleString("ko-KR");
 async function loadStats(){
   const [tot,lk,s1,s2,s3,st]=await Promise.all(["TOTAL","like","share-spot","share-cert","share-shot","stamp"].map(gcNum));
-  if(!tot) return;
-  const views=toN(tot), people=+String(tot.count_unique||"0").replace(/\D/g,""), likes=toN(lk), shares=toN(s1)+toN(s2)+toN(s3), seals=toN(st);
-  const el=$("stats"); if(!views) return;
-  el.innerHTML=`<span title="이 지도가 열린 횟수">👁 ${fmt(views)}<small>조회</small></span><span title="다녀간 사람 수">👤 ${fmt(people)}<small>방문</small></span>
-    <button type="button" data-like aria-pressed="${liked}" title="${liked?"좋아요를 눌렀어요":"이 지도가 마음에 들면"}">${liked?"♥":"♡"} ${fmt(likes)}<small>좋아요</small></button><span title="앱 안 공유 단추를 누른 횟수">↗ ${fmt(shares)}<small>공유</small></span><span title="모두가 찍은 도장 수">🏅 ${fmt(seals)}<small>도장</small></span>`;
+  // 숫자를 못 받아도(광고 차단·학교망 등) 칸은 보이게 '–'로
+  const views=toN(tot), people=tot?+String(tot.count_unique||"0").replace(/\D/g,""):0, likes=toN(lk), shares=toN(s1)+toN(s2)+toN(s3), seals=toN(st);
+  const el=$("stats"), F=n=>tot?fmt(n):"–";
+  el.innerHTML=`<span title="이 지도가 열린 횟수">👁 ${F(views)}<small>조회</small></span><span title="다녀간 사람 수">👤 ${F(people)}<small>방문</small></span>
+    <button type="button" data-like aria-pressed="${liked}" title="${liked?"좋아요를 눌렀어요":"이 지도가 마음에 들면"}">${liked?"♥":"♡"} ${F(likes)}<small>좋아요</small></button><span title="앱 안 공유 단추를 누른 횟수">↗ ${F(shares)}<small>공유</small></span><span title="모두가 찍은 도장 수">🏅 ${F(seals)}<small>도장</small></span>`;
   el.hidden=false;
   el.querySelector("[data-like]").onclick=e=>{if(liked) return; liked=true; try{localStorage.setItem("hcm-liked","1")}catch(_){} gc("like","좋아요");
-    const b=e.currentTarget; b.setAttribute("aria-pressed","true"); b.innerHTML=`♥ ${fmt(likes+1)}<small>좋아요</small>`; toast("좋아요 고마워요!");};
+    const b=e.currentTarget; b.setAttribute("aria-pressed","true"); b.innerHTML=`♥ ${F(likes+1)}<small>좋아요</small>`; toast("좋아요 고마워요!");};
 }
 loadStats();
 $("doneOnly").onclick=()=>{  // 도장 받은 곳만 보기 ↔ 모두 보기
