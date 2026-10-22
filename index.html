@@ -170,6 +170,12 @@ body[data-p="full"] .wxc,body[data-p="full"] .wxp{display:none}
 /* 맛집 줄 */
 .frow{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--rule);cursor:pointer;align-items:flex-start}
 .frow .fimg{width:72px;height:72px;border-radius:10px;object-fit:cover;flex:none;background:var(--paper);display:grid;place-items:center;color:var(--food)}
+.my-tag{font:600 10.5px/1.6 var(--body);background:var(--sea);color:#fff;border-radius:4px;padding:0 5px;margin-right:5px;vertical-align:2px}
+.my-del{width:30px;height:30px;border-radius:8px;border:1px solid var(--rule);background:var(--sheet);color:var(--muted);cursor:pointer}
+.inp{font:500 15px/1.3 var(--body);color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:10px 12px;width:100%}
+.inp:focus{outline:2px solid var(--sea);outline-offset:1px}
+.lbl small{color:var(--muted);font-size:11.5px}
+.seg button:disabled{opacity:.4;cursor:default}
 .fwrap{position:relative;flex:none;width:72px;height:72px}
 .fwrap .fimg{width:72px;height:72px}
 .ph-add{position:absolute;right:-6px;bottom:-6px;width:28px;height:28px;border-radius:50%;border:2px solid var(--sheet);background:var(--sea);color:#fff;display:grid;place-items:center;cursor:pointer;padding:0;box-shadow:0 1px 4px rgb(0 0 0 / .25)}
@@ -518,7 +524,52 @@ const kakaoTo=s=>`https://map.kakao.com/link/to/${encodeURIComponent(s.name)},${
 const kakaoFrom=s=>`https://map.kakao.com/link/from/${encodeURIComponent(s.name)},${s.lat},${s.lng}`;
 const CUI={korean:"한식",chinese:"중식",japanese:"일식",western:"양식",italian:"이탈리아",pizza:"피자",burger:"버거",chicken:"치킨",fried_chicken:"치킨",noodle:"국수",noodles:"국수",
   coffee_shop:"커피",coffee:"커피",bakery:"빵",cake:"케이크",dessert:"디저트",barbecue:"고기구이",bbq:"고기구이",seafood:"해산물",sushi:"초밥",ramen:"라멘",kimbap:"김밥",tea:"차",regional:"향토"};
-const kind=f=>({restaurant:"음식점",cafe:"카페",fast_food:"패스트푸드"}[f.kind]||"음식점")+(f.cuisine?` · ${[...new Set(f.cuisine.split(/[;,]\s*/).map(x=>CUI[x.trim()]||x.trim()))].join(", ")}`:"");
+// ── 내가 추가한 식당 (이 휴대폰 브라우저에만, 아무 데도 보내지 않음)
+let myFoods=[]; try{myFoods=JSON.parse(localStorage.getItem("hcm-myfood")||"[]")}catch(e){}
+const saveMyFoods=()=>{try{localStorage.setItem("hcm-myfood",JSON.stringify(myFoods))}catch(e){}};
+function placeMyFood(f){  // 전체 목록 + 3km 안 가장 가까운 유산의 '주변 맛집'에
+  let b=null; uniqSpots.forEach(({s})=>{const d=hav(f.lat,f.lng,s.lat,s.lng); if(!b||d<b.d) b={d,s};});
+  const g={...f,kind:"restaurant",src:"mine",at:b?b.s.name:"",dist:b?Math.round(b.d):0};
+  FOODS.unshift(g); if(b&&b.d<3000) C.forEach(c=>c.spots.forEach(s=>{if(s.num===b.s.num) (s.restaurants=s.restaurants||[]).unshift(g);}));
+}
+function unplaceMyFood(id){
+  const k=FOODS.findIndex(f=>f.id===id); if(k>=0) FOODS.splice(k,1);
+  C.forEach(c=>c.spots.forEach(s=>{if(s.restaurants) s.restaurants=s.restaurants.filter(f=>f.id!==id);}));
+}
+myFoods.forEach(placeMyFood);
+function openAddFood(){
+  const v=(lastView||visibleBounds()).getCenter();
+  const m=modal(`<h3>내 식당 추가</h3>
+    <p class="mt">다녀온 맛집을 직접 넣어요. 이 휴대폰에만 저장되고 다른 사람에게는 보이지 않아요.</p>
+    <label class="lbl">식당 이름 *<input class="inp" data-n maxlength="40" placeholder="예: 하회 장터 안동찜닭"></label>
+    <label class="lbl">대표 메뉴<input class="inp" data-m maxlength="40" placeholder="예: 안동찜닭"></label>
+    <label class="lbl">한 줄 메모<input class="inp" data-t maxlength="60" placeholder="예: 줄이 길어요, 주차 가능"></label>
+    <div class="lbl">위치<div class="seg" style="position:static;padding:4px 0 0">
+      <button type="button" data-w="me" class="${me?"on":""}" ${me?"":"disabled"}>지금 내 위치</button><button type="button" data-w="map" class="${me?"":"on"}">지도 가운데</button></div>
+      <small data-where>${me?"지금 있는 곳으로 저장해요 (식당 안이나 앞에서 누르면 정확해요)":"지도 가운데로 저장해요 — 창을 닫고 지도를 식당 위치로 옮긴 뒤 다시 열면 돼요"}</small></div>
+    <div class="acts2"><button type="button" class="btn primary" data-save>저장하고 사진 찍기</button><button type="button" class="btn" data-save-only>사진 없이 저장</button></div>`);
+  let where=me?"me":"map";
+  m.querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>{if(b.disabled) return; where=b.dataset.w; m.querySelectorAll("[data-w]").forEach(x=>x.classList.toggle("on",x===b));
+    m.querySelector("[data-where]").textContent=where==="me"?"지금 있는 곳으로 저장해요 (식당 안이나 앞에서 누르면 정확해요)":"지도 가운데로 저장해요 — 창을 닫고 지도를 식당 위치로 옮긴 뒤 다시 열면 돼요";});
+  const save=photo=>{
+    const name=m.querySelector("[data-n]").value.trim(); if(!name){m.querySelector("[data-n]").focus(); toast("식당 이름을 넣어 주세요"); return;}
+    const pt=where==="me"&&me?me:v;
+    const f={id:"my-"+Date.now(),name,menu:m.querySelector("[data-m]").value.trim(),memo:m.querySelector("[data-t]").value.trim(),lat:+pt.lat.toFixed(6),lng:+pt.lng.toFixed(6),addr:"",added:new Date().toISOString().slice(0,10)};
+    myFoods.unshift(f); saveMyFoods(); placeMyFood(f); gc("food-add","내 식당 추가"); m.remove();
+    foodTab="mine"; if(mode!=="food") openMode("food","full"); else render(); pb.scrollTop=0;
+    if(photo){phKey=f.id; $("fpIn").click();} else toast("내 식당에 넣었어요");
+  };
+  m.querySelector("[data-save]").onclick=()=>save(true);
+  m.querySelector("[data-save-only]").onclick=()=>save(false);
+  setTimeout(()=>m.querySelector("[data-n]").focus(),50);
+}
+function delMyFood(id){
+  const f=myFoods.find(x=>x.id===id); if(!f||!confirm(`'${f.name}'을(를) 내 식당에서 지울까요?`)) return;
+  myFoods=myFoods.filter(x=>x.id!==id); saveMyFoods(); unplaceMyFood(id);
+  if(myPh.has(id)){phDB.del(id).catch(()=>{}); URL.revokeObjectURL(myPh.get(id)); myPh.delete(id);}
+  const t=pb.scrollTop; render(); pb.scrollTop=t;
+}
+const kind=f=>f.src==="mine"?"내가 추가한 식당"+(f.memo?` · ${f.memo}`:""):({restaurant:"음식점",cafe:"카페",fast_food:"패스트푸드"}[f.kind]||"음식점")+(f.cuisine?` · ${[...new Set(f.cuisine.split(/[;,]\s*/).map(x=>CUI[x.trim()]||x.trim()))].join(", ")}`:"");
 const foodRank=f=>f.d*(fPhoto(f)?1:2);  // 사진이 있는 집을 앞으로
 // ── 내 식당 사진: 사진 없는 집(또는 바꾸고 싶은 집)에 직접 찍은 사진을 붙인다. 이 휴대폰 안(IndexedDB)에만 두고 아무 데도 보내지 않는다
 const myPh=new Map();  // 식당 키 → blob: 주소
@@ -814,12 +865,13 @@ const stars=f=>{const k=fKey(f), r=rates[k]||0;
 const fRow=(f,i)=>`<div class="frow${rates[fKey(f)]?" ate":""}" data-fi="${i}">
   <span class="fwrap">${fPhoto(f)?`<img class="fimg" src="${url(fPhoto(f))}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'fimg',innerHTML:I.fork}))">`:`<span class="fimg">${I.fork}</span>`}
     ${myPh.has(fKey(f))?`<span class="mine">내 사진</span>`:""}<button type="button" class="ph-add" data-ph="${esc(fKey(f))}" aria-label="${myPh.has(fKey(f))?"내 사진 바꾸기·지우기":"내가 찍은 사진 넣기"}" title="${myPh.has(fKey(f))?"내 사진 바꾸기·지우기":"내가 찍은 사진 넣기"}">${I.cam}</button></span>
-  <div class="ft"><b>${esc(f.name)}</b>${f.menu?`<span class="mn">${esc(f.menu)}</span>`:""}<small>${esc(kind(f))}${f.at?` · ${esc(f.at.split(" (")[0])} 근처`:""}</small>${stars(f)}</div>
-  <div class="fr">${f.d!=null?`<span class="rd">${km(f.d)}</span>`:""}<a class="nv" href="${naverOf(f)}" target="_blank" rel="noopener" aria-label="네이버 지도에서 ${esc(f.name)}" title="네이버 지도">N</a></div></div>`;
+  <div class="ft"><b>${f.src==="mine"?`<span class="my-tag">내 식당</span>`:""}${esc(f.name)}</b>${f.menu?`<span class="mn">${esc(f.menu)}</span>`:""}<small>${esc(kind(f))}${f.at?` · ${esc(f.at.split(" (")[0])} 근처`:""}</small>${stars(f)}</div>
+  <div class="fr">${f.d!=null?`<span class="rd">${km(f.d)}</span>`:""}${f.src==="mine"?`<button type="button" class="my-del" data-del="${esc(f.id)}" aria-label="${esc(f.name)} 지우기" title="지우기">✕</button>`:""}<a class="nv" href="${naverOf(f)}" target="_blank" rel="noopener" aria-label="네이버 지도에서 ${esc(f.name)}" title="네이버 지도">N</a></div></div>`;
 function bindFoods(list){
   pb.querySelectorAll(".frow").forEach(r=>r.onclick=e=>{
     if(e.target.closest("a,button")) return;
     const f=list[+r.dataset.fi]; setPanel(MAPV()); showOnMap([f.lat,f.lng],17); const m=foodMarks[fKey(f)]; if(m) m.openPopup();});
+  pb.querySelectorAll("[data-del]").forEach(b=>b.onclick=e=>{e.stopPropagation(); delMyFood(b.dataset.del);});
   pb.querySelectorAll(".ph-add").forEach(b=>b.onclick=async e=>{
     e.stopPropagation(); phKey=b.dataset.ph;
     if(myPh.has(phKey)&&confirm("내가 넣은 사진을 지울까요?\n(취소를 누르면 새로 찍어 바꿀 수 있어요)")){
@@ -835,15 +887,18 @@ function renderFood(){
   const sp=cur&&spotNum&&(spotOf(cur,spotNum)||{}).s, v=(lastView||visibleBounds()).getCenter();
   const base=sp?{lat:sp.lat,lng:sp.lng,name:sp.name.split(" (")[0]}:me?{lat:me.lat,lng:me.lng,name:"내 위치"}:{lat:v.lat,lng:v.lng,name:"지도 가운데"};
   let list;
-  if(foodTab==="ate") list=FOODS.filter(f=>rates[fKey(f)]).map(f=>({...f,d:hav(base.lat,base.lng,f.lat,f.lng)})).sort((a,b)=>rates[fKey(b)]-rates[fKey(a)]);
+  if(foodTab==="mine") list=FOODS.filter(f=>f.src==="mine").map(f=>({...f,d:hav(base.lat,base.lng,f.lat,f.lng)}));
+  else if(foodTab==="ate") list=FOODS.filter(f=>rates[fKey(f)]).map(f=>({...f,d:hav(base.lat,base.lng,f.lat,f.lng)})).sort((a,b)=>rates[fKey(b)]-rates[fKey(a)]);
   else list=nearFoods(base,25);
-  $("pTitle").innerHTML=`맛집<small>${foodTab==="ate"?"먹어 본 곳":esc(base.name)+" 주변"}</small>`;
+  $("pTitle").innerHTML=`맛집<small>${foodTab==="ate"?"먹어 본 곳":foodTab==="mine"?"내가 추가한 식당":esc(base.name)+" 주변"}</small>`;
   const nAte=FOODS.filter(f=>rates[fKey(f)]).length;
-  pb.innerHTML=`<p class="rt-note" style="margin:0 0 6px">기준: <b>${esc(base.name)}</b>${sp?" (보던 장소 카드)":me?"":" (내 위치를 켜면 내 위치 기준)"} — 거리는 여기서 잰 직선거리예요.</p><div class="seg"><button type="button" data-t="near" class="${foodTab==="near"?"on":""}">가까운 곳</button><button type="button" data-t="ate" class="${foodTab==="ate"?"on":""}">★ 먹어 본 곳 ${nAte}</button></div>
-    ${list.map(fRow).join("")||`<div class="empty">${foodTab==="ate"?"먹어 본 곳에 별을 주면 여기에 모여요":"맛집 자료가 없어요"}</div>`}
+  pb.innerHTML=`<p class="rt-note" style="margin:0 0 6px">기준: <b>${esc(base.name)}</b>${sp?" (보던 장소 카드)":me?"":" (내 위치를 켜면 내 위치 기준)"} — 거리는 여기서 잰 직선거리예요.</p><div class="seg"><button type="button" data-t="near" class="${foodTab==="near"?"on":""}">가까운 곳</button><button type="button" data-t="ate" class="${foodTab==="ate"?"on":""}">★ 먹어 본 곳 ${nAte}</button><button type="button" data-t="mine" class="${foodTab==="mine"?"on":""}">내 식당 ${myFoods.length}</button></div>
+    <button type="button" class="trip-go" data-addfood style="margin:4px 0 6px"><span class="rt-n">+</span><span class="rt-t"><b>내 식당 추가</b><small>다녀온 맛집을 이름·대표 메뉴·사진으로 남겨요 (이 휴대폰에만)</small></span><span aria-hidden="true">›</span></button>
+    ${list.map(fRow).join("")||`<div class="empty">${foodTab==="ate"?"먹어 본 곳에 별을 주면 여기에 모여요":foodTab==="mine"?"아직 추가한 식당이 없어요":"맛집 자료가 없어요"}</div>`}
     <div class="sec"><a class="btn" style="width:100%;margin-top:12px" href="${sp?naverFood(sp):`https://map.naver.com/p/search/${encodeURIComponent("맛집")}`}" target="_blank" rel="noopener">네이버 지도에서 맛집 더 찾기</a></div>
     <p class="src">맛집 자료: 한국관광공사 TourAPI</p>`;
   pb.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{foodTab=b.dataset.t; render(); pb.scrollTop=0;});
+  pb.querySelector("[data-addfood]").onclick=openAddFood;
   bindFoods(list); showFoods(list);
 }
 
