@@ -813,7 +813,7 @@ function goBack(){
 $("pX").onclick=()=>goHome();
 $("brand").onclick=()=>openMode("notice","full");
 // 검색창 밑 통계 (GoatCounter 공개 숫자): 조회 = 열린 횟수, 방문 = 다녀간 사람, 좋아요 = 이 단추, 공유 = 앱 안 공유 단추
-let liked=false; try{liked=localStorage.getItem("hcm-liked")==="1"}catch(e){}
+let liked=false; try{liked=localStorage.getItem("hcm-liked2")==="1"}catch(e){}
 // GoatCounter 공개 숫자는 같은 주소면 몇 시간씩 저장본(캐시)을 준다 → 시작일을 사이트를 연 날(10-22)보다 이른 날 중에서 한 시간마다 바꿔 늘 새 숫자를 받는다
 const gcStart=()=>new Date(Date.UTC(2025,0,1)+(Math.floor(Date.now()/36e5)%600)*864e5).toISOString().slice(0,10);
 const gcNum=path=>fetch(`https://heritage-course-map.goatcounter.com/counter/${path}.json?start=${gcStart()}`).then(r=>r.ok?r.json():null).catch(()=>null);
@@ -832,7 +832,7 @@ async function loadStats(){
   el.innerHTML=`<span title="이 지도가 열린 횟수">👁 ${F(views)}<small>조회</small></span><span title="다녀간 사람 수">👤 ${F(people)}<small>방문</small></span>
     <button type="button" data-like aria-pressed="${liked}" title="${liked?"좋아요를 눌렀어요":"이 지도가 마음에 들면"}">${liked?"♥":"♡"} ${F(likes)}<small>좋아요</small></button><span title="앱 안 공유 단추를 누른 횟수">↗ ${F(shares)}<small>공유</small></span><span title="모두가 찍은 도장 수">🏅 ${F(seals)}<small>도장</small></span>`;
   el.hidden=false;
-  el.querySelector("[data-like]").onclick=e=>{if(liked) return; liked=true; try{localStorage.setItem("hcm-liked","1")}catch(_){} gc("like","좋아요");
+  el.querySelector("[data-like]").onclick=e=>{if(liked) return; liked=true; try{localStorage.setItem("hcm-liked2","1")}catch(_){} gc("like","좋아요");
     const b=e.currentTarget; b.setAttribute("aria-pressed","true"); b.innerHTML=`♥ ${F(likes+1)}<small>좋아요</small>`; toast("좋아요 고마워요!");};
 }
 loadStats();
