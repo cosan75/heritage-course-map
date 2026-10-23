@@ -654,7 +654,7 @@ function panelH(s){
 const pv=()=>mobile()?panelH(pstate):0;
 const MAPV=()=>mobile()?"closed":"full";  // 지도로 보여 줄 때: 휴대폰은 창을 내려 지도만 (보던 창은 ↑로 다시)
 function vis(){
-  if(mobile()) return {l:0,t:topB(),r:innerWidth,b:navTop()-pv()};
+  if(mobile()) return {l:0,t:topB(),r:innerWidth,b:navTop()-(pstate==="full"?0:pv())};  // 창이 화면을 다 덮을 때는 창을 내렸을 때의 지도 기준으로
   return {l:pstate==="closed"?0:panel.getBoundingClientRect().right,t:0,r:innerWidth,b:innerHeight};
 }
 function fitTo(b,maxZoom=15){
