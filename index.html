@@ -814,7 +814,9 @@ $("pX").onclick=()=>goHome();
 $("brand").onclick=()=>openMode("notice","full");
 // 검색창 밑 통계 (GoatCounter 공개 숫자): 조회 = 열린 횟수, 방문 = 다녀간 사람, 좋아요 = 이 단추, 공유 = 앱 안 공유 단추
 let liked=false; try{liked=localStorage.getItem("hcm-liked")==="1"}catch(e){}
-const gcNum=path=>fetch(`https://heritage-course-map.goatcounter.com/counter/${path}.json?start=2026-10-01`).then(r=>r.ok?r.json():null).catch(()=>null);  // start를 주지 않으면 0으로 나오고 오래 캐시됨
+// GoatCounter 공개 숫자는 같은 주소면 몇 시간씩 저장본(캐시)을 준다 → 시작일을 사이트를 연 날(10-22)보다 이른 날 중에서 한 시간마다 바꿔 늘 새 숫자를 받는다
+const gcStart=()=>new Date(Date.UTC(2025,0,1)+(Math.floor(Date.now()/36e5)%600)*864e5).toISOString().slice(0,10);
+const gcNum=path=>fetch(`https://heritage-course-map.goatcounter.com/counter/${path}.json?start=${gcStart()}`).then(r=>r.ok?r.json():null).catch(()=>null);
 const toN=v=>+String((v&&v.count)||"0").replace(/\D/g,"");
 const fmt=n=>n>=10000?(n/10000).toFixed(n<100000?1:0)+"만":n.toLocaleString("ko-KR");
 async function loadStats(){

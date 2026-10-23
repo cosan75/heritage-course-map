@@ -15,9 +15,11 @@ jobs:
         run: |
           set -e
           GC=https://heritage-course-map.goatcounter.com/counter
+          # 같은 주소는 몇 시간씩 저장본을 주므로, 시작일을 사이트 연 날(10-22)보다 이른 날 중에서 한 시간마다 바꾼다
+          START=$(date -u -d "2025-01-01 +$(( $(date +%s)/3600 % 600 )) days" +%F)
           out="{"
           for p in TOTAL like share-spot share-cert share-shot stamp; do
-            j=$(curl -fsS "$GC/$p.json?start=2026-10-01" || echo '{"count":"0","count_unique":"0"}')
+            j=$(curl -fsS "$GC/$p.json?start=$START" || echo '{"count":"0","count_unique":"0"}')
             out="$out\"$p\":$j,"
           done
           echo "${out}\"at\":\"$(date -u +%FT%TZ)\"}" | jq -c . > stats.new
