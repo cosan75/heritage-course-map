@@ -818,7 +818,12 @@ const gcNum=path=>fetch(`https://heritage-course-map.goatcounter.com/counter/${p
 const toN=v=>+String((v&&v.count)||"0").replace(/\D/g,"");
 const fmt=n=>n>=10000?(n/10000).toFixed(n<100000?1:0)+"만":n.toLocaleString("ko-KR");
 async function loadStats(){
-  const [tot,lk,s1,s2,s3,st]=await Promise.all(["TOTAL","like","share-spot","share-cert","share-shot","stamp"].map(gcNum));
+  const P=["TOTAL","like","share-spot","share-cert","share-shot","stamp"];
+  let [tot,lk,s1,s2,s3,st]=await Promise.all(P.map(gcNum));
+  if(!tot){  // GoatCounter 주소가 막히면(삼성 인터넷 추적 방지·광고 차단 등) 한 시간마다 옮겨 두는 사이트 안 파일로
+    const j=await fetch("stats.json?"+Math.floor(Date.now()/6e5)).then(r=>r.ok?r.json():null).catch(()=>null);
+    if(j) [tot,lk,s1,s2,s3,st]=P.map(k=>j[k]||null);
+  }
   // 숫자를 못 받아도(광고 차단·학교망 등) 칸은 보이게 '–'로
   const views=toN(tot), people=tot?+String(tot.count_unique||"0").replace(/\D/g,""):0, likes=toN(lk), shares=toN(s1)+toN(s2)+toN(s3), seals=toN(st);
   const el=$("stats"), F=n=>tot?fmt(n):"–";

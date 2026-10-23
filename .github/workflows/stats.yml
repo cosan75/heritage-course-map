@@ -1,0 +1,29 @@
+# 검색창 밑 통계 칩용 숫자를 사이트 안 파일(stats.json)로 옮겨 둔다.
+# 휴대폰 브라우저의 추적 방지·광고 차단이 GoatCounter 주소를 막아도 같은 사이트 파일은 읽히기 때문.
+name: stats
+on:
+  schedule: [{cron: "23 * * * *"}]   # 한 시간마다
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  stats:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: GoatCounter 공개 숫자 받기
+        run: |
+          set -e
+          GC=https://heritage-course-map.goatcounter.com/counter
+          out="{"
+          for p in TOTAL like share-spot share-cert share-shot stamp; do
+            j=$(curl -fsS "$GC/$p.json?start=2026-10-01" || echo '{"count":"0","count_unique":"0"}')
+            out="$out\"$p\":$j,"
+          done
+          echo "${out}\"at\":\"$(date -u +%FT%TZ)\"}" | jq -c . > stats.new
+          # 숫자가 바뀌었을 때만 올린다 (시각만 다르면 그대로)
+          if [ -f stats.json ] && [ "$(jq -c 'del(.at)' stats.json)" = "$(jq -c 'del(.at)' stats.new)" ]; then rm stats.new; exit 0; fi
+          mv stats.new stats.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add stats.json && git commit -m "통계 숫자 갱신" && git push
