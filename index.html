@@ -792,7 +792,7 @@ function goHome(fromPop){  // X: 창을 닫고 처음 화면(전국 방문코스
 }
 function goBack(){
   if(mode!=="course") return;
-  if(stage===3){stage=2; spotNum=""; foodLayer.clearLayers(); render(); refreshPins(); const c=C.find(x=>x.key===cur); if(c) fitTo(L.latLngBounds(c.spots.map(s=>[s.lat,s.lng])),13);}
+  if(stage===3){stage=2; spotNum=""; foodLayer.clearLayers(); wxUpdate(); render(); refreshPins(); const c=C.find(x=>x.key===cur); if(c) fitTo(L.latLngBounds(c.spots.map(s=>[s.lat,s.lng])),13);}
   else if(stage===2){stage=1; cur=""; draw(); render(); setPanel("full");}
   pb.scrollTop=0;
 }
@@ -1100,7 +1100,8 @@ function openCourse(k){  // 길을 고르면 지도와 반씩
 function openSpot(k,n,s){  // 장소 카드: 지도는 그 유산 가운데, 창은 반
   const x=spotOf(k,n); if(!x||!x.s) return;
   mode="course"; stage=3; spotNum=n;
-  if(cur!==k){cur=k; saved=k; try{localStorage.setItem("hcm-course",k)}catch(e){} wxFollow="course"; wxUpdate(); draw();} else refreshPins();
+  if(cur!==k){cur=k; saved=k; try{localStorage.setItem("hcm-course",k)}catch(e){} draw();} else refreshPins();
+  wxFollow="course"; wxUpdate();  // 날씨도 이 장소로
   render(); setPanel(s||"full"); pb.scrollTop=0; ensurePush();
   showOnMap([x.s.lat,x.s.lng],Math.max(map.getZoom(),15));
   showFoods((x.s.restaurants||[]).map(f=>({...f,at:x.s.name})));
@@ -1440,7 +1441,8 @@ const WX_SYM=[["thunder","⚡","뇌우"],["snow","❄","눈"],["sleet","🌨","�
   ["fog","🌫","안개"],["cloudy","☁","흐림"],["partlycloudy","⛅","구름 조금"],["fair","🌤","대체로 맑음"],["clearsky","☀","맑음"]];
 const wxSym=c=>WX_SYM.find(([k])=>String(c||"").startsWith(k)||String(c||"").includes(k))||["","·","—"];
 function wxPlace(){
-  const c=cur&&C.find(x=>x.key===cur);
+  const c=cur&&C.find(x=>x.key===cur), sp=c&&spotNum&&c.spots.find(s=>s.num===spotNum);
+  if(sp&&(wxFollow==="course"||!me)) return {lat:sp.lat,lng:sp.lng,name:sp.name.split(" (")[0]};  // 장소 카드를 보면 그 장소 날씨
   if(c&&(wxFollow==="course"||!me)){const b=L.latLngBounds(c.spots.map(s=>[s.lat,s.lng])).getCenter(); return {lat:b.lat,lng:b.lng,name:courseName(c)};}
   if(me) return {lat:me.lat,lng:me.lng,name:"내 위치"};
   return {lat:DAEJEON[0],lng:DAEJEON[1],name:"대전"};
