@@ -282,6 +282,15 @@ dl.info dt{color:var(--muted)} dl.info dd{margin:0;min-width:0;user-select:text}
 .rt-geo span{flex:1}
 .rt-geo .btn{min-height:34px;padding:6px 10px;white-space:nowrap}
 a.row{text-decoration:none;color:inherit}
+.pick2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pick2 .btn{flex-direction:column;gap:8px;padding:16px 8px;font-size:14px}
+.pick2 .btn svg{width:30px;height:30px}
+.nw{white-space:nowrap}
+.stamp-go{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.stamp-go a{font:600 12.5px/1 var(--body);color:var(--sea);background:var(--sea-soft);border-radius:8px;padding:7px 10px;text-decoration:none;white-space:nowrap}
+.rt-acts{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.rt-acts .btn{flex:1 1 140px}
+.btn.kko{background:#fee500;border-color:#fee500;color:#191919;font-weight:600}
 .trip-go{display:flex;align-items:center;gap:10px;width:100%;border:1px solid var(--sea);background:var(--sea-soft);border-radius:12px;padding:11px 12px;margin:2px 0 10px;text-align:left;cursor:pointer;color:var(--ink)}
 .rt-box .rd{display:flex;flex-direction:column;align-items:flex-end;gap:2px}.rt-box .rd small{font-weight:500;color:var(--muted);font-size:11px}
 .meal{border-top:1px dotted var(--rule);padding:8px 0 6px;display:flex;flex-direction:column;gap:6px}
@@ -462,7 +471,7 @@ body.done-only .sp.done::after{content:"✓";position:absolute;bottom:-6px;left:
   <button type="button" data-m="me" aria-label="내 위치" title="내 위치"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.6" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
   <button type="button" data-m="course" aria-label="지도(방문코스)" title="지도(방문코스)"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20z"/><path d="M9 4v13.5M15 6.5V20"/></svg></button>
   <button type="button" data-m="food" aria-label="맛집" title="맛집"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v8M4.5 2v5.5a2.5 2.5 0 0 0 5 0V2M7 10v12M17 22V2c-2.2 1.3-3.5 4-3.5 7.5V14H17"/></svg></button>
-  <button type="button" id="camBtn" aria-label="인증샷 찍기" title="인증샷 찍기"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h2l1.6-2h5.8l1.6 2h2A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><circle cx="12" cy="12.5" r="3.8"/></svg></button><input type="file" id="camIn" accept="image/*" capture="environment" hidden><input type="file" id="fpIn" accept="image/*" capture="environment" hidden>
+  <button type="button" id="camBtn" aria-label="인증샷 찍기" title="인증샷 찍기"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h2l1.6-2h5.8l1.6 2h2A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><circle cx="12" cy="12.5" r="3.8"/></svg></button><input type="file" id="camIn" accept="image/*" capture="environment" hidden><input type="file" id="camGal" accept="image/*" hidden><input type="file" id="fpIn" accept="image/*" capture="environment" hidden><input type="file" id="fpGal" accept="image/*" hidden>
   <button type="button" data-m="cert" aria-label="인증" title="인증"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9.5" r="6.5"/><path d="m9.2 9.6 2 2 3.8-4"/><path d="m8.5 15.2-1.6 6.3 5.1-2.4 5.1 2.4-1.6-6.3"/></svg><span class="cnt" id="cnt" hidden></span></button>
   <button type="button" id="updown" aria-label="창 올리기" title="창 올리기·내리기"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 6-6 6 6"/></svg></button>
 </nav>
@@ -506,6 +515,7 @@ const I={
   tel:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 3.5h3.5l1.7 4.3-2.2 1.4a11 11 0 0 0 6.8 6.8l1.4-2.2 4.3 1.7V19a1.5 1.5 0 0 1-1.6 1.5A16.5 16.5 0 0 1 3.5 5.1 1.5 1.5 0 0 1 5 3.5z"/></svg>',
   more:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M8 9.5h8M8 14.5h5"/></svg>',
   cam:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h2l1.6-2h5.8l1.6 2h2A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><circle cx="12" cy="12.5" r="3.8"/></svg>',
+  img:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="10" r="1.8"/><path d="m4.5 18 5-5 3.5 3.5 2.5-2.5 4 4"/></svg>',
   area:'<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20z"/></svg>'
 };
 
@@ -578,7 +588,7 @@ function openAddFood(){
     const f={id:"my-"+Date.now(),name,menu:m.querySelector("[data-m]").value.trim(),memo:m.querySelector("[data-t]").value.trim(),lat:+pt.lat.toFixed(6),lng:+pt.lng.toFixed(6),addr:"",added:new Date().toISOString().slice(0,10)};
     myFoods.unshift(f); saveMyFoods(); placeMyFood(f); gc("food-add","내 식당 추가"); m.remove();
     foodTab="mine"; if(mode!=="food") openMode("food","full"); else render(); pb.scrollTop=0;
-    if(photo){phKey=f.id; $("fpIn").click();} else toast("내 식당에 넣었어요");
+    if(photo){phKey=f.id; pickPhoto("fpIn","fpGal","식당 사진");} else toast("내 식당에 넣었어요");
   };
   m.querySelector("[data-save]").onclick=()=>save(true);
   m.querySelector("[data-save-only]").onclick=()=>save(false);
@@ -784,8 +794,7 @@ function findNearest(pt){
 const TITLES={me:"내 위치",food:"맛집",course:"방문코스",cert:"인증",trip:"이 화면 동선",notice:"공지·안내"};
 let pushed=false;  // 휴대폰 '뒤로' 단추: 앱을 나가지 않고 창을 닫거나 한 단계 뒤로
 function ensurePush(){if(!pushed){try{history.pushState({hcm:1},"");}catch(e){} pushed=true;}}
-addEventListener("popstate",()=>{if(!pushed) return; pushed=false;
-  if(mode==="course"&&stage>1&&pstate!=="closed"){goBack(); ensurePush();} else goHome(true);});
+addEventListener("popstate",()=>{if(!pushed) return; pushed=false; document.querySelectorAll(".modal").forEach(m=>m.remove()); goHome(true);});
 function openMode(m,s){
   if(mode!==m){mode=m; if(m==="course"&&!cur) stage=1; gc("panel-"+m,TITLES[m]);}
   const wasClosed=pstate==="closed";
@@ -921,7 +930,7 @@ function bindFoods(list){
     e.stopPropagation(); phKey=b.dataset.ph;
     if(myPh.has(phKey)&&confirm("내가 넣은 사진을 지울까요?\n(취소를 누르면 새로 찍어 바꿀 수 있어요)")){
       await phDB.del(phKey).catch(()=>{}); URL.revokeObjectURL(myPh.get(phKey)); myPh.delete(phKey); const t=pb.scrollTop; render(); pb.scrollTop=t; return;}
-    $("fpIn").click();});
+    pickPhoto("fpIn","fpGal","식당 사진");});
   pb.querySelectorAll(".stars").forEach(sp=>sp.querySelectorAll("button").forEach(b=>b.onclick=e=>{
     e.stopPropagation(); const k=sp.dataset.rate, v=+b.dataset.v;
     if(rates[k]===v) delete rates[k]; else rates[k]=v; saveRates();
@@ -937,8 +946,8 @@ function renderFood(){
   else list=nearFoods(base,25);
   $("pTitle").innerHTML=`맛집<small>${foodTab==="ate"?"먹어 본 곳":foodTab==="mine"?"내가 추가한 식당":esc(base.name)+" 주변"}</small>`;
   const nAte=FOODS.filter(f=>rates[fKey(f)]).length;
-  pb.innerHTML=`<p class="rt-note" style="margin:0 0 6px">기준: <b>${esc(base.name)}</b>${sp?" (보던 장소 카드)":me?"":" (내 위치를 켜면 내 위치 기준)"} — 거리는 여기서 잰 직선거리예요.</p><div class="seg"><button type="button" data-t="near" class="${foodTab==="near"?"on":""}">가까운 곳</button><button type="button" data-t="ate" class="${foodTab==="ate"?"on":""}">★ 먹어 본 곳 ${nAte}</button><button type="button" data-t="mine" class="${foodTab==="mine"?"on":""}">내 식당 ${myFoods.length}</button></div>
-    <button type="button" class="trip-go" data-addfood style="margin:4px 0 6px"><span class="rt-n">+</span><span class="rt-t"><b>내 식당 추가</b><small>다녀온 맛집을 이름·대표 메뉴·사진으로 남겨요 (이 휴대폰에만)</small></span><span aria-hidden="true">›</span></button>
+  pb.innerHTML=`<p class="rt-note" style="margin:0 0 6px">기준: <b>${esc(base.name)}</b>${sp?' <span class="nw">(보던 장소 카드)</span>':me?"":' <span class="nw">(내 위치를 켜면 내 위치 기준)</span>'} — <span class="nw">거리는 여기서 잰</span> 직선거리예요.</p><div class="seg"><button type="button" data-t="near" class="${foodTab==="near"?"on":""}">가까운 곳</button><button type="button" data-t="ate" class="${foodTab==="ate"?"on":""}">★ 먹어 본 곳 ${nAte}</button><button type="button" data-t="mine" class="${foodTab==="mine"?"on":""}">내 식당 ${myFoods.length}</button></div>
+    <button type="button" class="trip-go" data-addfood style="margin:4px 0 6px"><span class="rt-n">+</span><span class="rt-t"><b>내 식당 추가</b><small>다녀온 맛집을 이름·대표 메뉴·사진으로 남겨요 <span class="nw">(이 휴대폰에만)</span></small></span><span aria-hidden="true">›</span></button>
     ${list.map(fRow).join("")||`<div class="empty">${foodTab==="ate"?"먹어 본 곳에 별을 주면 여기에 모여요":foodTab==="mine"?"아직 추가한 식당이 없어요":"맛집 자료가 없어요"}</div>`}
     <div class="sec"><a class="btn" style="width:100%;margin-top:12px" href="${sp?naverFood(sp):`https://map.naver.com/p/search/${encodeURIComponent("맛집")}`}" target="_blank" rel="noopener">네이버 지도에서 맛집 더 찾기</a></div>
     <p class="src">맛집 자료: 한국관광공사 TourAPI</p>`;
@@ -962,7 +971,7 @@ function renderCourse(){
     ${c.theme?`<div class="meta">${esc(c.theme)}</div>`:""}</div>
     ${rts.length?`<div class="sec"><h3>추천 동선 <small style="font-weight:500">${me?"내 위치에서 출발, 가장 짧은 순서":"가장 짧은 순서"}</small></h3>
       ${me?"":`<div class="rt-geo"><span>내 위치를 허용하면 지금 있는 곳에서 출발하는 동선을 짜 드려요.</span><button class="btn primary" type="button" data-geo>내 위치 켜기</button></div>`}${rts.map(routeBox).join("")}
-      <p class="rt-note">직선거리로 순서를 정하고, 시간은 차로 이동(직선거리의 1.4배, 시속 60km)·한 곳에 1시간으로 어림했어요. 실제 길은 구간마다 카카오맵 길찾기로 확인하세요.</p></div>`:""}
+      <p class="rt-note">직선거리로 순서를 정하고, 시간은 <span class="nw">차로 이동</span><span class="nw">(직선거리의 1.4배, 시속 60km)</span>·<span class="nw">한 곳에 1시간으로</span> 어림했어요. 실제 길은 <span class="nw">카카오맵 길찾기로</span> 확인하세요.</p></div>`:""}
     <div class="sec"><h3>${me?"내 위치에서 가까운 순":"유산 목록"}</h3><div class="seg"><button type="button" data-open="0" class="${openOnly?"":"on"}">모두 ${all.length}</button><button type="button" data-open="1" class="${openOnly?"on":""}">지금 갈 수 있는 곳 ${all.length-shut.length}</button></div></div>`+
     (openOnly&&shut.length?`<p class="rt-note" style="margin:0 0 4px">오늘 휴무이거나 운영 시간이 아닌 ${shut.length}곳을 뺐어요. (공휴일·설·추석은 반영하지 않아요)</p>`:"")+
     spots.map(s=>`<button class="row" type="button" data-n="${esc(s.num)}"><span class="num${c.group===2?" sq":""}${stamps.has(s.num)?" done":""}" style="--c:${COLOR[c.key]}">${esc(s.num)}</span>
@@ -1038,7 +1047,29 @@ function routeBox(r,i){
       <ol class="rt-l">${r.path.map((x,j)=>`<li><span class="num" style="--c:${spotCol(x)}">${esc(x.num)}</span><span>${esc(x.name.split(" (")[0])}</span>${(()=>{const a=j?r.path[j-1]:r.from; return a?`<a href="${kakaoLeg(a,x)}" target="_blank" rel="noopener">${km(hav(a.lat,a.lng,x.lat,x.lng))} 길찾기</a>`:"<small>출발</small>";})()}</li>`).join("")}
         ${r.back?`<li><span class="num" style="--c:var(--me)">⌂</span><span>내 위치로 돌아오기</span><a href="${kakaoLeg(last,r.from)}" target="_blank" rel="noopener">${km(hav(last.lat,last.lng,r.from.lat,r.from.lng))} 길찾기</a></li>`:""}</ol>
       ${mealHTML(mealPlan(r))}
-      <button class="btn" type="button" data-route="${i}" style="width:100%;margin:0 0 12px">지도에 동선 그리기</button></details>`;
+      <div class="rt-acts"><button class="btn" type="button" data-route="${i}">지도에 동선 그리기</button>${kakaoMulti(r).map((u,k,a)=>`<a class="btn kko" href="${url(u)}" target="_blank" rel="noopener">카카오맵 길찾기${a.length>1?` ${k+1}/${a.length}`:""}</a>`).join("")}</div>
+      ${kakaoMulti(r).length>1?`<p class="rt-note" style="margin:-6px 0 10px">카카오맵은 한 번에 경유지 5곳까지라 <span class="nw">${kakaoMulti(r).length}번으로 나눴어요</span> <span class="nw">(앞 묶음의 끝이</span> <span class="nw">다음 묶음의 출발)</span>.</p>`:""}</details>`;
+}
+// 카카오맵 웹 길찾기(여러 곳)는 카카오 좌표(WCONGNAMUL)를 쓴다:
+// 위경도 → 베셀 타원체 횡메르카토르(원점 38°N 127°E, 가산 200000/500000, k=1) → ×2.5
+function toWcong(lat,lng){
+  const rad=Math.PI/180;
+  const bl=lat, bo=lng;  // 카카오는 타원체 이동 없이 위경도를 그대로 쓴다(실측: 이동을 넣으면 ±330m 어긋남)
+  const a=6377397.155, f=1/299.1528128, e2=f*(2-f), ep2=e2/(1-e2), k0=1, la=bl*rad, lo=bo*rad, la0=38*rad, lo0=127*rad;
+  const M=p=>a*((1-e2/4-3*e2*e2/64-5*e2**3/256)*p-(3*e2/8+3*e2*e2/32+45*e2**3/1024)*Math.sin(2*p)+(15*e2*e2/256+45*e2**3/1024)*Math.sin(4*p)-(35*e2**3/3072)*Math.sin(6*p));
+  const N=a/Math.sqrt(1-e2*Math.sin(la)**2), T=Math.tan(la)**2, Cc=ep2*Math.cos(la)**2, A=(lo-lo0)*Math.cos(la);
+  const E=200000+k0*N*(A+(1-T+Cc)*A**3/6+(5-18*T+T*T+72*Cc-58*ep2)*A**5/120);
+  const Nn=500000+k0*(M(la)-M(la0)+N*Math.tan(la)*(A*A/2+(5-T+9*Cc+4*Cc*Cc)*A**4/24+(61-58*T+T*T+600*Cc-330*ep2)*A**6/720));
+  return [Math.round(E*2.5),Math.round(Nn*2.5)];
+}
+// 여러 곳 이어서 카카오맵 길찾기: 한 번에 출발+경유 5곳+도착까지 → 넘치면 이어지는 묶음으로 나눈다
+function kakaoMulti(r){
+  const pts=[...(r.from?[r.from]:[]),...r.path,...(r.back&&r.from?[{...r.from,name:"내 위치"}]:[])], out=[];
+  for(let i=0;i<pts.length-1;i+=6){
+    const ch=pts.slice(i,i+7), xy=ch.flatMap(x=>toWcong(x.lat,x.lng));
+    out.push("https://map.kakao.com/?map_type=TYPE_MAP&target=car&rt="+xy.join(",")+ch.map((x,k)=>`&rt${k+1}=${encodeURIComponent(String(x.name).split(" (")[0])}`).join(""));
+  }
+  return out;
 }
 const kakaoLeg=(a,b)=>`https://map.kakao.com/link/from/${encodeURIComponent(a.name)},${a.lat},${a.lng}/to/${encodeURIComponent(b.name)},${b.lat},${b.lng}`;
 const routeLayer=L.layerGroup().addTo(map);
@@ -1077,8 +1108,8 @@ function renderTrip(){
   const rs=[a]; if(base){const r=nearestFirst(pts,base); r.back=true; r.len+=hav(r.path[r.path.length-1].lat,r.path[r.path.length-1].lng,base.lat,base.lng); if(!sameOrder(r,a)) rs.push({...r,label:"가까운 곳부터 차례로 돌고 돌아오기"});}
   tripCache=rs;
   pb.innerHTML=(me?"":`<div class="rt-geo"><span>내 위치를 허용하면 지금 있는 곳에서 출발해 다시 돌아오는 동선을 짜 드려요.</span><button class="btn primary" type="button" data-geo>내 위치 켜기</button></div>`)+
-    `<p class="rt-note" style="margin:4px 0 10px">${t.left<t.all.length&&t.left>1?`지도에 보이던 ${t.all.length}곳 중 도장 안 받은 ${t.left}곳`:`지도에 보이던 ${t.all.length}곳`}${cut?` 중 ${me?"내 위치":"가운데"}에서 가까운 12곳`:""}으로 짰어요. 지도를 옮기거나 확대한 뒤 다시 열면 그 화면 기준으로 바뀌어요.</p>`+
-    rs.map(routeBox).join("")+`<p class="rt-note">직선거리로 순서를 정하고, 시간은 차로 이동(직선거리의 1.4배, 시속 60km)·한 곳에 1시간으로 어림했어요. 실제 길은 구간마다 카카오맵 길찾기로 확인하세요.</p>`;
+    `<p class="rt-note" style="margin:4px 0 10px">${t.left<t.all.length&&t.left>1?`지도에 보이던 ${t.all.length}곳 중 도장 안 받은 ${t.left}곳`:`지도에 보이던 ${t.all.length}곳`}${cut?` 중 ${me?"내 위치":"가운데"}에서 가까운 12곳`:""}으로 짰어요. <span class="nw">지도를 옮기거나</span> 확대한 뒤 다시 열면 <span class="nw">그 화면 기준으로</span> 바뀌어요.</p>`+
+    rs.map(routeBox).join("")+`<p class="rt-note">직선거리로 순서를 정하고, 시간은 <span class="nw">차로 이동</span><span class="nw">(직선거리의 1.4배, 시속 60km)</span>·<span class="nw">한 곳에 1시간으로</span> 어림했어요. 실제 길은 <span class="nw">카카오맵 길찾기로</span> 확인하세요.</p>`;
   const bx=pb.querySelector(".rt-box"); if(bx) bx.open=true;
   pb.querySelectorAll("[data-route]").forEach(b=>b.onclick=()=>drawRoute(cssv("--sea"),rs[+b.dataset.route]));
   const gb=pb.querySelector("[data-geo]"); if(gb) gb.onclick=()=>{gb.textContent="위치 찾는 중…"; startGeo();};
@@ -1139,6 +1170,7 @@ function renderSpot(c,s){
       <h3>${esc(s.name)}</h3>
       <div class="k">${esc([s.designation,s.tagline,s.plus?"플러스 거점":""].map(x=>String(x||"").trim()).filter(Boolean).join(" · ")||groupName(c.group))}</div>
       <div class="s">${stBadge(s)} 스탬프 <b>${esc(s.stamp||"현장 안내 확인")}</b></div>
+      <div class="stamp-go"><a href="https://map.kakao.com/link/by/walk/${encodeURIComponent(s.name.split(" (")[0])},${s.lat},${s.lng}" target="_blank" rel="noopener">🚶 걸어서 길찾기</a>${s.stamp?`<a href="https://map.kakao.com/link/search/${encodeURIComponent(s.name.split(" (")[0]+" "+String(s.stamp).replace(/\(.*?\)/g,"").split(/[,·/]/)[0].trim())}" target="_blank" rel="noopener">📍 스탬프 자리 찾기</a>`:""}</div>
       <div class="d">${d!=null?`<span class="rd">${km(d)}</span>`:""}${esc(s.address||"")}</div>
       ${s.field&&s.field.note?`<div class="fnote">⚠ ${esc(s.field.note)}</div>`:""}
     </div>
@@ -1205,7 +1237,13 @@ function shotSpot(){
   let b=null; uniqSpots.forEach(({s})=>{const d=hav(me.lat,me.lng,s.lat,s.lng); if(d<1500&&(!b||d<b.d)) b={d,s};});
   return b&&b.s;
 }
-$("camBtn").onclick=()=>$("camIn").click();
+// 사진 넣는 방법 고르기: 지금 찍기 / 앨범에서 고르기
+function pickPhoto(cam,gal,title){
+  const m=modal(`<h3>${esc(title)}</h3><div class="pick2"><button type="button" class="btn primary" data-c>${I.cam}<span>사진 찍기</span></button><button type="button" class="btn" data-g>${I.img}<span>앨범에서 고르기</span></button></div>`);
+  m.querySelector("[data-c]").onclick=()=>{m.remove(); $(cam).click();};
+  m.querySelector("[data-g]").onclick=()=>{m.remove(); $(gal).click();};
+}
+$("camBtn").onclick=()=>pickPhoto("camIn","camGal","인증샷");
 $("fpIn").onchange=async e=>{const f=e.target.files[0]; e.target.value=""; if(!f||!phKey) return;
   try{await savePhoto(f); gc("food-photo","식당 사진 넣기"); toast("사진을 넣었어요 (이 휴대폰에만 저장)"); const t=pb.scrollTop; render(); pb.scrollTop=t;}catch(err){toast("사진을 저장하지 못했어요");}};
 $("camIn").onchange=async e=>{
@@ -1233,6 +1271,7 @@ $("camIn").onchange=async e=>{
     const st=m.querySelector("[data-st]"); if(st) st.onclick=()=>{m.remove(); openSpot(spotCourseOf(s).key,s.num); stampNow(s.num);};
   }catch(err){m.querySelector(".mt").textContent="사진을 열지 못했어요. 다시 찍어 주세요.";}
 };
+$("camGal").onchange=$("camIn").onchange; $("fpGal").onchange=$("fpIn").onchange;  // 앨범에서 고른 사진도 같은 처리
 
 function celebrate(list){
   const done1=C.filter(c=>c.spots.every(s=>stamps.has(s.num))).length;
