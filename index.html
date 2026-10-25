@@ -114,7 +114,7 @@ button{font:inherit;color:inherit}
 
 /* 아래: 아이콘 줄 */
 .nav{position:fixed;z-index:1200;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));height:58px;border-radius:20px;  /* 떠 있는 둥근 아이콘 줄 */
-  background:var(--navbg);box-shadow:0 4px 16px rgb(0 0 0 / .18);display:grid;grid-template-columns:repeat(6,1fr)}
+  background:var(--navbg);box-shadow:0 4px 16px rgb(0 0 0 / .18);display:grid;grid-template-columns:repeat(5,1fr)}
 .nav button{border:0;background:none;display:grid;place-items:center;cursor:pointer;color:var(--muted);position:relative}
 .nav button svg{width:26px;height:26px}
 .nav button[aria-current="true"]{color:var(--sea)}
@@ -471,7 +471,7 @@ body.done-only .sp.done::after{content:"✓";position:absolute;bottom:-6px;left:
   <button type="button" data-m="me" aria-label="내 위치" title="내 위치"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.6" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
   <button type="button" data-m="course" aria-label="지도(방문코스)" title="지도(방문코스)"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20z"/><path d="M9 4v13.5M15 6.5V20"/></svg></button>
   <button type="button" data-m="food" aria-label="맛집" title="맛집"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v8M4.5 2v5.5a2.5 2.5 0 0 0 5 0V2M7 10v12M17 22V2c-2.2 1.3-3.5 4-3.5 7.5V14H17"/></svg></button>
-  <button type="button" id="camBtn" aria-label="인증샷 찍기" title="인증샷 찍기"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h2l1.6-2h5.8l1.6 2h2A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><circle cx="12" cy="12.5" r="3.8"/></svg></button><input type="file" id="camIn" accept="image/*" capture="environment" hidden><input type="file" id="camGal" accept="image/*" hidden><input type="file" id="fpIn" accept="image/*" capture="environment" hidden><input type="file" id="fpGal" accept="image/*" hidden>
+  <input type="file" id="camIn" accept="image/*" capture="environment" hidden><input type="file" id="camGal" accept="image/*" hidden><input type="file" id="fpIn" accept="image/*" capture="environment" hidden><input type="file" id="fpGal" accept="image/*" hidden>
   <button type="button" data-m="cert" aria-label="인증" title="인증"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9.5" r="6.5"/><path d="m9.2 9.6 2 2 3.8-4"/><path d="m8.5 15.2-1.6 6.3 5.1-2.4 5.1 2.4-1.6-6.3"/></svg><span class="cnt" id="cnt" hidden></span></button>
   <button type="button" id="updown" aria-label="창 올리기" title="창 올리기·내리기"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 6-6 6 6"/></svg></button>
 </nav>
@@ -1178,6 +1178,7 @@ function renderSpot(c,s){
     <div class="acts">
       <button class="act stamp" type="button" data-stamp aria-pressed="${has}">${I.stamp}<span>${has?"도장 받음":"도장 찍기"}</span></button>
       <a class="act" href="${kakaoTo(s)}" target="_blank" rel="noopener">${I.route}<span>길찾기</span></a>
+      <button class="act" type="button" data-shot>${I.cam}<span>인증샷</span></button>
       ${s.myh&&s.myh.audio?`<button class="act" type="button" data-audio>${I.play}<span>음성 해설</span></button>`:""}
       <button class="act" type="button" data-more aria-expanded="false">${I.more}<span>자세히</span></button>
     </div>
@@ -1199,6 +1200,7 @@ function renderSpot(c,s){
   fitSeals(pb);
   pb.querySelector("[data-stamp]").onclick=()=>{if(stamps.has(s.num)){if(!confirm(`${s.name} 도장을 지울까요?`)) return; stamps.delete(s.num); saveStamps(); afterStamp();} else stampNow(s.num);};
   const mb=pb.querySelector("[data-more]"); mb.onclick=()=>{const m=$("more"), on=m.hidden; m.hidden=!on; mb.setAttribute("aria-expanded",String(on)); if(on){m.scrollIntoView({block:"nearest",behavior:"smooth"});}};
+  pb.querySelector("[data-shot]").onclick=()=>pickPhoto("camIn","camGal",`${s.name.split(" (")[0]} 인증샷`);  // 인증샷은 장소 카드에서만
   const au=pb.querySelector("[data-audio]"); if(au) au.onclick=()=>play(s.myh.audio.kr,s.name);
   const ae=pb.querySelector("[data-audio-en]"); if(ae) ae.onclick=()=>play(s.myh.audio.en,s.name+" (English)");
   pb.querySelector("[data-share]").onclick=()=>shareSpot(s);
@@ -1242,7 +1244,7 @@ function pickPhoto(cam,gal,title){
   m.querySelector("[data-c]").onclick=()=>{m.remove(); $(cam).click();};
   m.querySelector("[data-g]").onclick=()=>{m.remove(); $(gal).click();};
 }
-$("camBtn").onclick=()=>pickPhoto("camIn","camGal","인증샷");
+
 $("fpIn").onchange=async e=>{const f=e.target.files[0]; e.target.value=""; if(!f||!phKey) return;
   try{await savePhoto(f); gc("food-photo","식당 사진 넣기"); toast("사진을 넣었어요 (이 휴대폰에만 저장)"); const t=pb.scrollTop; render(); pb.scrollTop=t;}catch(err){toast("사진을 저장하지 못했어요");}};
 $("camIn").onchange=async e=>{
