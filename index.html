@@ -792,9 +792,8 @@ function findNearest(pt){
 
 // ── 창 열기·닫기
 const TITLES={me:"내 위치",food:"맛집",course:"방문코스",cert:"인증",trip:"이 화면 동선",notice:"공지·안내"};
-let pushed=false;  // 휴대폰 '뒤로' 단추: 앱을 나가지 않고 창을 닫거나 한 단계 뒤로
-function ensurePush(){if(!pushed){try{history.pushState({hcm:1},"");}catch(e){} pushed=true;}}
-addEventListener("popstate",()=>{if(!pushed) return; pushed=false; document.querySelectorAll(".modal").forEach(m=>m.remove()); goHome(true);});
+// 휴대폰 '뒤로' 단추는 손대지 않는다 → 한 번 누르면 바로 앱(페이지)을 나간다. 창 닫기는 X·↓·쓸어 내리기로
+function ensurePush(){}
 function openMode(m,s){
   if(mode!==m){mode=m; if(m==="course"&&!cur) stage=1; gc("panel-"+m,TITLES[m]);}
   const wasClosed=pstate==="closed";
@@ -808,7 +807,6 @@ function render(){
   syncNav();
 }
 function goHome(fromPop){  // X: 창을 닫고 처음 화면(전국 방문코스)으로
-  if(!fromPop&&pushed){pushed=false; try{history.back();}catch(e){}}
   mode=""; stage=1; spotNum=""; searchLayer.clearLayers(); foodLayer.clearLayers(); routeLayer.clearLayers();
   setPanel("closed"); cur=""; filter="all"; draw(true);  // 처음 화면: 전국 방문코스 한눈에
   wxFollow="me"; wxUpdate();
