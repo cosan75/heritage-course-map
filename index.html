@@ -1071,6 +1071,20 @@ function kakaoMulti(r){
   }
   return out;
 }
+// 스탬프 자리 찾기: 카카오맵은 긴 문장(유산 이름 + 위치 설명)으로는 못 찾는다 → 스탬프가 있는 '마지막 장소' 이름만 뽑는다
+// 예) '사도관광센터(옥외)' → 사도관광센터, '대가야박물관 입구' → 대가야박물관, '매표소 앞' → 공산성 매표소
+const ST_STOP=new Set("앞 옆 뒤 입구 내부 근처 왼쪽 오른쪽 맞은편 직전 사이 정문 건물 계단 로비 테이블 안내데스크 인포데스크 검표소 사무실 출구 및 지나 지나서 문 옥외 카페 쪽".split(" "));
+const ST_GENERIC=/^(매표소|관광안내소|종합안내소|안내소|종합관광안내소|문화관광해설사의집|문화해설사의집|문화재해설사집|문화관광해설안내소|홍보관|전시관|상설전시실|박물관|기념관|안내센터)$/;
+function stampQuery(s){
+  const nm=String(s.name), inParen=(nm.match(/\(([^)]+)\)/)||[])[1];
+  const base=(inParen||nm).replace(/\s*\(.*\)/,"").trim(), t=base.split(" ");
+  const short=t.length>1&&t[0].length<=3?t.slice(1).join(" "):base;  // '공주 공산성' → 공산성
+  const seg=String(s.stamp||"").replace(/\([^)]*\)/g," ").split(/\s+및\s+|[,·/]/)[0];
+  const place=seg.split(/\s+/).filter(w=>w.length>1&&!ST_STOP.has(w)&&!/^\d+층$/.test(w)).join(" ").trim();
+  if(!place||short.includes(place)) return short;  // '고석정 고석정'·'…박물관 박물관' 같은 겹침 없이
+  if(ST_GENERIC.test(place)||place.length<4) return `${short} ${place}`;
+  return place;
+}
 const kakaoLeg=(a,b)=>`https://map.kakao.com/link/from/${encodeURIComponent(a.name)},${a.lat},${a.lng}/to/${encodeURIComponent(b.name)},${b.lat},${b.lng}`;
 const routeLayer=L.layerGroup().addTo(map);
 function drawRoute(col,r){  // 동선을 지도에 굵은 선과 들르는 차례 번호로
@@ -1170,7 +1184,7 @@ function renderSpot(c,s){
       <h3>${esc(s.name)}</h3>
       <div class="k">${esc([s.designation,s.tagline,s.plus?"플러스 거점":""].map(x=>String(x||"").trim()).filter(Boolean).join(" · ")||groupName(c.group))}</div>
       <div class="s">${stBadge(s)} 스탬프 <b>${esc(s.stamp||"현장 안내 확인")}</b></div>
-      <div class="stamp-go"><a href="https://map.kakao.com/link/by/walk/${encodeURIComponent(s.name.split(" (")[0])},${s.lat},${s.lng}" target="_blank" rel="noopener">🚶 걸어서 길찾기</a>${s.stamp?`<a href="https://map.kakao.com/link/search/${encodeURIComponent(s.name.split(" (")[0]+" "+String(s.stamp).replace(/\(.*?\)/g,"").split(/[,·/]/)[0].trim())}" target="_blank" rel="noopener">📍 스탬프 자리 찾기</a>`:""}</div>
+      <div class="stamp-go"><a href="https://map.kakao.com/link/by/walk/${encodeURIComponent(s.name.split(" (")[0])},${s.lat},${s.lng}" target="_blank" rel="noopener">🚶 걸어서 길찾기</a>${s.stamp?`<a href="https://map.kakao.com/link/search/${encodeURIComponent(stampQuery(s))}" target="_blank" rel="noopener" title="카카오맵에서 '${esc(stampQuery(s))}' 찾기">📍 스탬프 자리 찾기</a>`:""}</div>
       <div class="d">${d!=null?`<span class="rd">${km(d)}</span>`:""}${esc(s.address||"")}</div>
       ${s.field&&s.field.note?`<div class="fnote">⚠ ${esc(s.field.note)}</div>`:""}
     </div>
