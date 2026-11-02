@@ -1318,10 +1318,8 @@ function renderCert(){
       return `<details class="cr${left.length?"":" full"}"${left.length?"":" data-full"}><summary><span class="cr-h"><span class="pk-d${c.group===2?" sq":""}" style="background:${COLOR[c.key]}"></span><b>${esc(courseName(c))}</b><span>${left.length?`${d}/${n} · 남은 곳 ${left.length}`:"완주"}</span></span>
         <span class="bar"><i style="width:${Math.round(100*d/n)}%"></i></span></summary>
         ${left.length?`<div class="cr-l">${left.map(s=>`<button type="button" data-spot="${c.key}|${esc(s.num)}">${esc(s.name.split(" (")[0])}</button>`).join("")}</div>`:""}</details>`;}).join("")}</div>
-    <button class="btn" type="button" style="width:100%;margin-top:14px" data-backup>도장 백업·옮기기</button>
     <a class="btn" style="width:100%;margin-top:10px" href="https://github.com/cosan75/heritage-course-map/issues/new" target="_blank" rel="noopener">불편한 점·의견 알려 주기</a>`;
   pb.querySelectorAll("[data-spot]").forEach(b=>b.onclick=()=>{const[k,n]=b.dataset.spot.split("|"); openSpot(k,n);});
-  pb.querySelector("[data-backup]").onclick=openBackup;
   const ins=pb.querySelector("[data-install]"); if(ins) ins.onclick=openInstall;
   certImage().then(async cv=>{
     const im=$("certImg"); if(!im) return; const u=cv.toDataURL("image/png"); im.src=u; $("certSave").href=u;
@@ -1368,8 +1366,7 @@ function modal(html){
 let toastT=null;
 function toast(t){let d=$("toast"); if(!d){d=document.createElement("div"); d.id="toast"; d.className="toast"; d.setAttribute("role","status"); document.body.appendChild(d);}
   d.textContent=t; d.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>{d.hidden=true;},3200);}
-// 스탬프 백업·옮기기: 찍은 번호를 짧은 코드·링크로 (휴대폰을 바꾸거나 브라우저 기록을 지워도 되살림)
-const backupCode=()=>"HCM1."+[...stamps].sort().join(".");
+// 예전에 만든 옮기기 링크(#s=…)·백업 코드(HCM1.…)로 열면 도장을 합칠지 묻는다
 function readCode(s){
   const m=String(s||"").trim().match(/HCM1\.([0-9A-Z.]*)/)||String(s||"").match(/[#&]s=([0-9A-Z.]+)/);
   if(!m) return null; return m[1].split(".").filter(n=>allNums.includes(n));
@@ -1379,19 +1376,6 @@ function mergeStamps(nums,from){
   if(!add.length){alert(`${from}의 도장 ${nums.length}곳은 이미 모두 찍혀 있어요.`); return;}
   if(!confirm(`${from}에서 도장 ${add.length}곳을 더할까요? (지금 찍힌 ${stamps.size}곳은 그대로 둡니다)`)) return;
   add.forEach(n=>stamps.add(n)); saveStamps(); afterStamp();
-}
-function openBackup(){
-  const link=location.origin+location.pathname+"#s="+[...stamps].sort().join(".");
-  const m=modal(`<h3>도장 백업·옮기기</h3>
-    <p class="mt">찍은 도장은 이 브라우저에만 저장돼요. 휴대폰을 바꾸거나 기록을 지우기 전에 코드나 링크를 저장해 두세요. (찍힌 ${stamps.size}곳)</p>
-    <label class="lbl">백업 코드<textarea readonly rows="2">${esc(backupCode())}</textarea></label>
-    <div class="acts2"><button type="button" class="btn primary" data-copy="code">코드 복사</button><button type="button" class="btn" data-copy="link">옮기기 링크 복사</button></div>
-    <label class="lbl">다른 곳의 코드 불러오기<textarea rows="2" placeholder="HCM1.01.02… 를 붙여 넣기" data-in></textarea></label>
-    <div class="acts2"><button type="button" class="btn" data-load>불러오기(합치기)</button></div>`);
-  m.querySelectorAll("[data-copy]").forEach(b=>b.onclick=async()=>{const v=b.dataset.copy==="code"?backupCode():link;
-    try{await navigator.clipboard.writeText(v); b.textContent="복사됨";}catch(e){prompt("복사해 두세요",v);}});
-  m.querySelector("[data-load]").onclick=()=>{const nums=readCode(m.querySelector("[data-in]").value);
-    if(!nums){alert("백업 코드(HCM1.…)나 옮기기 링크를 붙여 넣어 주세요."); return;} mergeStamps(nums,"붙여 넣은 코드"); m.remove();};
 }
 (function(){const nums=readCode(location.hash); if(nums&&nums.length){history.replaceState(null,"",location.pathname+location.search); setTimeout(()=>mergeStamps(nums,"옮기기 링크"),400);}})();
 
