@@ -795,6 +795,7 @@ const TITLES={me:"내 위치",food:"맛집",course:"방문코스",cert:"인증",
 // 휴대폰 '뒤로' 단추는 손대지 않는다 → 한 번 누르면 바로 앱(페이지)을 나간다. 창 닫기는 X·↓·쓸어 내리기로
 function ensurePush(){}
 function openMode(m,s){
+  remember();
   if(mode!==m){mode=m; if(m==="course"&&!cur) stage=1; gc("panel-"+m,TITLES[m]);}
   const wasClosed=pstate==="closed";
   render(); setPanel(s||"full"); pb.scrollTop=0; ensurePush();
@@ -806,10 +807,16 @@ function render(){
   if(mode==="me") renderMe(); else if(mode==="food") renderFood(); else if(mode==="course") renderCourse(); else if(mode==="cert") renderCert(); else if(mode==="trip") renderTrip(); else if(mode==="notice") renderNotice();
   syncNav();
 }
-function goHome(fromPop){  // X: 창을 닫고 처음 화면(전국 방문코스)으로
+// X: 창을 열기 바로 전 지도(위치·확대·고른 길)로 돌아간다. 기억이 없으면 처음 화면(전국 방문코스)으로
+let back=null;
+const remember=()=>{if(pstate==="closed") back={c:map.getCenter(),z:map.getZoom(),cur,filter,wx:wxFollow};};
+function goHome(home){  // home=true: 늘 처음 화면(전국)으로
+  const b=home?null:back; back=null;
   mode=""; stage=1; spotNum=""; searchLayer.clearLayers(); foodLayer.clearLayers(); routeLayer.clearLayers();
-  setPanel("closed"); cur=""; filter="all"; draw(true);  // 처음 화면: 전국 방문코스 한눈에
-  wxFollow="me"; wxUpdate();
+  setPanel("closed");
+  if(b){cur=b.cur; filter=b.filter; draw(); map.setView(b.c,b.z,{animate:false}); wxFollow=b.wx;}
+  else{cur=""; filter="all"; draw(true); wxFollow="me";}
+  wxUpdate();
 }
 function goBack(){
   if(mode!=="course") return;
@@ -847,7 +854,7 @@ $("doneOnly").onclick=()=>{  // 도장 받은 곳만 보기 ↔ 모두 보기
   const n=gotN();
   if(!doneOnly&&!n){toast("아직 도장 받은 곳이 없어요"); return;}
   doneOnly=!doneOnly; document.body.classList.toggle("done-only",doneOnly); $("doneOnly").setAttribute("aria-pressed",String(doneOnly));
-  goHome();  // 고른 길·동선·맛집 표시를 걷고 처음 화면으로
+  goHome(true);  // 고른 길·동선·맛집 표시를 걷고 처음 화면으로
   fitTo(KOREA,13);  // 처음 화면처럼 전국 지도에서 (받은 곳이 어디까지 퍼졌는지 한눈에)
   if(doneOnly) toast(`도장 받은 ${n}곳만 보여요`);
 };
@@ -1140,7 +1147,7 @@ function renderNotice(){
   $("pTitle").innerHTML="공지·안내<small>국가유산 방문 캠페인</small>";
   pb.innerHTML=NOTICES.map(([t,u,d])=>`<a class="row" href="${url(u)}" target="_blank" rel="noopener"><span class="ri" style="background:var(--sea)">${I.more}</span><span class="rt"><b>${esc(t)}</b><small>${esc(d)}</small></span><span aria-hidden="true">↗</span></a>`).join("")+
     `<p class="rt-note" style="margin-top:10px">공지는 캠페인 누리집에서 바로 열려요(이 지도는 내용을 바꾸지 않아요).</p><button class="btn" type="button" data-home style="width:100%;margin-top:10px">처음 지도 화면으로</button>`;
-  pb.querySelector("[data-home]").onclick=()=>goHome();
+  pb.querySelector("[data-home]").onclick=()=>goHome(true);
 }
 
 function renderPicker(){
@@ -1158,14 +1165,14 @@ function renderPicker(){
   const tg=pb.querySelector("[data-trip]"); if(tg) tg.onclick=()=>openMode("trip","full");
 }
 function openCourse(k){  // 길을 고르면 지도와 반씩
-  cur=k; saved=k; stage=2; spotNum=""; mode="course"; routeLayer.clearLayers();
+  remember(); cur=k; saved=k; stage=2; spotNum=""; mode="course"; routeLayer.clearLayers();
   try{localStorage.setItem("hcm-course",k)}catch(e){}
   wxFollow="course"; wxUpdate();
   render(); setPanel("full"); pb.scrollTop=0; ensurePush(); draw(true);
 }
 function openSpot(k,n,s){  // 장소 카드: 지도는 그 유산 가운데, 창은 반
   const x=spotOf(k,n); if(!x||!x.s) return;
-  mode="course"; stage=3; spotNum=n;
+  remember(); mode="course"; stage=3; spotNum=n;
   if(cur!==k){cur=k; saved=k; try{localStorage.setItem("hcm-course",k)}catch(e){} draw();} else refreshPins();
   wxFollow="course"; wxUpdate();  // 날씨도 이 장소로
   render(); setPanel(s||"full"); pb.scrollTop=0; ensurePush();
@@ -1311,8 +1318,10 @@ function renderCert(){
       return `<details class="cr${left.length?"":" full"}"${left.length?"":" data-full"}><summary><span class="cr-h"><span class="pk-d${c.group===2?" sq":""}" style="background:${COLOR[c.key]}"></span><b>${esc(courseName(c))}</b><span>${left.length?`${d}/${n} · 남은 곳 ${left.length}`:"완주"}</span></span>
         <span class="bar"><i style="width:${Math.round(100*d/n)}%"></i></span></summary>
         ${left.length?`<div class="cr-l">${left.map(s=>`<button type="button" data-spot="${c.key}|${esc(s.num)}">${esc(s.name.split(" (")[0])}</button>`).join("")}</div>`:""}</details>`;}).join("")}</div>
+    <button class="btn" type="button" style="width:100%;margin-top:14px" data-backup>도장 백업·옮기기</button>
     <a class="btn" style="width:100%;margin-top:10px" href="https://github.com/cosan75/heritage-course-map/issues/new" target="_blank" rel="noopener">불편한 점·의견 알려 주기</a>`;
   pb.querySelectorAll("[data-spot]").forEach(b=>b.onclick=()=>{const[k,n]=b.dataset.spot.split("|"); openSpot(k,n);});
+  pb.querySelector("[data-backup]").onclick=openBackup;
   const ins=pb.querySelector("[data-install]"); if(ins) ins.onclick=openInstall;
   certImage().then(async cv=>{
     const im=$("certImg"); if(!im) return; const u=cv.toDataURL("image/png"); im.src=u; $("certSave").href=u;
@@ -1359,7 +1368,8 @@ function modal(html){
 let toastT=null;
 function toast(t){let d=$("toast"); if(!d){d=document.createElement("div"); d.id="toast"; d.className="toast"; d.setAttribute("role","status"); document.body.appendChild(d);}
   d.textContent=t; d.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>{d.hidden=true;},3200);}
-// 예전에 만든 옮기기 링크(#s=…)·백업 코드(HCM1.…)로 열면 도장을 합칠지 묻는다
+// 스탬프 백업·옮기기: 찍은 번호를 짧은 코드·링크로 (휴대폰을 바꾸거나 브라우저 기록을 지워도 되살림)
+const backupCode=()=>"HCM1."+[...stamps].sort().join(".");
 function readCode(s){
   const m=String(s||"").trim().match(/HCM1\.([0-9A-Z.]*)/)||String(s||"").match(/[#&]s=([0-9A-Z.]+)/);
   if(!m) return null; return m[1].split(".").filter(n=>allNums.includes(n));
@@ -1369,6 +1379,19 @@ function mergeStamps(nums,from){
   if(!add.length){alert(`${from}의 도장 ${nums.length}곳은 이미 모두 찍혀 있어요.`); return;}
   if(!confirm(`${from}에서 도장 ${add.length}곳을 더할까요? (지금 찍힌 ${stamps.size}곳은 그대로 둡니다)`)) return;
   add.forEach(n=>stamps.add(n)); saveStamps(); afterStamp();
+}
+function openBackup(){
+  const link=location.origin+location.pathname+"#s="+[...stamps].sort().join(".");
+  const m=modal(`<h3>도장 백업·옮기기</h3>
+    <p class="mt">찍은 도장은 이 브라우저에만 저장돼요. 휴대폰을 바꾸거나 기록을 지우기 전에 코드나 링크를 저장해 두세요. (찍힌 ${stamps.size}곳)</p>
+    <label class="lbl">백업 코드<textarea readonly rows="2">${esc(backupCode())}</textarea></label>
+    <div class="acts2"><button type="button" class="btn primary" data-copy="code">코드 복사</button><button type="button" class="btn" data-copy="link">옮기기 링크 복사</button></div>
+    <label class="lbl">다른 곳의 코드 불러오기<textarea rows="2" placeholder="HCM1.01.02… 를 붙여 넣기" data-in></textarea></label>
+    <div class="acts2"><button type="button" class="btn" data-load>불러오기(합치기)</button></div>`);
+  m.querySelectorAll("[data-copy]").forEach(b=>b.onclick=async()=>{const v=b.dataset.copy==="code"?backupCode():link;
+    try{await navigator.clipboard.writeText(v); b.textContent="복사됨";}catch(e){prompt("복사해 두세요",v);}});
+  m.querySelector("[data-load]").onclick=()=>{const nums=readCode(m.querySelector("[data-in]").value);
+    if(!nums){alert("백업 코드(HCM1.…)나 옮기기 링크를 붙여 넣어 주세요."); return;} mergeStamps(nums,"붙여 넣은 코드"); m.remove();};
 }
 (function(){const nums=readCode(location.hash); if(nums&&nums.length){history.replaceState(null,"",location.pathname+location.search); setTimeout(()=>mergeStamps(nums,"옮기기 링크"),400);}})();
 
