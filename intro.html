@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>국가유산 도장깨기 소개</title>
+<meta name="description" content="2026 국가유산 방문 캠페인 118곳 도장을 지도 한 장으로. 설치·가입 없이 브라우저에서 바로, 무료, 광고 없음. 개인이 만든 비공식 지도.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://gc.zgo.at; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://heritage-course-map.goatcounter.com; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="theme-color" content="#f4f3ee">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="국가유산 도장깨기">
+<meta property="og:title" content="국가유산 도장깨기 — 118곳 도장, 지도 한 장으로">
+<meta property="og:description" content="설치·가입 없이 브라우저에서 바로. 내 위치에서 가장 짧은 동선, 길 따라 맛집, 완주 인증서까지. 무료, 광고 없음.">
+<meta property="og:url" content="https://cosan75.github.io/heritage-course-map/intro.html">
+<meta property="og:image" content="https://cosan75.github.io/heritage-course-map/icons/og.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&text=%EB%8F%84%EC%9E%A5%EA%B9%A8%EA%B8%B0&display=swap">
+<style>
+:root{
+  --paper:#f4f3ee; --sheet:#ffffff; --ink:#1f2328; --muted:#5f655f; --rule:#e2e0d8;
+  --sea:#2c5d82; --sea-soft:#e2ebf1; --seal:#c8372d; --seal-soft:#fbe9e7; --ok:#1e7a46;
+  --display:"Gowun Batang","Noto Serif KR",serif;
+  --body:"IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --frame:#1f2328;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#15181b; --sheet:#1d2125; --ink:#e9e8e2; --muted:#a2a79f; --rule:#343a3f;
+    --sea:#7fb0d6; --sea-soft:#1e2c37; --seal:#ef7a6e; --seal-soft:#3a2220; --ok:#6cc093;
+    --frame:#000000;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#15181b; --sheet:#1d2125; --ink:#e9e8e2; --muted:#a2a79f; --rule:#343a3f;
+  --sea:#7fb0d6; --sea-soft:#1e2c37; --seal:#ef7a6e; --seal-soft:#3a2220; --ok:#6cc093;
+  --frame:#000000;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 17px/1.7 var(--body);
+  word-break:keep-all;overflow-wrap:break-word}
+a{color:var(--sea)}
+img{max-width:100%;display:block}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+.jua{font-family:"Jua",var(--display);font-weight:400}
+
+/* 머리 */
+.top{border-bottom:1px solid var(--rule)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;height:60px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-weight:600}
+.brand img{width:34px;height:34px;border-radius:9px}
+.top nav a{font-size:15px;text-decoration:none;margin-left:16px;color:var(--muted)}
+.top nav a:hover{color:var(--ink)}
+
+/* 첫 화면 */
+.hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding-top:56px;padding-bottom:56px}
+.eyebrow{display:inline-block;font-size:14px;color:var(--muted);margin:0 0 14px}
+h1{font:700 clamp(32px,5.2vw,52px)/1.25 var(--display);margin:0 0 18px;letter-spacing:-.01em}
+h1 .jua{color:var(--seal);font-size:1.08em}
+.lead{font-size:18px;color:var(--muted);margin:0 0 28px;max-width:30em}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 22px;border-radius:12px;
+  font:600 16px/1 var(--body);text-decoration:none;border:1px solid transparent}
+.btn.primary{background:var(--sea);color:#fff}
+:root[data-theme="dark"] .btn.primary{color:#10202c}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.primary{color:#10202c}}
+.btn.ghost{background:var(--sheet);color:var(--ink);border-color:var(--rule)}
+.btn:focus-visible{outline:3px solid var(--seal);outline-offset:2px}
+.facts{display:flex;flex-wrap:wrap;gap:6px 18px;margin:0;padding:0;list-style:none;font-size:15px;color:var(--muted)}
+.facts li::before{content:"✓";color:var(--ok);font-weight:600;margin-right:6px}
+
+/* 휴대폰 틀 */
+.phone{background:var(--frame);border-radius:30px;padding:8px;box-shadow:0 18px 40px rgb(0 0 0 / .18)}
+.phone img{border-radius:23px;width:100%;height:auto;aspect-ratio:390/844;object-fit:cover}
+.pair{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:440px;margin-left:auto}
+.pair .phone:last-child{margin-top:48px}
+
+/* 숫자 띠 */
+.band{background:var(--sheet);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.band .wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding-top:26px;padding-bottom:26px}
+.stat b{display:block;font:700 30px/1.2 var(--display)}
+.stat span{font-size:14px;color:var(--muted)}
+
+/* 기능 */
+section{padding:72px 0}
+h2{font:700 clamp(26px,3.6vw,34px)/1.35 var(--display);margin:0 0 10px}
+.sub{color:var(--muted);margin:0 0 40px}
+.feat{display:grid;grid-template-columns:240px 1fr;gap:40px;align-items:center;padding:32px 0;border-top:1px solid var(--rule)}
+.feat:nth-of-type(even){grid-template-columns:1fr 240px}
+.feat:nth-of-type(even) .phone{order:2}
+.feat h3{font:700 23px/1.4 var(--display);margin:0 0 8px}
+.feat p{margin:0;color:var(--muted);max-width:32em}
+.num{display:inline-block;font:600 13px/1 var(--body);color:var(--seal);background:var(--seal-soft);border-radius:999px;padding:6px 10px;margin-bottom:12px}
+
+/* 설치 */
+.install{background:var(--sea-soft)}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{background:var(--sheet);border:1px solid var(--rule);border-radius:14px;padding:22px}
+.card h3{font:600 17px/1.4 var(--body);margin:0 0 10px}
+.card ol{margin:0;padding-left:20px;color:var(--muted);font-size:16px}
+.card p{margin:0;color:var(--muted);font-size:16px}
+
+/* 묻고 답하기 */
+details{border-top:1px solid var(--rule);padding:18px 0}
+details:last-of-type{border-bottom:1px solid var(--rule)}
+summary{cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between;gap:16px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--muted);font-weight:400}
+details[open] summary::after{content:"−"}
+details p{margin:10px 0 0;color:var(--muted)}
+
+/* 끝 */
+.end{text-align:center}
+.end .cta{justify-content:center}
+footer{border-top:1px solid var(--rule);padding:28px 0 40px;font-size:14px;color:var(--muted)}
+footer p{margin:0 0 6px}
+
+@media (max-width:820px){
+  .hero .wrap{grid-template-columns:1fr;gap:36px;padding-top:36px;padding-bottom:40px}
+  .pair{margin:0 auto;max-width:360px}
+  .band .wrap{grid-template-columns:repeat(2,1fr)}
+  section{padding:52px 0}
+  .feat,.feat:nth-of-type(even){grid-template-columns:1fr;gap:20px}
+  .feat .phone,.feat:nth-of-type(even) .phone{order:2;max-width:260px;margin:0 auto;width:100%}
+  .cards{grid-template-columns:1fr}
+  .top nav a:not(.go){display:none}
+}
+@media (max-width:380px){
+  .btn{width:100%}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./intro.html"><img src="icons/icon-192.png" alt="" width="34" height="34">국가유산 도장깨기</a>
+    <nav>
+      <a href="#features">기능</a>
+      <a href="#install">설치</a>
+      <a href="#faq">묻고 답하기</a>
+      <a class="go" href="./">바로 쓰기 →</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <div class="wrap">
+      <div>
+        <p class="eyebrow">2026 국가유산 방문 캠페인 · 방문코스 지도</p>
+        <h1>118곳 <span class="jua">도장깨기</span>,<br>지도 한 장으로</h1>
+        <p class="lead">어디까지 왔는지, 다음엔 어디로 갈지, 근처에서 뭘 먹을지. 방문코스 17개 길을 지도 하나에 모았어요.</p>
+        <div class="cta">
+          <a class="btn primary" href="./">지금 바로 쓰기</a>
+          <a class="btn ghost" href="#install">홈 화면에 설치하기</a>
+        </div>
+        <ul class="facts">
+          <li>설치·가입 없이 브라우저에서</li>
+          <li>무료, 광고 없음</li>
+          <li>기록은 내 폰에만</li>
+        </ul>
+      </div>
+      <div class="pair" aria-hidden="true">
+        <div class="phone"><img src="intro-shots/1-map.jpg" alt="" width="390" height="844"></div>
+        <div class="phone"><img src="intro-shots/4-place.jpg" alt="" width="390" height="844"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="band">
+    <div class="wrap">
+      <div class="stat"><b>17</b><span>방문코스 길</span></div>
+      <div class="stat"><b>118</b><span>도장 찍는 곳</span></div>
+      <div class="stat"><b>635</b><span>근처 맛집</span></div>
+      <div class="stat"><b>1.2만</b><span>전국 국가유산 위치</span></div>
+    </div>
+  </div>
+
+  <section id="features">
+    <div class="wrap">
+      <h2>여행 하루가 이 순서로 흘러가요</h2>
+      <p class="sub">길을 고르고, 동선을 짜고, 도장을 찍고, 밥 먹고, 완주까지.</p>
+
+      <div class="feat">
+        <div class="phone"><img src="intro-shots/1-map.jpg" alt="전국 방문코스 거점이 길마다 다른 색 핀으로 보이는 지도 첫 화면" width="390" height="844" loading="lazy"></div>
+        <div>
+          <span class="num">한눈에</span>
+          <h3>전국 방문코스를 지도 한 장에</h3>
+          <p>길마다 색이 다른 핀으로 118곳이 한 번에 보여요. 유산 이름이나 지역을 검색하고, 내 위치를 켜면 가장 가까운 곳부터 알려 줘요.</p>
+        </div>
+      </div>
+
+      <div class="feat">
+        <div class="phone"><img src="intro-shots/2-courses.jpg" alt="길 고르기 목록: 길마다 받은 도장 수가 보임" width="390" height="844" loading="lazy"></div>
+        <div>
+          <span class="num">길 고르기</span>
+          <h3>길마다 몇 곳 남았는지</h3>
+          <p>가야 문명의 길, 백제 고도의 길, 산사의 길… 길을 고르면 그 길의 유산만 지도에 남고, 받은 도장 수가 함께 보여요.</p>
+        </div>
+      </div>
+
+      <div class="feat">
+        <div class="phone"><img src="intro-shots/3-route.jpg" alt="백제 고도의 길 추천 동선: 가장 짧은 순서와 거리, 걸리는 시간" width="390" height="844" loading="lazy"></div>
+        <div>
+          <span class="num">동선</span>
+          <h3>내 위치에서 가장 짧은 순서로</h3>
+          <p>지금 있는 곳에서 출발해 길 안의 유산을 가장 짧게 도는 순서를 짜 줘요. 아직 도장을 안 받은 곳만 고를 수도 있고, 구간마다 카카오맵 길찾기로 바로 이어져요.</p>
+        </div>
+      </div>
+
+      <div class="feat">
+        <div class="phone"><img src="intro-shots/4-place.jpg" alt="공주 마곡사 카드: 스탬프 위치, 사진, 도장 받음 표시" width="390" height="844" loading="lazy"></div>
+        <div>
+          <span class="num">도장</span>
+          <h3>스탬프 자리까지 알려 주는 장소 카드</h3>
+          <p>도장이 어느 건물에 있는지, 오늘 열었는지, 사진과 음성 해설까지 카드 한 장에 있어요. 근처 200m 안에 들어가면 도장 찍을 곳이라고 먼저 알려 줘요.</p>
+        </div>
+      </div>
+
+      <div class="feat">
+        <div class="phone"><img src="intro-shots/6-food.jpg" alt="공주 마곡사 주변 맛집 목록: 대표 메뉴와 거리" width="390" height="844" loading="lazy"></div>
+        <div>
+          <span class="num">맛집</span>
+          <h3>길 따라 삼시세끼</h3>
+          <p>보고 있는 유산 주변 식당을 대표 메뉴와 함께 가까운 순으로 보여 줘요. 다녀온 곳엔 별점과 사진을 남겨 나만의 맛집 목록을 만들 수 있어요.</p>
+        </div>
+      </div>
+
+      <div class="feat">
+        <div class="phone"><img src="intro-shots/5-cert.jpg" alt="도장 모음 인증서: 길마다 진행 막대" width="390" height="844" loading="lazy"></div>
+        <div>
+          <span class="num">완주</span>
+          <h3>도장 모음 인증서</h3>
+          <p>지금까지 모은 도장을 인증서 그림 한 장으로 만들어 저장하거나 가족·친구에게 공유해요. 길을 다 돌면 완주 도장이 쿵 찍혀요.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="install" class="install">
+    <div class="wrap">
+      <h2>홈 화면에 앱처럼 두기</h2>
+      <p class="sub">스토어에서 받을 필요 없어요. 한 번 추가하면 아이콘을 눌러 바로 열려요.</p>
+      <div class="cards">
+        <div class="card">
+          <h3>안드로이드 (크롬)</h3>
+          <ol>
+            <li>크롬으로 <a href="./">도장깨기</a>를 열어요</li>
+            <li>오른쪽 위 ⋮ 메뉴를 눌러요</li>
+            <li>‘홈 화면에 추가’ 또는 ‘앱 설치’를 눌러요</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h3>아이폰 (사파리)</h3>
+          <ol>
+            <li>사파리로 <a href="./">도장깨기</a>를 열어요</li>
+            <li>아래 공유 단추(□↑)를 눌러요</li>
+            <li>‘홈 화면에 추가’를 눌러요</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h3>삼성 인터넷·카카오톡에서 열었다면</h3>
+          <p>설치가 막히는 경우가 있어요. 주소를 복사해 크롬에서 열고 위 방법대로 추가해 주세요. 앱 안 ‘인증’ 화면의 ‘홈 화면에 추가’ 단추로도 할 수 있어요.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <h2>묻고 답하기</h2>
+      <p class="sub">더 궁금한 건 <a href="https://github.com/cosan75/heritage-course-map/issues">의견 남기기</a>로 알려 주세요.</p>
+
+      <details>
+        <summary>여기서 도장을 찍으면 기념품을 받을 수 있나요?</summary>
+        <p>아니요. 기념품은 종이 방문자 여권에 찍은 실물 도장으로 <a href="https://www.kh.or.kr/visit/kor/index.do">국가유산 방문 캠페인 공식 홈페이지</a>에서 신청해요. 도장깨기는 어디까지 왔는지 기록하고 길을 안내하는 도우미예요.</p>
+      </details>
+      <details>
+        <summary>회원가입이나 로그인이 필요한가요?</summary>
+        <p>필요 없어요. 주소를 열면 바로 쓸 수 있어요.</p>
+      </details>
+      <details>
+        <summary>도장 기록은 어디에 저장되나요?</summary>
+        <p>쓰고 있는 휴대폰의 브라우저 안에만 저장돼요. 서버로 보내지 않아서 만든 사람도 볼 수 없어요. 그래서 브라우저 기록을 지우거나 다른 휴대폰으로 바꾸면 기록이 따라가지 않아요.</p>
+      </details>
+      <details>
+        <summary>광고가 있나요?</summary>
+        <p>없어요. 몇 명이 다녀갔는지만 개인정보 없이 세는 방문 통계(GoatCounter)를 써요.</p>
+      </details>
+      <details>
+        <summary>운영 시간이나 도장 위치가 현장과 달라요.</summary>
+        <p>공식 안내와 관광공사 자료를 바탕으로 만들었지만 현장 사정이 바뀔 수 있어요. 가기 전에 공식 홈페이지 공지를 함께 확인해 주시고, 틀린 곳은 의견 남기기로 알려 주시면 고칠게요.</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="end">
+    <div class="wrap">
+      <h2>이번 주말, 어느 길부터 깨 볼까요?</h2>
+      <p class="sub">지도를 열고 가장 가까운 도장부터 시작해 보세요.</p>
+      <div class="cta">
+        <a class="btn primary" href="./">도장깨기 열기</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><b>비공식 지도</b> · 국가유산청·국가유산진흥원과 관계없이 개인이 만들었어요.</p>
+    <p>자료: 국가유산 방문 캠페인 공식 안내, 국가유산청 나만의 국가유산 해설사, 한국관광공사 TourAPI, 지도 © OpenStreetMap 기여자</p>
+  </div>
+</footer>
+
+<script data-goatcounter="https://heritage-course-map.goatcounter.com/count" async src="https://gc.zgo.at/count.v4.js" integrity="sha384-nRw6qfbWyJha9LhsOtSb2YJDyZdKvvCFh0fJYlkquSFjUxp9FVNugbfy8q1jdxI+" crossorigin="anonymous"></script>
+</body>
+</html>
